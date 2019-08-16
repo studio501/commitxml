@@ -17,6 +17,9 @@
 #include "LoadShader.h"
 
 #include "SOIL2/SOIL2.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 const GLint WIDTH = 800, HEIGHT = 600;
 
@@ -124,6 +127,13 @@ int main(int argc, const char * argv[]) {
         
 //        glUseProgram(shaderProgram);
         ourShader.Use();
+        
+        glm::mat4 transform;
+        transform = glm::translate(transform, glm::vec3(0.5f,0.5f,0.0f));
+        transform = glm::rotate(transform, (GLfloat)glfwGetTime() * -5.0f, glm::vec3(0.0f,0.0f,1.0f));
+        
+        GLint transformLocation = glGetUniformLocation(ourShader.Program,"transform");
+        glUniformMatrix4fv(transformLocation,1,GL_FALSE,glm::value_ptr(transform));
         
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
