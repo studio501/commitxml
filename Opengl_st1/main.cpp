@@ -65,9 +65,9 @@ int main(int argc, const char * argv[]) {
     GLfloat vertices[] =
     {
         //positon               //color                 //texture coord
-      0.5f,0.0f,0.0f,         1.0f,0.0f,0.0f,           1.0f,1.0f,//top right
+      0.5f,0.5f,0.0f,         1.0f,0.0f,0.0f,           1.0f,1.0f,//top right
         0.5f,-0.5f,0.0f,        1.0f,1.0f,1.0f,         1.0f,0.0f,//bottom right
-        -0.5f,-0.0f,0.0f,         1.0f,0.0f,0.0f,       0.0f,0.0f,//bottom left
+        -0.5f,-0.5f,0.0f,         1.0f,0.0f,0.0f,       0.0f,0.0f,//bottom left
         -0.5f,0.5f,0.0f,         1.0f,1.0f,1.0f,       0.0f,1.0f//top left
     };
     
@@ -125,12 +125,11 @@ int main(int argc, const char * argv[]) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         
-//        glUseProgram(shaderProgram);
         ourShader.Use();
         
-        glm::mat4 transform;
-        transform = glm::translate(transform, glm::vec3(0.5f,0.5f,0.0f));
-        transform = glm::rotate(transform, (GLfloat)glfwGetTime() * -5.0f, glm::vec3(0.0f,0.0f,1.0f));
+        glm::mat4 transform = glm::mat4(1.0);
+        transform = glm::translate(transform, glm::vec3(0.5f,-0.2f,0.0f));
+        transform = glm::rotate(transform, (GLfloat)glfwGetTime() * -0.1010f, glm::vec3(0.0f,0.0f,1.0f));
         
         GLint transformLocation = glGetUniformLocation(ourShader.Program,"transform");
         glUniformMatrix4fv(transformLocation,1,GL_FALSE,glm::value_ptr(transform));
