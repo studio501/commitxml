@@ -24,7 +24,7 @@
 const GLint WIDTH = 800, HEIGHT = 600;
 
 
-
+#define USE_ORTH 0
 
 
 int main(int argc, const char * argv[]) {
@@ -56,48 +56,120 @@ int main(int argc, const char * argv[]) {
     
     glViewport(0, 0, screeenHeight, screeenHeight);
     
-    Shader ourShader("res/shader/core.vs","res/shader/core.fs");
-    //enable alpha
+    glEnable(GL_DEPTH_TEST);
+    
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-    
-    GLfloat vertices[] =
-    {
-        //positon               //color                 //texture coord
-      0.5f,0.5f,0.0f,         1.0f,0.0f,0.0f,           1.0f,1.0f,//top right
-        0.5f,-0.5f,0.0f,        1.0f,1.0f,1.0f,         1.0f,0.0f,//bottom right
-        -0.5f,-0.5f,0.0f,         1.0f,0.0f,0.0f,       0.0f,0.0f,//bottom left
-        -0.5f,0.5f,0.0f,         1.0f,1.0f,1.0f,       0.0f,1.0f//top left
+#if USE_ORTH
+    GLfloat vertices[] = {
+        -0.5f * 500, -0.5f * 500, -0.5f * 500,  0.0f, 0.0f,
+        0.5f * 500, -0.5f * 500, -0.5f * 500,  1.0f, 0.0f,
+        0.5f * 500,  0.5f * 500, -0.5f * 500,  1.0f, 1.0f,
+        0.5f * 500,  0.5f * 500, -0.5f * 500,  1.0f, 1.0f,
+        -0.5f * 500,  0.5f * 500, -0.5f * 500,  0.0f, 1.0f,
+        -0.5f * 500, -0.5f * 500, -0.5f * 500,  0.0f, 0.0f,
+        
+        -0.5f * 500, -0.5f * 500,  0.5f * 500,  0.0f, 0.0f,
+        0.5f * 500, -0.5f * 500,  0.5f * 500,  1.0f, 0.0f,
+        0.5f * 500,  0.5f * 500,  0.5f * 500,  1.0f, 1.0f,
+        0.5f * 500,  0.5f * 500,  0.5f * 500,  1.0f, 1.0f,
+        -0.5f * 500,  0.5f * 500,  0.5f * 500,  0.0f, 1.0f,
+        -0.5f * 500, -0.5f * 500,  0.5f * 500,  0.0f, 0.0f,
+        
+        -0.5f * 500,  0.5f * 500,  0.5f * 500,  1.0f, 0.0f,
+        -0.5f * 500,  0.5f * 500, -0.5f * 500,  1.0f, 1.0f,
+        -0.5f * 500, -0.5f * 500, -0.5f * 500,  0.0f, 1.0f,
+        -0.5f * 500, -0.5f * 500, -0.5f * 500,  0.0f, 1.0f,
+        -0.5f * 500, -0.5f * 500,  0.5f * 500,  0.0f, 0.0f,
+        -0.5f * 500,  0.5f * 500,  0.5f * 500,  1.0f, 0.0f,
+        
+        0.5f * 500,  0.5f * 500,  0.5f * 500,  1.0f, 0.0f,
+        0.5f * 500,  0.5f * 500, -0.5f * 500,  1.0f, 1.0f,
+        0.5f * 500, -0.5f * 500, -0.5f * 500,  0.0f, 1.0f,
+        0.5f * 500, -0.5f * 500, -0.5f * 500,  0.0f, 1.0f,
+        0.5f * 500, -0.5f * 500,  0.5f * 500,  0.0f, 0.0f,
+        0.5f * 500,  0.5f * 500,  0.5f * 500,  1.0f, 0.0f,
+        
+        -0.5f * 500, -0.5f * 500, -0.5f * 500,  0.0f, 1.0f,
+        0.5f * 500, -0.5f * 500, -0.5f * 500,  1.0f, 1.0f,
+        0.5f * 500, -0.5f * 500,  0.5f * 500,  1.0f, 0.0f,
+        0.5f * 500, -0.5f * 500,  0.5f * 500,  1.0f, 0.0f,
+        -0.5f * 500, -0.5f * 500,  0.5f * 500,  0.0f, 0.0f,
+        -0.5f * 500, -0.5f * 500, -0.5f * 500,  0.0f, 1.0f,
+        
+        -0.5f * 500,  0.5f * 500, -0.5f * 500,  0.0f, 1.0f,
+        0.5f * 500,  0.5f * 500, -0.5f * 500,  1.0f, 1.0f,
+        0.5f * 500,  0.5f * 500,  0.5f * 500,  1.0f, 0.0f,
+        0.5f * 500,  0.5f * 500,  0.5f * 500,  1.0f, 0.0f,
+        -0.5f * 500,  0.5f * 500,  0.5f * 500,  0.0f, 0.0f,
+        -0.5f * 500,  0.5f * 500, -0.5f * 500,  0.0f, 1.0f
     };
-    
-    GLuint indices[] =
-    {
-        0,1,3, //first triangle
-        1,2,3 //second triangle
+#else
+    GLfloat vertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
+#endif
     
-    GLuint VBO,VAO,EBO;
+    
+    Shader ourShader("res/shader/core.vs","res/shader/core.fs");
+    //enable alpha
+    
+    
+    GLuint VBO,VAO;
     glGenVertexArrays(1,&VAO);
     glGenBuffers(1,&VBO);
-    glGenBuffers(1,&EBO);
     
     glBindVertexArray(VAO);
     
     glBindBuffer(GL_ARRAY_BUFFER,VBO);
     glBufferData(GL_ARRAY_BUFFER,sizeof(vertices),vertices,GL_STATIC_DRAW);
     
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(indices),indices,GL_STATIC_DRAW);
-    
     //position attribute
-    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,8* sizeof(GL_FLOAT),(GLvoid *)0);
+    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,5* sizeof(GL_FLOAT),(GLvoid *)0);
     glEnableVertexAttribArray(0);
-    //color attribute
-    glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,8* sizeof(GL_FLOAT),(GLvoid *)(3*sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
     //tex coord attribute
-    glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,8* sizeof(GL_FLOAT),(GLvoid *)(6*sizeof(GLfloat)));
+    glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,5* sizeof(GL_FLOAT),(GLvoid *)(3*sizeof(GLfloat)));
     glEnableVertexAttribArray(2);
     
     //glBindBuffer(GL_ARRAY_BUFFER,0);
@@ -114,39 +186,71 @@ int main(int argc, const char * argv[]) {
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
     
-    unsigned char *image = SOIL_load_image("res/images/activity_ad_beiyong.png", &width, &height, 0, SOIL_LOAD_RGBA);
+    unsigned char *image = SOIL_load_image("res/images/57075_ad1_new.jpg", &width, &height, 0, SOIL_LOAD_RGBA);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
     glGenerateMipmap(GL_TEXTURE_2D);
     SOIL_free_image_data(image);
     glBindTexture(GL_TEXTURE_2D, 0);
     
+    glm::mat4 projection = glm::mat4(1.0);
+#if USE_ORTH
+    projection = glm::ortho(0.0f, ( GLfloat )screenWidth, 0.0f, ( GLfloat )screeenHeight, 0.1f, 1000.0f);
+#else
+    projection = glm::perspective(45.0f, GLfloat(screenWidth/screeenHeight), 0.1f, 100.0f);
+#endif
+    
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-        ourShader.Use();
+//        ourShader.Use();
         
-        glm::mat4 transform = glm::mat4(1.0);
-        transform = glm::translate(transform, glm::vec3(0.5f,-0.2f,0.0f));
-        transform = glm::rotate(transform, (GLfloat)glfwGetTime() * -0.1010f, glm::vec3(0.0f,0.0f,1.0f));
-        
-        GLint transformLocation = glGetUniformLocation(ourShader.Program,"transform");
-        glUniformMatrix4fv(transformLocation,1,GL_FALSE,glm::value_ptr(transform));
+//        glm::mat4 transform = glm::mat4(1.0);
+//        transform = glm::translate(transform, glm::vec3(0.5f,-0.2f,0.0f));
+//        transform = glm::rotate(transform, (GLfloat)glfwGetTime() * -0.1010f, glm::vec3(0.0f,0.0f,1.0f));
+//
+//        GLint transformLocation = glGetUniformLocation(ourShader.Program,"transform");
+//        glUniformMatrix4fv(transformLocation,1,GL_FALSE,glm::value_ptr(transform));
         
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
-        glUniform1i(glGetUniformLocation(ourShader.Program,"ourTexture"),0);
+        glUniform1i(glGetUniformLocation(ourShader.Program,"ourTexture1"),0);
+        
+        ourShader.Use();
+        
+        glm::mat4 model = glm::mat4(1.0);
+        glm::mat4 view = glm::mat4(1.0);
+        
+#if USE_ORTH
+        model = glm::rotate( model, ( GLfloat)glfwGetTime( ) * 1.0f, glm::vec3( 0.5f, 1.0f, 0.0f ) ); // use to compare orthographic and perspective projection
+        view = glm::translate( view, glm::vec3( screenWidth / 2, screeenHeight / 2, -700.0f ) ); // use with orthographic projection
+#else
+        model = glm::rotate( model, ( GLfloat)glfwGetTime( ) * 1.0f, glm::vec3( 0.5f, 1.0f, 0.0f ) ); // use with perspective projection
+        view = glm::translate( view, glm::vec3( 0.0f, 0.0f, -3.0f ) ); // use with perspective projection
+#endif
+      
+        // Get their uniform location
+        GLint modelLoc = glGetUniformLocation(ourShader.Program,"model");
+        GLint viewlLoc = glGetUniformLocation(ourShader.Program,"view");
+        GLint projLoc = glGetUniformLocation(ourShader.Program,"projection");
+        
+        // Pass them to the shaders
+        glUniformMatrix4fv(modelLoc,1,GL_FALSE,glm::value_ptr(model));
+        glUniformMatrix4fv(viewlLoc,1,GL_FALSE,glm::value_ptr(view));
+        glUniformMatrix4fv(projLoc,1,GL_FALSE,glm::value_ptr(projection));
+        
         glBindVertexArray(VAO);
-//        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+//        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
+        
+        // Swap the screen buffers
         glfwSwapBuffers(window);
     }
     
     glDeleteVertexArrays(1,&VAO);
     glDeleteBuffers(1,&VBO);
-    glDeleteBuffers(1,&EBO);
     glfwTerminate();
     return 0;
     
