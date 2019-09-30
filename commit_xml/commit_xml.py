@@ -198,7 +198,6 @@ def replace_head_tail(src_headtail,src_middle):
 	middle = src_middle[arr2[0]:arr2[1]+1]
 
 	append_by_table(head,middle,'\n')
-	print(head[len(head) - 1])
 	append_by_table(head,tail)
 
 	return head
@@ -220,22 +219,18 @@ def modify_file_xml(copy_xml,filename,group_name):
 	group_ele = None
 	# group_ele = root.find(group_name)
 	for elem in root:
-		print(elem.attrib)
-		print(is_group_ele(elem))
 		if elem.attrib.get('id') == group_name:
 			group_ele = elem
 			break
 	    # for subelem in elem:
 	    #     print(subelem.attrib)
 
-	print(group_ele)
 	ci_msg = None
 	if group_ele is not None:
 		delete_list = []
 		udpate_list = []
 		add_list = []
 		for elem in group_ele:
-			# print(elem.attrib)
 			pass
 			# next(ifilter(predicate, seq), None)
 			for elem_cp in copy_xml:
@@ -267,7 +262,6 @@ def modify_file_xml(copy_xml,filename,group_name):
 			group_ele.append(x)
 			a_arr.append(x.attrib.get('id'))
 
-		print('delete list is ',delete_list)
 		# sort
 		data = []
 		for elem in group_ele:
@@ -290,7 +284,6 @@ def modify_file_xml(copy_xml,filename,group_name):
 			ci_msg += u'删除: ' + ','.join(delete_list)
 	else:
 		be_group = is_temp_ele(copy_xml) and is_group_ele(copy_xml[0])
-		print('be_group',be_group,copy_xml.tag,copy_xml.attrib)
 
 		group_arr = []
 		if be_group:
@@ -315,7 +308,6 @@ def modify_file_xml(copy_xml,filename,group_name):
 	# print(mydata_str[1])
 
 	tr = _find_first_last_group(mydata_str)
-	print(tr)
 
 	mydata_str_2 = None
 	with open(filename,'r') as f:
@@ -341,7 +333,6 @@ def upgrade_ver(filename):
 	ver_line = vers[0].rstrip()
 	ver = ver_line.split('|')
 	if len(ver) == 2:
-		print(ver[1])
 		res = add_version_code_last(ver[1].split('.'))
 		ver[1] = '.'.join(res)
 		ver_str = '|'.join(ver)
@@ -354,19 +345,87 @@ def upgrade_ver(filename):
 
 	return ''
 
-def main(src_path,config_file):
+def get_safe_ver(ver):
+	t_arr = ver.split('.')
+	if len(t_arr) == 2:
+		t = []
+		t[0] = t_arr[0]
+		t[1] = "%02d" % int(t_arr[1])
+		t[2] = '0'
+		return '.'.join(t)
+	elif len(t_arr) == 3:
+		t = []
+		t[0] = t_arr[0]
+		t[1] = "%02d" % int(t_arr[1])
+		t[2] = t_arr[1]
+		return '.'.join(t)
+
+	raise_error(u'无法识别的版本号 ' + ver)
+
+def get_lang_arr(isAll=False):
+	return ["text_ar.ini",
+	"text_de.ini",
+	"text_en.ini",
+	"text_es.ini",
+	"text_fa.ini",
+	"text_fr.ini",
+	"text_id.ini",
+	"text_it.ini",
+	"text_ja.ini",
+	"text_ko.ini",
+	"text_nl.ini",
+	"text_no.ini",
+	"text_pl.ini",
+	"text_pt.ini",
+	"text_ro.ini",
+	"text_ru.ini",
+	"text_th.ini",
+	"text_tr.ini",
+	"text_uk.ini",
+	"text_zh_CN.ini",
+	"text_zh_TW.ini"] if isAll else ["text_zh_CN.ini"]
+
+def find_txt_by_id(file_contents,id)
+	return next(ifilter(lambda x: x.count(id+'=') == 1, file_contents), None)
+
+def get_copy_txt(pub_file_len,dst_file):
+	file_contents = None
+	with open(dst_file,'r') as f:
+		file_contents = f.readlines()
+
+	copy_txt = None
+	if pub_file_len == 1:
+		my_input(u'请将要复制的内容拷贝到剪贴板后回车')
+		copy_txt = getClipBoardContent()
+	else:
+		all_lang_file = my_input(u'请拖入全语言文件').rstrip()
+		js_data = open_json_file(all_lang_file)
+
+
+		pass
+
+def main(file_type,config_file):
 	pass
 
 	file_type = '1'
-	pub_file_name = 'database.local.xml'
+	pub_file_name = None
+	group_name = None
+	copy_xml = None
+	if file_type == '1':
+		pub_file_name = ['database.local.xml']
+		group_name = get_group_name()
+		ready = my_input(u'请将要复制的内容拷贝到剪贴板后回车')
+		copy_xml = checkClipContent(getClipBoardContent(),'xml')
 
-	group_name = get_group_name()
-
-	ready = my_input(u'请将要复制的内容拷贝到剪贴板后回车')
+	elif file_type == '2':
+		is_all = my_input(u'是否发布全语言 (y/n)?') == 'y'
+		pub_file_name = get_lang_arr(is_all)
+	else:
+		raise_error(u'无法处理的文件类型 '+ file_type)
 
 	# print(getClipBoardContent())
-	copy_xml = checkClipContent(getClipBoardContent(),'xml')
-
+	
+	pub_file_len = len(pub_file_name)
 	js_data = open_json_file("config.json")
 
 	for info in js_data['destination']:
@@ -382,16 +441,35 @@ def main(src_path,config_file):
 
 				if ver_range:
 					for ver in ver_range:
+						ver = get_safe_ver(ver)
 						pt = os.path.join(info['path'],ver)
 						if os.path.exists(pt):
 							svn_update(pt)
-							dst_file = os.path.join(pt,pub_file_name)
-							if os.path.exists(dst_file):
-								ci_msg = modify_file_xml(copy_xml,dst_file,group_name)
-								ci_msg2 = upgrade_ver(os.path.join(pt,'VERSION.txt'))
-								svn_commit(info['path'],ci_msg + '\n' + ci_msg2)
-							else:
-								raise_error(u'找不到对应文件 '+ pub_file_name,True)
+
+							ci_msg = ''
+							for pb in pub_file_name:
+								dst_file = os.path.join(pt,pb)
+								if os.path.exists(dst_file):
+									ci_msg1 = None
+									if file_type == '1':
+										ci_msg1 = modify_file_xml(copy_xml,dst_file,group_name)
+									elif file_type == '2':
+										copy_txt = None
+										if pub_file_len == 1:
+											copy_txt = get_copy_txt(pub_file_len,dst_file)
+											
+										else:
+										
+										if copy_txt:
+											ci_msg1 = modify_file_ini(copy_txt,dst_file)
+									
+									ci_msg2 = upgrade_ver(os.path.join(pt,'VERSION.txt'))
+									if isStringNil(ci_msg):
+										ci_msg = ci_msg1 + '\n' + ci_msg2
+								else:
+									raise_error(u'找不到对应文件 '+ pb,True)
+							svn_commit(str(pt),ci_msg)
+
 						else:
 							raise_error(u'找不到此版本目录 '+ ver,True)
 
@@ -399,7 +477,9 @@ def main(src_path,config_file):
 def test():
 	pass
 
-	upgrade_ver('/Users/mac/Documents/my_projects/cok/innerDyRes/5.05.0/VERSION.txt')
+	print(type([]))
+	# svn_commit('/Users/mac/Documents/my_projects/cok/innerDyRes/5.00.0','msg')
+	# upgrade_ver('/Users/mac/Documents/my_projects/cok/innerDyRes/5.05.0/VERSION.txt')
 	# s1 = u'{0}表作如下修改'.format('group_name')
 	# print(s1)
 	# print( get_ver_range('5.01.0~5.22.0'))
@@ -421,7 +501,7 @@ def test():
 
 if __name__ == '__main__':
 	if len(sys.argv) == 3:
-		if False:
+		if True:
 			test()
 		else:
 			main(sys.argv[1],sys.argv[2])
