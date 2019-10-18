@@ -10,6 +10,33 @@ import xml.etree.ElementTree as ET
 
 import subprocess
 
+# Iterative Binary Search Function 
+# It returns location of x in given array arr if present, 
+# else returns -1 
+def binarySearch(arr, l, r, x): 
+  	
+	lastDirLow = True
+	mid = None
+	while l <= r: 
+
+		mid	 = l + (r - l)/2
+	      
+		# Check if x is present at mid 
+		if arr[mid][0] == x: 
+			return arr[mid][1] 
+
+		# If x is greater, ignore left half 
+		elif arr[mid][0] < x: 
+			l = mid + 1
+			lastDirLow = True
+
+		# If x is smaller, ignore right half 
+		else: 
+			r = mid - 1
+			lastDirLow = False
+	idx = mid if lastDirLow else mid - 1
+	return arr[mid][1]
+
 def svn_update(dir):
 	subprocess.call(['svn','update',dir])
 
@@ -385,25 +412,109 @@ def get_lang_arr(isAll=False):
 	"text_zh_CN.ini",
 	"text_zh_TW.ini"] if isAll else ["text_zh_CN.ini"]
 
-def find_txt_by_id(file_contents,id)
+def find_txt_by_id(file_contents,id):
 	return next(ifilter(lambda x: x.count(id+'=') == 1, file_contents), None)
 
-def get_copy_txt(pub_file_len,dst_file):
+def get_txt_map(txt_arr):
+	dic1 = {}
+	for x in txt_arr:
+		t_arr = x.split('=')
+		if len(t_arr) == 2:
+			dic1[t_arr[0]] = t_arr[1]
+
+	return dic1
+
+def get_dialog_id(dialog):
+	dialog_arr = dialog.split('=')
+	if len(dialog_arr) == 2:
+		return dialog_arr[0]
+
+	return None
+
+def insert_one_(file_contents,copy_line):
+	copy_id = get_dialog_id(copy_line)
+	if not copy_id:
+		raise_error(u'格式不正确 ' + copy_line)
+	for i,line in enumerate(file_contents):
+		txt_id = get_dialog_id(line)
+		if txt_id:
+			pass
+
+
+def insert_into_file(file_contents,copy_contents):
+	pass
+	fc = []
+
+	for i,line in enumerate(file_contents):
+		txt_id = get_dialog_id(line)
+		if txt_id:
+			fc.append([txt_id,i])
+
+def save_ini_file(dst_file,file_keys_order):
+	pass
+
+def reCompLine(txt_id,txt_content):
+	print(txt_id)
+	print(txt_content)
+	return u'='.join((txt_id, txt_content)).encode('utf-8').strip() + '\n'
+	# return u''+ txt_id + u'=' + txt_content + u'\n'
+
+def modify_file_ini(copy_txt,dst_file,pb):
 	file_contents = None
 	with open(dst_file,'r') as f:
 		file_contents = f.readlines()
 
-	copy_txt = None
-	if pub_file_len == 1:
-		my_input(u'请将要复制的内容拷贝到剪贴板后回车')
-		copy_txt = getClipBoardContent()
-	else:
-		all_lang_file = my_input(u'请拖入全语言文件').rstrip()
-		js_data = open_json_file(all_lang_file)
+	# copy_txt = None
+	# if pub_file_len == 1:
+	# 	my_input(u'请将要复制的内容拷贝到剪贴板后回车')
+	# 	copy_txt = getClipBoardContent().rstrip().split('\n')
+	# else:
+	# 	all_lang_file = my_input(u'请拖入全语言文件').rstrip()
+	# 	js_data = open_json_file(all_lang_file)
+	# 	copy_txt = js_data[pb]
+
+	file_keys = get_txt_map(file_contents)
+	copy_keys = get_txt_map(copy_txt)
+	has_same = False
+	for x in copy_keys:
+		if file_keys.get(x):
+			print('Exist id={0}'.format(x))
+			# print('Exist id={0} Origin{1} Replace{2}'.format(x,file_keys[x],copy_keys[x]))
+			# print('已经存在id='+x+' '+ '原始值'+file_keys[x]+' '+'替换值'+copy_keys[x])
+			has_same = True
+	if has_same:
+		is_replace = my_input(u'是否要替换已有多语言 (y/n)?').rstrip() == 'y'
+		if not is_replace:
+			sys.exit()
 
 
-		pass
+	add_list = []
+	udpate_list = []
+	delete_list = []
+	for x in copy_keys:
+		if not file_keys.get(x):
+			add_list.append(x)
+		else:
+			cv = copy_keys[x]
+			if cv.count('@dd') == 1:
+				delete_list.append(x)
+			else:
+				udpate_list.append(x)
 
+	print("add_list",add_list)
+	print("udpate_list",udpate_list)
+	print("delete_list",delete_list)
+	# return copy_txt
+
+	for x in udpate_list:
+		for i,line in enumerate(file_contents):
+			txt_id = get_dialog_id(line)
+			if txt_id and txt_id == x:
+				file_contents[i] = reCompLine(x,copy_keys[x])
+
+	with open('after_change.ini','w') as f:
+		for line in file_contents:
+			f.write(line)
 def main(file_type,config_file):
 	pass
 
@@ -426,6 +537,11 @@ def main(file_type,config_file):
 	# print(getClipBoardContent())
 	
 	pub_file_len = len(pub_file_name)
+	all_lang_json = None
+	if pub_file_len > 1:
+		all_lang_file = my_input(u'请拖入全语言文件').rstrip()
+		all_lang_json = open_json_file(all_lang_file)
+
 	js_data = open_json_file("config.json")
 
 	for info in js_data['destination']:
@@ -455,13 +571,19 @@ def main(file_type,config_file):
 										ci_msg1 = modify_file_xml(copy_xml,dst_file,group_name)
 									elif file_type == '2':
 										copy_txt = None
+
 										if pub_file_len == 1:
-											copy_txt = get_copy_txt(pub_file_len,dst_file)
+											my_input(u'请将要复制的内容拷贝到剪贴板后回车')
+											copy_txt = getClipBoardContent().rstrip().split('\n')
+
+											# copy_txt = get_copy_txt(pub_file_len,dst_file,pb)
 											
 										else:
+											# copy_txt = get_copy_txt(pub_file_len,dst_file,pb)
+											copy_txt = all_lang_json[pb]
 										
 										if copy_txt:
-											ci_msg1 = modify_file_ini(copy_txt,dst_file)
+											ci_msg1 = modify_file_ini(copy_txt,dst_file,pb)
 									
 									ci_msg2 = upgrade_ver(os.path.join(pt,'VERSION.txt'))
 									if isStringNil(ci_msg):
@@ -477,7 +599,9 @@ def main(file_type,config_file):
 def test():
 	pass
 
-	print(type([]))
+	all_lang_json = open_json_file('all_lang.json')
+	modify_file_ini(all_lang_json['text_ar.ini'],'/Users/mac/Documents/my_projects/cok/innerDyRes/5.05.0/text_ar.ini',None)
+	# print(type([]))
 	# svn_commit('/Users/mac/Documents/my_projects/cok/innerDyRes/5.00.0','msg')
 	# upgrade_ver('/Users/mac/Documents/my_projects/cok/innerDyRes/5.05.0/VERSION.txt')
 	# s1 = u'{0}表作如下修改'.format('group_name')
