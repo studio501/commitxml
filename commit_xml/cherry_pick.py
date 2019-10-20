@@ -125,11 +125,41 @@ def main(commit_ssha):
 def test():
 	pass
 
-	server_url = 'https://git.elex-tech.com/tangwen/clientcode'
-	gl = gitlab.Gitlab(server_url, private_token='hhtzC8mxC18pmsAY4_w-')
-	projects = gl.projects
-	for x in projects.list():
-		print(x.accessrequests.list())
+	# Cr6rxBTHpcRvHiPZtX7o
+
+	# server_url = 'https://gitlab.com/inryygy007'
+	server_url = 'https://gitlab.com'
+	token = "Cr6rxBTHpcRvHiPZtX7o"
+
+	with gitlab.Gitlab(server_url, token) as gl:
+		for x in gl.projects.list():
+			print(x)
+
+		# print(len(gl.projects.list()))
+		# print(gl.projects.list)
+
+
+	# gl = gitlab.Gitlab(server_url, private_token='Cr6rxBTHpcRvHiPZtX7o')
+	# projects = gl.projects
+	# # print(projects)
+
+	# projects = gl.projects.list()
+	# for project in projects:
+	#     print(project)
+	#     break
+
+	# print(gl.projects.get_create_attrs())
+
+	# project = gl.projects.get(0)
+	# print(project.attributes)
+	# group = gl.groups.get(0)
+	# for project in group.projects.list():
+	#     print(project)
+	# pl = projects.list()
+	# print(projects.list())
+	# print(projects.accessrequests.list())
+	# for x in projects.list():
+	# 	print(x.accessrequests.list())
 	# ten_first_groups = gl.groups.list(page=1, per_page=10)
 	# print(ten_first_groups)
 
