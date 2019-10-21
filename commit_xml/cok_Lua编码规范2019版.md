@@ -85,12 +85,26 @@ return getLang(text_id,unpack(txt_arr))
 -- 假设t 有100个元素
 local t
 ...
+-- 不推荐1 循环遍历找极值
+-- 不推荐2 排序后找极值
+
+-- 推荐
 local max_ele = math.max(unpack(t))
 ```
 
-- 1111111111使用迭代器访问表
+- 对不再使用的表引用手动置 nil 方便Lua 进行垃圾回收
 ```lua
+function SettingView:onCleanup()
+  	self.m_data = nil
+end
 
+-- 两个表互相引用 应该使用其中一个为 weak 防止对象一直被持有
+local a = {}
+local b = {}
+a.indexB = b
+b.indexA = a
+
+setmetatable(a, { __mode = "v" })
 ```
 
 - 1111111111使用迭代器访问表
