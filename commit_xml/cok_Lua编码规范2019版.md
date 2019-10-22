@@ -1,8 +1,8 @@
 # Lua 编码规范 #
 
 ## 版本 ##
-- 项目中使用 ToLua 插件来实现 Lua 和 C# 的桥接。目前为止，插件支持的 Lua 语言版本为 5.1，兼容部分 Lua 5.2 的语法特性。
-- 使用 [middleclass](https://github.com/kikito/middleclass) 插件在 Lua 中模拟面向对象编程。
+- 项目中使用 Lua 语言版本为 5.1, 本规范只对应5.1版本。
+- 使用 metatable 方式在 Lua 中模拟面向对象编程。
 
 ## 文件名和文件粒度
 
@@ -14,15 +14,15 @@
 
 - 表的长度：使用 `#` 操作符来代替 `table.getn` 方法。
 
-  ```lua
-  t = {}
+```lua
+t = {}
 
-  -- 应避免的用法。
-  local len = table.getn(t)
+-- 应避免的用法。
+local len = table.getn(t)
 
-  -- 推荐用法。
-  local len = #t
-  ```
+-- 推荐用法。
+local len = #t
+```
 - 表判空和字符串判空
 ```lua
 local t = {}
@@ -73,7 +73,7 @@ if #txt_arr == 1 then
 		return getLang(text_id,txt_arr[1])
 elseif #txt_arr == 2 then
   	return getLang(text_id,txt_arr[1],txt_arr[2])
--- could be a bounch of elseif ...
+-- could be a bounch of elseif here ...
 end
 
 -- 推荐
@@ -107,29 +107,50 @@ b.indexA = a
 setmetatable(a, { __mode = "v" })
 ```
 
-- 1111111111使用迭代器访问表
+- 利用逻辑运算的短路效应
+```lua
+-- and 返回第二个值,or 返回第一个值
+-- 如果 call_expression1 返回不为(nil 或者 false) 则 call_expression2 不会调用
+return call_expression1() or call_expression2()
+
+-- 如果 call_expression1 返回nil 或者 false 则 call_expression2 不会调用
+return call_expression1() and call_expression2()
+```
+
+- 简化逻辑运算处理,避免不必要的if else 语句
+```lua
+-- lua 的值都可转化为bool值
+-- 不推荐
+if spr_data then
+  	spr:setVisible(true)
+else
+  	spr:setVisible(false)
+end
+
+-- 推荐
+spr:setVisible(not not spr_data)
+```
+
+- 使用 and or 实现三目运算注意的问题
+```lua
+-- 想要当 flag 为 true 的时候 返回 false,实际总是返回true
+-- 注意 and 返回第二个值,or 返回第一个值
+local a = flag and false or true -- a = true always
+```
+
+- 避免代码中多处出现相同常量,关键的常量应该使用函数获取,减少常量的出处,方便维护整理
 ```lua
 
 ```
 
-- 1111111111使用迭代器访问表
+- 使用tolua.type 进行 c++原生对象类型比较
 ```lua
+-- 不推荐
+local someView
+local is_valid = tolua.cast(someView,'cc.Node')
 
-```
-
-- 1111111111使用迭代器访问表
-```lua
-
-```
-
-- 1111111111使用迭代器访问表
-```lua
-
-```
-
-- 1111111111使用迭代器访问表
-```lua
-
+--推荐 
+local is_valid = tolua.type(someView) == 'cc.Node'
 ```
 - **禁止**随意使用全局变量和函数，避免全局函数和全局变量泛滥的情况。
 
@@ -184,7 +205,7 @@ setmetatable(a, { __mode = "v" })
   ```
 
 - 单行定义的表（如上面的 `t`），花括号与其包裹内容之间应有一个空格。
-- 连接运算符".."两边要有空格
+- 连接运算符 ".." 两边要有空格
 ```lua
 	return "abcd" .. "efgh"
 ```
@@ -348,7 +369,7 @@ end
 
 ## 全局或局部函数
 
-使用 Pascal 命名法。
+使用 Pascal 命名法。尽量减少全局变量或函数的创建
 
 ```lua
 function StringToNum(str)
@@ -395,7 +416,7 @@ actNode:runAction(cc.Sequence:create(cc.CallFunc:create(function ()
       end)))
 ```
 
-## 模拟面向对象
+## 面向对象
 
 ### 类和对象
 
