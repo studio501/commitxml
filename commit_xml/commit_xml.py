@@ -15,6 +15,9 @@ import platform
 if platform.system() == 'Windows':
 	import win32clipboard
 
+def file_extension(path): 
+	return os.path.splitext(path)[1] 
+
 def is_number(str):
     try:
         # 因为使用float有一个例外是'NaN'
@@ -260,7 +263,7 @@ def is_group_ele(rt):
 def is_temp_ele(rt):
 	return is_spec_ele_(rt,'temp_group__')
 
-def modify_file_xml(copy_xml,filename,group_name,fen_biao_flagn):
+def modify_file_xml(copy_xml,filename,group_name):
 	tree = ET.parse(filename)
 	root = tree.getroot()
 
@@ -569,22 +572,41 @@ def modify_file_ini(copy_txt,dst_file,pb):
 		ci_msg += 'delete: ' + str(delete_list)
 
 	return ci_msg
+
+def get_files_in_dir(sourceDir):
+	file_list = []
+	xml_Ext = '.xml'
+	for f in os.listdir(sourceDir):
+		sourceF = os.path.join(sourceDir,f)
+		if os.path.isfile(sourceF) and xml_Ext == file_extension(f):
+			file_list.append(os.path.basename(f))
+
+
+	return file_list
+
+def get_blank_xml(fileName):
+	with open(fileName,'w') as f:
+		f.write('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n<tns:database xmlns:tns="http://www.iw.com/sns/platform/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n</tns:database>\n')
+
 def main():
 	pass
 
 	file_type = my_input(u'(1) 提交xml表、 (2) 提交多语言: ').rstrip()
+	file_is_xml = file_type == '1'
+	file_is_lang = file_type == '2'
+
 	if file_type != '1' and file_type != '2':
 		raise_error(u'无法处理的文件类型 '+ file_type)
 	pub_file_name = None
 	group_name = None
 	copy_xml = None
-	if file_type == '1':
+	if file_is_xml:
 		pub_file_name = ['database.local.xml']
 		group_name = get_group_name()
 		ready = my_input(u'请将要复制的内容拷贝到剪贴板后回车')
 		copy_xml = checkClipContent(getClipBoardContent(),'xml')
 
-	elif file_type == '2':
+	elif file_is_lang:
 		is_all = my_input(u'是否发布全语言 (y/n)?') == 'y'
 		pub_file_name = get_lang_arr(is_all)
 
@@ -602,55 +624,78 @@ def main():
 		ci_flag = my_input(u'是否提交 ' + info['nickname'] + ' (y/n)?') == 'y'
 		if ci_flag:
 			fen_biao_flag = info.get('fen_biao') == True
-			ver_to_publish = my_input(u'请输入发布版本 x~y 或 x,y,z: ').rstrip()
-			if not isStringNil(ver_to_publish):
-				ver_range = None
-				if ver_to_publish.count('~') == 1:
-					ver_range = get_ver_range(ver_to_publish)
-				else:
-					ver_range = ver_to_publish.split(',')
+			ver_to_publish = info.get('range')
+			ver_to_publish = ['.'] if table_is_empty(ver_to_publish) else ver_to_publish
+			# my_input(u'请输入发布版本 x~y 或 x,y,z: ').rstrip()
+			if not table_is_empty(ver_to_publish):
+				# ver_range = None
+				# if ver_to_publish.count('~') == 1:
+				# 	ver_range = get_ver_range(ver_to_publish)
+				# else:
+				# 	ver_range = ver_to_publish.split(',')
 
-				print('ver_range',ver_range)
-				if ver_range:
-					for ver in ver_range:
-						ver = get_safe_ver(ver)
-						pt = os.path.join(info['path'],ver)
-						if os.path.exists(pt):
-							svn_update(pt)
+				# print('ver_range',ver_range)
+				# if ver_range:
+				for ver in ver_to_publish:
+					ver = get_safe_ver(ver)
+					pt = os.path.join(info['path'],ver)
+					if os.path.exists(pt):
+						svn_update(pt)
 
-							ci_msg = ''
-							for pb in pub_file_name:
-								safe_check = file_type == '1' or all_lang_json.get(pb)
-								if safe_check:
-									dst_file = os.path.join(pt,pb)
-									if os.path.exists(dst_file):
-										ci_msg1 = None
-										if file_type == '1':
-											ci_msg1 = modify_file_xml(copy_xml,dst_file,group_name,fen_biao_flag)
-										elif file_type == '2':
-											copy_txt = None
+						ci_msg = ''
 
-											if pub_file_len == 1:
-												my_input(u'请将要复制的内容拷贝到剪贴板后回车')
-												copy_txt = getClipBoardContent().rstrip().split('\n')
+						if file_is_xml:
+							dst_file = None
+							if fen_biao_flag:
+								pass
+								
+								dst_file = os.path.join(pt,group_name + '.xml')
+								all_xml = get_files_in_dir(pt)
+								if not table_contains(all_xml,group_name):
+									get_blank_xml(dst_file)	
+							else:
+								dst_file = os.path.join(pt,'database.local.xml')
 
-												# copy_txt = get_copy_txt(pub_file_len,dst_file,pb)
-												
-											else:
-												# copy_txt = get_copy_txt(pub_file_len,dst_file,pb)
-												copy_txt = all_lang_json[pb]
+
+							if os.path.exists(dst_file):
+								ci_msg1 = None
+								ci_msg1 = modify_file_xml(copy_xml,dst_file,group_name)
+
+
+
+
+						for pb in pub_file_name:
+							safe_check = file_type == '1' or all_lang_json.get(pb)
+							if safe_check:
+								dst_file = os.path.join(pt,pb)
+								if os.path.exists(dst_file):
+									ci_msg1 = None
+									if file_type == '1':
+										ci_msg1 = modify_file_xml(copy_xml,dst_file,group_name,fen_biao_flag)
+									elif file_type == '2':
+										copy_txt = None
+
+										if pub_file_len == 1:
+											my_input(u'请将要复制的内容拷贝到剪贴板后回车')
+											copy_txt = getClipBoardContent().rstrip().split('\n')
+
+											# copy_txt = get_copy_txt(pub_file_len,dst_file,pb)
 											
-											if copy_txt:
-												ci_msg1 = modify_file_ini(copy_txt,dst_file,pb)
+										else:
+											# copy_txt = get_copy_txt(pub_file_len,dst_file,pb)
+											copy_txt = all_lang_json[pb]
 										
-										ci_msg2 = upgrade_ver(os.path.join(pt,'VERSION.txt'))
-										if isStringNil(ci_msg):
-											ci_msg = ci_msg1 + '\n' + ci_msg2
-									else:
-										raise_error(u'找不到对应文件 '+ pb,True)
-							svn_commit(str(pt),ci_msg)
-						else:
-							raise_error(u'找不到此版本目录 '+ ver,True)
+										if copy_txt:
+											ci_msg1 = modify_file_ini(copy_txt,dst_file,pb)
+									
+									ci_msg2 = upgrade_ver(os.path.join(pt,'VERSION.txt'))
+									if isStringNil(ci_msg):
+										ci_msg = ci_msg1 + '\n' + ci_msg2
+								else:
+									raise_error(u'找不到对应文件 '+ pb,True)
+						svn_commit(str(pt),ci_msg)
+					else:
+						raise_error(u'找不到此版本目录 '+ ver,True)
 
 
 def test():
