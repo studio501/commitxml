@@ -3,12 +3,14 @@
 		{
 			"nickname":"内网",
 			"path":"/Users/mac/Documents/my_projects/cok/innerDyRes",
-			"range":"5.01.0~5.05.0"
+			"range":[],
+			"fen_biao":true
 		},
 		{
 			"nickname":"外网75",
 			"path":"/Users/mac/Documents/my_projects/cok/outerDyRes75",
-			"range":"5.01.0~5.05.0"
-		},
+			"range":["5.05.0"],
+			"fen_biao":false
+		}
 	]
 }

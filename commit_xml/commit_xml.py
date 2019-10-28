@@ -10,6 +10,21 @@ import xml.etree.ElementTree as ET
 
 import subprocess
 
+import platform
+
+if platform.system() == 'Windows':
+	import win32clipboard
+
+def is_number(str):
+    try:
+        # 因为使用float有一个例外是'NaN'
+        if str=='NaN':
+            return False
+        float(str)
+        return True
+    except ValueError:
+        return False
+
 # Iterative Binary Search Function 
 # It returns location of x in given array arr if present, 
 # else returns -1 
@@ -116,11 +131,17 @@ def raise_error(msg,iwWarnning=False):
 		sys.exit()
 
 def getClipBoardContent():
-	p = subprocess.Popen(['pbpaste'], stdout=subprocess.PIPE)
-	retcode = p.wait()
-	data = p.stdout.read()
-	#这里的data为bytes类型，之后需要转成utf-8操作
-	return data.decode('utf-8')
+	if platform.system() == 'Windows':
+		win32clipboard.OpenClipboard()
+		data = win32clipboard.GetClipboardData()
+		win32clipboard.CloseClipboard()
+		return data.decode('utf-8')
+	else:
+		p = subprocess.Popen(['pbpaste'], stdout=subprocess.PIPE)
+		retcode = p.wait()
+		data = p.stdout.read()
+		#这里的data为bytes类型，之后需要转成utf-8操作
+		return data.decode('utf-8')
 
 def checkClipContent(str_content,file_type='xml',beSecondCheck=False):
 	# str_arr = str_content.split('\n')
@@ -239,7 +260,7 @@ def is_group_ele(rt):
 def is_temp_ele(rt):
 	return is_spec_ele_(rt,'temp_group__')
 
-def modify_file_xml(copy_xml,filename,group_name):
+def modify_file_xml(copy_xml,filename,group_name,fen_biao_flagn):
 	tree = ET.parse(filename)
 	root = tree.getroot()
 
@@ -375,22 +396,23 @@ def upgrade_ver(filename):
 def get_safe_ver(ver):
 	t_arr = ver.split('.')
 	if len(t_arr) == 2:
-		t = []
+		t = [0,0,0]
 		t[0] = t_arr[0]
 		t[1] = "%02d" % int(t_arr[1])
 		t[2] = '0'
 		return '.'.join(t)
 	elif len(t_arr) == 3:
-		t = []
+		t = [0,0,0]
 		t[0] = t_arr[0]
 		t[1] = "%02d" % int(t_arr[1])
-		t[2] = t_arr[1]
+		t[2] = t_arr[2]
 		return '.'.join(t)
 
 	raise_error(u'无法识别的版本号 ' + ver)
 
 def get_lang_arr(isAll=False):
-	return ["text_ar.ini",
+	return [
+	"text_ar.ini",
 	"text_de.ini",
 	"text_en.ini",
 	"text_es.ini",
@@ -410,7 +432,8 @@ def get_lang_arr(isAll=False):
 	"text_tr.ini",
 	"text_uk.ini",
 	"text_zh_CN.ini",
-	"text_zh_TW.ini"] if isAll else ["text_zh_CN.ini"]
+	"text_zh_TW.ini"
+	] if isAll else ["text_zh_CN.ini"]
 
 def find_txt_by_id(file_contents,id):
 	return next(ifilter(lambda x: x.count(id+'=') == 1, file_contents), None)
@@ -501,10 +524,9 @@ def modify_file_ini(copy_txt,dst_file,pb):
 			else:
 				udpate_list.append(x)
 
-	print("add_list",add_list)
-	print("udpate_list",udpate_list)
-	print("delete_list",delete_list)
-	# return copy_txt
+	# print("add_list",add_list)
+	# print("udpate_list",udpate_list)
+	# print("delete_list",delete_list)
 
 	for x in udpate_list:
 		for i,line in enumerate(file_contents):
@@ -512,13 +534,47 @@ def modify_file_ini(copy_txt,dst_file,pb):
 			if txt_id and txt_id == x:
 				file_contents[i] = reCompLine(x,copy_keys[x])
 
-	with open('after_change.ini','w') as f:
+	file_contents_len = len(file_contents)
+	file_max_idx = file_contents_len - 1
+	for x in add_list:
+		print('is_number',is_number(x))
+		if is_number(x):
+			for i,line in enumerate(file_contents):
+				txt_id = get_dialog_id(line)
+				if txt_id:
+					next_id = None
+					counter = 0
+					while True:
+						counter += 1
+						next_id = get_dialog_id(file_contents[min(file_max_idx,i+counter)])
+						if next_id:
+							break
+					if next_id and (txt_id != next_id) and is_number(txt_id) and is_number(next_id):
+						if int(x) > int(txt_id) and int(x) < int(next_id):
+							file_contents.insert(i+1,reCompLine(x,copy_keys[x]))
+							break
+
+	with open(dst_file,'w') as f:
 		for line in file_contents:
 			f.write(line)
-def main(file_type,config_file):
+
+	ci_msg = ''
+	if len(add_list) > 0:
+		ci_msg += 'add: ' + str(add_list) + '\n'
+
+	if len(udpate_list) > 0:
+		ci_msg += 'update: ' + str(udpate_list) + '\n'
+
+	if len(delete_list) > 0:
+		ci_msg += 'delete: ' + str(delete_list)
+
+	return ci_msg
+def main():
 	pass
 
-	file_type = '1'
+	file_type = my_input(u'(1) 提交xml表、 (2) 提交多语言: ').rstrip()
+	if file_type != '1' and file_type != '2':
+		raise_error(u'无法处理的文件类型 '+ file_type)
 	pub_file_name = None
 	group_name = None
 	copy_xml = None
@@ -531,15 +587,13 @@ def main(file_type,config_file):
 	elif file_type == '2':
 		is_all = my_input(u'是否发布全语言 (y/n)?') == 'y'
 		pub_file_name = get_lang_arr(is_all)
-	else:
-		raise_error(u'无法处理的文件类型 '+ file_type)
 
 	# print(getClipBoardContent())
 	
 	pub_file_len = len(pub_file_name)
 	all_lang_json = None
 	if pub_file_len > 1:
-		all_lang_file = my_input(u'请拖入全语言文件').rstrip()
+		all_lang_file = my_input(u'请拖入全语言文件: ').rstrip()
 		all_lang_json = open_json_file(all_lang_file)
 
 	js_data = open_json_file("config.json")
@@ -547,7 +601,8 @@ def main(file_type,config_file):
 	for info in js_data['destination']:
 		ci_flag = my_input(u'是否提交 ' + info['nickname'] + ' (y/n)?') == 'y'
 		if ci_flag:
-			ver_to_publish = my_input(u'请输入发布版本 x~y 或 x,y,z').rstrip()
+			fen_biao_flag = info.get('fen_biao') == True
+			ver_to_publish = my_input(u'请输入发布版本 x~y 或 x,y,z: ').rstrip()
 			if not isStringNil(ver_to_publish):
 				ver_range = None
 				if ver_to_publish.count('~') == 1:
@@ -555,6 +610,7 @@ def main(file_type,config_file):
 				else:
 					ver_range = ver_to_publish.split(',')
 
+				print('ver_range',ver_range)
 				if ver_range:
 					for ver in ver_range:
 						ver = get_safe_ver(ver)
@@ -564,34 +620,35 @@ def main(file_type,config_file):
 
 							ci_msg = ''
 							for pb in pub_file_name:
-								dst_file = os.path.join(pt,pb)
-								if os.path.exists(dst_file):
-									ci_msg1 = None
-									if file_type == '1':
-										ci_msg1 = modify_file_xml(copy_xml,dst_file,group_name)
-									elif file_type == '2':
-										copy_txt = None
+								safe_check = file_type == '1' or all_lang_json.get(pb)
+								if safe_check:
+									dst_file = os.path.join(pt,pb)
+									if os.path.exists(dst_file):
+										ci_msg1 = None
+										if file_type == '1':
+											ci_msg1 = modify_file_xml(copy_xml,dst_file,group_name,fen_biao_flag)
+										elif file_type == '2':
+											copy_txt = None
 
-										if pub_file_len == 1:
-											my_input(u'请将要复制的内容拷贝到剪贴板后回车')
-											copy_txt = getClipBoardContent().rstrip().split('\n')
+											if pub_file_len == 1:
+												my_input(u'请将要复制的内容拷贝到剪贴板后回车')
+												copy_txt = getClipBoardContent().rstrip().split('\n')
 
-											# copy_txt = get_copy_txt(pub_file_len,dst_file,pb)
+												# copy_txt = get_copy_txt(pub_file_len,dst_file,pb)
+												
+											else:
+												# copy_txt = get_copy_txt(pub_file_len,dst_file,pb)
+												copy_txt = all_lang_json[pb]
 											
-										else:
-											# copy_txt = get_copy_txt(pub_file_len,dst_file,pb)
-											copy_txt = all_lang_json[pb]
+											if copy_txt:
+												ci_msg1 = modify_file_ini(copy_txt,dst_file,pb)
 										
-										if copy_txt:
-											ci_msg1 = modify_file_ini(copy_txt,dst_file,pb)
-									
-									ci_msg2 = upgrade_ver(os.path.join(pt,'VERSION.txt'))
-									if isStringNil(ci_msg):
-										ci_msg = ci_msg1 + '\n' + ci_msg2
-								else:
-									raise_error(u'找不到对应文件 '+ pb,True)
+										ci_msg2 = upgrade_ver(os.path.join(pt,'VERSION.txt'))
+										if isStringNil(ci_msg):
+											ci_msg = ci_msg1 + '\n' + ci_msg2
+									else:
+										raise_error(u'找不到对应文件 '+ pb,True)
 							svn_commit(str(pt),ci_msg)
-
 						else:
 							raise_error(u'找不到此版本目录 '+ ver,True)
 
@@ -599,8 +656,20 @@ def main(file_type,config_file):
 def test():
 	pass
 
-	all_lang_json = open_json_file('all_lang.json')
-	modify_file_ini(all_lang_json['text_ar.ini'],'/Users/mac/Documents/my_projects/cok/innerDyRes/5.05.0/text_ar.ini',None)
+	dict1 = {'a':100}
+
+	if dict1.get('a'):
+		print('yews')
+		pass
+	# print (get_safe_ver('5.5'))
+	# la = [1,2,3,4,5]
+	# for i,x in enumerate(la):
+	# 	print('i,x',i,x)
+	# 	if x == 2:
+	# 		la.insert(i+1,999)
+
+	# all_lang_json = open_json_file('all_lang.json')
+	# modify_file_ini(all_lang_json['text_ar.ini'],'/Users/mac/Documents/my_projects/cok/innerDyRes/5.05.0/text_ar.ini',None)
 	# print(type([]))
 	# svn_commit('/Users/mac/Documents/my_projects/cok/innerDyRes/5.00.0','msg')
 	# upgrade_ver('/Users/mac/Documents/my_projects/cok/innerDyRes/5.05.0/VERSION.txt')
@@ -624,11 +693,11 @@ def test():
 	# 	print(e.attrib)
 
 if __name__ == '__main__':
-	if len(sys.argv) == 3:
-		if True:
+	if len(sys.argv) == 1:
+		if False:
 			test()
 		else:
-			main(sys.argv[1],sys.argv[2])
+			main()
 	else:
 		print('@param1: src file')
 		print('@param2: config json')
