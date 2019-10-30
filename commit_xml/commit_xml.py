@@ -6,7 +6,8 @@ import sys,os,re
 from os import listdir
 from os.path import isfile, join
 import json
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET_Check
+from lxml import etree as ET
 
 import subprocess
 
@@ -14,6 +15,74 @@ import platform
 
 if platform.system() == 'Windows':
 	import win32clipboard
+
+# =======================================================================
+# Monkey patch ElementTree
+# import xml.etree.ElementTree as ET
+
+# def _serialize_xml(write, elem, encoding, qnames, namespaces):
+#     tag = elem.tag
+#     text = elem.text
+#     if tag is ET.Comment:
+#         write("<!--%s-->" % ET._encode(text, encoding))
+#     elif tag is ET.ProcessingInstruction:
+#         write("<?%s?>" % ET._encode(text, encoding))
+#     else:
+#         tag = qnames[tag]
+#         if tag is None:
+#             if text:
+#                 write(ET._escape_cdata(text, encoding))
+#             for e in elem:
+#                 _serialize_xml(write, e, encoding, qnames, None)
+#         else:
+#             write("<" + tag)
+#             items = elem.items()
+#             if items or namespaces:
+#                 if namespaces:
+#                     for v, k in sorted(namespaces.items(),
+#                                     key=lambda x: x[1]):  # sort on prefix
+#                         if k:
+#                             k = ":" + k
+#                         write(" xmlns%s=\"%s\"" % (
+#                             k.encode(encoding),
+#                             ET._escape_attrib(v, encoding)
+#                             ))
+#                 #for k, v in sorted(items):  # lexical order
+#                 for k, v in items: # Monkey patch
+#                     if isinstance(k, ET.QName):
+#                         k = k.text
+#                     if isinstance(v, ET.QName):
+#                         v = qnames[v.text]
+#                     else:
+#                         v = ET._escape_attrib(v, encoding)
+#                     write(" %s=\"%s\"" % (qnames[k], v))
+#             if text or len(elem):
+#                 write(">")
+#                 if text:
+#                     write(ET._escape_cdata(text, encoding))
+#                 for e in elem:
+#                     _serialize_xml(write, e, encoding, qnames, None)
+#                 write("</" + tag + ">")
+#             else:
+#                 write(" />")
+#     if elem.tail:
+#         write(ET._escape_cdata(elem.tail, encoding))
+
+# ET._serialize_xml = _serialize_xml
+
+# from collections import OrderedDict
+
+# class OrderedXMLTreeBuilder(ET.XMLTreeBuilder):
+#     def _start_list(self, tag, attrib_in):
+#         fixname = self._fixname
+#         tag = fixname(tag)
+#         attrib = OrderedDict()
+#         if attrib_in:
+#             for i in range(0, len(attrib_in), 2):
+#                 attrib[fixname(attrib_in[i])] = self._fixtext(attrib_in[i+1])
+#         return self._target.start(tag, attrib)
+
+# =======================================================================
 
 def file_extension(path): 
 	return os.path.splitext(path)[1] 
@@ -60,7 +129,8 @@ def svn_update(dir):
 
 def svn_commit(dir,msg='auto commit by script.'):
 	if type(dir) is str:
-		subprocess.call(['svn','ci',dir,'-m',msg])
+		# subprocess.call(['svn','ci',dir,'-m',msg])
+		print('svn','ci',dir,'-m',msg)
 	else:
 		raise_error('no such dir {}'.format(dir))
 
@@ -138,7 +208,8 @@ def getClipBoardContent():
 		win32clipboard.OpenClipboard()
 		data = win32clipboard.GetClipboardData()
 		win32clipboard.CloseClipboard()
-		return data.decode('utf-8')
+		td = data.decode('utf-8')
+		return td
 	else:
 		p = subprocess.Popen(['pbpaste'], stdout=subprocess.PIPE)
 		retcode = p.wait()
@@ -152,11 +223,19 @@ def checkClipContent(str_content,file_type='xml',beSecondCheck=False):
 		# for x in str_arr:
 		if file_type == 'xml':
 			if beSecondCheck:
+				str_arr = str_content.split('\n')
+				for x in str_arr:
+					ET_Check.fromstring(x)
 				str_content = '<temp_group__>\n' + str_content + '\n</temp_group__>'
 
+			# print(str_content)
+			if not beSecondCheck:
+				ET_Check.fromstring(str_content)
 			res = ET.fromstring(str_content)
+
 			if res.tag == "ItemSpec":
 				str_content = '<temp_group__>\n' + str_content + '\n</temp_group__>'
+				ET_Check.fromstring(str_content)
 				return ET.fromstring(str_content)
 			return res
 	except:
@@ -263,7 +342,12 @@ def is_group_ele(rt):
 def is_temp_ele(rt):
 	return is_spec_ele_(rt,'temp_group__')
 
-def modify_file_xml(copy_xml,filename,group_name):
+def get_help(object):
+	object_methods = [method_name for method_name in dir(object) if callable(getattr(object, method_name))]
+
+	return object_methods
+
+def modify_file_xml(copy_xml,filename,group_name,is_blank_xml):
 	tree = ET.parse(filename)
 	root = tree.getroot()
 
@@ -286,13 +370,16 @@ def modify_file_xml(copy_xml,filename,group_name):
 			# next(ifilter(predicate, seq), None)
 			for elem_cp in copy_xml:
 				if elem_cp.attrib.get('dd') == '1':
-					delete_list.append(int(elem_cp.attrib.get('id')))
+					i_id = int(elem_cp.attrib.get('id'))
+					if not table_contains(delete_list,i_id):
+						delete_list.append(i_id)
 				else:
 					if elem.attrib.get('id') == elem_cp.attrib.get('id'):
 						udpate_list.append([elem,elem_cp])
 
 		for elem_cp in copy_xml:
-			add_flag = True
+			add_flag = elem_cp.attrib.get('dd') != '1'
+			# print(get_help(elem_cp))
 			for elem in udpate_list:
 				if elem[1].attrib.get('id') == elem_cp.attrib.get('id'):
 					add_flag = False
@@ -304,12 +391,16 @@ def modify_file_xml(copy_xml,filename,group_name):
 		for x in udpate_list:
 			old_xml = x[0]
 			new_xml = x[1]
-			# old_xml = new_xml
-			old_xml[:] = [item[-1] for item in new_xml]
+
+			old_xml.attrib.clear()
+			for x in new_xml.attrib:
+				old_xml.attrib[x] = new_xml.attrib.get(x)
+
 			u_arr.append(new_xml.attrib.get('id'))
+
 		a_arr = []
+
 		for x in add_list:
-			# x.tail = '\n\t'
 			group_ele.append(x)
 			a_arr.append(x.attrib.get('id'))
 
@@ -321,18 +412,20 @@ def modify_file_xml(copy_xml,filename,group_name):
 		    	data.append((key, elem))
 
 		data.sort()
+
 		group_ele[:] = [item[-1] for item in data]
-		ci_msg = u'{0}表作如下修改:\n'.format(group_name)
+
+		ci_msg = '{0} modify:\n'.format(group_name)
 		if not table_is_empty(u_arr):
-			ci_msg += u'更新: ' + ','.join(u_arr)
+			ci_msg += 'update: ' + ','.join(u_arr)
 
-		ci_msg += '\n'
 		if not table_is_empty(a_arr):
-			ci_msg += u'新增: ' + ','.join(a_arr)
+			ci_msg += '\n'
+			ci_msg += 'add: ' + ','.join(a_arr)
 
-		ci_msg += '\n'
 		if not table_is_empty(delete_list):
-			ci_msg += u'删除: ' + ','.join(delete_list)
+			ci_msg += '\n'
+			ci_msg += 'delete: ' + ','.join(str(x) for x in delete_list)
 	else:
 		be_group = is_temp_ele(copy_xml) and is_group_ele(copy_xml[0])
 
@@ -343,32 +436,37 @@ def modify_file_xml(copy_xml,filename,group_name):
 				group_arr.append(x.attrib.get('id'))
 		else:
 			copy_xml.tag = "Group"
-			copy_xml.attrib = {"id" : group_name}
-			# copy_xml.tail = '\n'
+			copy_xml.attrib['id'] = group_name
 			root.append(copy_xml)
 			group_arr.append(group_name)
-		# attrib = {}
-		# element = root.makeelement(group_name,attrib)
-		ci_msg = u'新增表' + ','.join(group_arr)
+		ci_msg = 'new add: ' + ','.join(group_arr)
 	indent_xml(root)
 
 	mydata = ET.tostring(root)
-	# ET.tostring(root,pretty_print=True)
 	mydata_str = mydata.split('\n')
 	# print(mydata_str[0])
-	# print(mydata_str[1])
+	# print(mydata_str)
 
-	tr = _find_first_last_group(mydata_str)
+	after_rep = None
+	if is_blank_xml:
+		mydata_str.insert(0,'<?xml version="1.0" encoding="UTF-8" standalone="no"?>')
+		after_rep = mydata_str
 
-	mydata_str_2 = None
-	with open(filename,'r') as f:
-		mydata_str_2 = f.readlines()
-	after_rep = replace_head_tail(mydata_str_2,mydata_str)
+		for i,x in enumerate(after_rep):
+			after_rep[i] += '\n'
+	else:
+		tr = _find_first_last_group(mydata_str)
+
+		mydata_str_2 = None
+		with open(filename,'r') as f:
+			mydata_str_2 = f.readlines()
+		after_rep = replace_head_tail(mydata_str_2,mydata_str)
 
 	with open(filename,'w') as f:
 		for line in after_rep:
 			f.write(line)
 
+	print(ci_msg)
 	return ci_msg or 'auto commit.'
 
 def get_group_name():
@@ -376,6 +474,8 @@ def get_group_name():
 	return my_input(u'请输入表名')
 
 def upgrade_ver(filename):
+	if not os.path.exists(filename):
+		return ''
 	vers = None
 	with open(filename,'r') as f:
 		vers = f.readlines()
@@ -390,7 +490,7 @@ def upgrade_ver(filename):
 		with open(filename,'w') as f:
 			f.write(ver_str + '\n')
 
-		return u'提升版本号从{0}到{1}'.format(ver_line,ver_str)
+		return 'upgrade verstion.txt from{0} to {1}'.format(ver_line,ver_str)
 	else:
 		raise_error(u'当前版本信息有误 ' + filename)
 
@@ -571,6 +671,7 @@ def modify_file_ini(copy_txt,dst_file,pb):
 	if len(delete_list) > 0:
 		ci_msg += 'delete: ' + str(delete_list)
 
+	print(ci_msg)
 	return ci_msg
 
 def get_files_in_dir(sourceDir):
@@ -610,8 +711,6 @@ def main():
 		is_all = my_input(u'是否发布全语言 (y/n)?') == 'y'
 		pub_file_name = get_lang_arr(is_all)
 
-	# print(getClipBoardContent())
-	
 	pub_file_len = len(pub_file_name)
 	all_lang_json = None
 	if pub_file_len > 1:
@@ -624,26 +723,30 @@ def main():
 		ci_flag = my_input(u'是否提交 ' + info['nickname'] + ' (y/n)?') == 'y'
 		if ci_flag:
 			fen_biao_flag = info.get('fen_biao') == True
-			ver_to_publish = info.get('range')
-			ver_to_publish = ['.'] if table_is_empty(ver_to_publish) else ver_to_publish
-			# my_input(u'请输入发布版本 x~y 或 x,y,z: ').rstrip()
-			if not table_is_empty(ver_to_publish):
-				# ver_range = None
-				# if ver_to_publish.count('~') == 1:
-				# 	ver_range = get_ver_range(ver_to_publish)
-				# else:
-				# 	ver_range = ver_to_publish.split(',')
+			ver_to_publish = None
+			if file_is_xml:
+				ver_to_publish = info.get('range')
+				ver_to_publish = ['.'] if table_is_empty(ver_to_publish) else ver_to_publish
+			elif file_is_lang:
+				ver_to_publish = my_input(u'请输入发布版本 x~y 或 x,y,z: ').rstrip()
+				if ver_to_publish.count('~') == 1:
+					ver_to_publish = get_ver_range(ver_to_publish)
+				else:
+					ver_to_publish = ver_to_publish.split(',')
 
-				# print('ver_range',ver_range)
-				# if ver_range:
+				for i,v in enumerate(ver_to_publish):
+					ver_to_publish[i] = get_safe_ver(v)
+
+			if not table_is_empty(ver_to_publish):
 				for ver in ver_to_publish:
-					ver = get_safe_ver(ver)
 					pt = os.path.join(info['path'],ver)
 					if os.path.exists(pt):
 						svn_update(pt)
 
 						ci_msg = ''
+						ci_msg1 = None
 
+						blank_xml = False
 						if file_is_xml:
 							dst_file = None
 							if fen_biao_flag:
@@ -651,91 +754,53 @@ def main():
 								
 								dst_file = os.path.join(pt,group_name + '.xml')
 								all_xml = get_files_in_dir(pt)
-								if not table_contains(all_xml,group_name):
-									get_blank_xml(dst_file)	
+								if not table_contains(all_xml,group_name+'.xml'):
+									blank_xml = True
+									get_blank_xml(dst_file)
+									subprocess.call(['svn','add',dst_file,'--force'])
 							else:
 								dst_file = os.path.join(pt,'database.local.xml')
 
 
 							if os.path.exists(dst_file):
-								ci_msg1 = None
-								ci_msg1 = modify_file_xml(copy_xml,dst_file,group_name)
+								ci_msg1 = modify_file_xml(copy_xml,dst_file,group_name,blank_xml)
 
-
-
-
-						for pb in pub_file_name:
-							safe_check = file_type == '1' or all_lang_json.get(pb)
-							if safe_check:
+						elif file_is_lang:
+							for pb in pub_file_name:
 								dst_file = os.path.join(pt,pb)
 								if os.path.exists(dst_file):
-									ci_msg1 = None
-									if file_type == '1':
-										ci_msg1 = modify_file_xml(copy_xml,dst_file,group_name,fen_biao_flag)
-									elif file_type == '2':
-										copy_txt = None
+									copy_txt = None
 
-										if pub_file_len == 1:
-											my_input(u'请将要复制的内容拷贝到剪贴板后回车')
-											copy_txt = getClipBoardContent().rstrip().split('\n')
-
-											# copy_txt = get_copy_txt(pub_file_len,dst_file,pb)
-											
-										else:
-											# copy_txt = get_copy_txt(pub_file_len,dst_file,pb)
-											copy_txt = all_lang_json[pb]
-										
-										if copy_txt:
-											ci_msg1 = modify_file_ini(copy_txt,dst_file,pb)
+									if pub_file_len == 1:
+										my_input(u'请将要复制的内容拷贝到剪贴板后回车')
+										copy_txt = getClipBoardContent().rstrip().split('\n')
+									else:
+										copy_txt = all_lang_json.get(pb)
 									
-									ci_msg2 = upgrade_ver(os.path.join(pt,'VERSION.txt'))
-									if isStringNil(ci_msg):
-										ci_msg = ci_msg1 + '\n' + ci_msg2
-								else:
-									raise_error(u'找不到对应文件 '+ pb,True)
+									if copy_txt:
+										ci_msg1 = modify_file_ini(copy_txt,dst_file,pb)
+
+						ci_msg2 = upgrade_ver(os.path.join(pt,'VERSION.txt'))
+						if isStringNil(ci_msg):
+							ci_msg = ci_msg1 + '\n' + ci_msg2
+
 						svn_commit(str(pt),ci_msg)
 					else:
-						raise_error(u'找不到此版本目录 '+ ver,True)
+						raise_error(u'找不到对应文件 '+ pb,True)
+
 
 
 def test():
 	pass
+	# old_xml = [1,2,3]
+	# new_xml = ['4',5,6]
+	# old_xml[:] = [item for item in new_xml]
 
-	dict1 = {'a':100}
+	# print(old_xml)
 
-	if dict1.get('a'):
-		print('yews')
-		pass
-	# print (get_safe_ver('5.5'))
-	# la = [1,2,3,4,5]
-	# for i,x in enumerate(la):
-	# 	print('i,x',i,x)
-	# 	if x == 2:
-	# 		la.insert(i+1,999)
-
-	# all_lang_json = open_json_file('all_lang.json')
-	# modify_file_ini(all_lang_json['text_ar.ini'],'/Users/mac/Documents/my_projects/cok/innerDyRes/5.05.0/text_ar.ini',None)
-	# print(type([]))
-	# svn_commit('/Users/mac/Documents/my_projects/cok/innerDyRes/5.00.0','msg')
-	# upgrade_ver('/Users/mac/Documents/my_projects/cok/innerDyRes/5.05.0/VERSION.txt')
-	# s1 = u'{0}表作如下修改'.format('group_name')
-	# print(s1)
-	# print( get_ver_range('5.01.0~5.22.0'))
-	# print('5.01.0'.split(','))
-	
-	# a = my_input(u"plase copy")
-	# print(checkClipContent(getClipBoardContent(),'xml'))
-	# modify_file_xml(checkClipContent(getClipBoardContent(),'xml'),"database.local.xml","five_red_envolope_rank")
-	# str_arr = checkClipContent(getClipBoardContent(),'xml')
-	# print(len(str_arr))
-	# str_arr.tag = "mybet"
-	# str_arr.attrib = {"id":"abcd"}
-	# print(str_arr.attrib)
-	# print(str_arr[1].tag)
-	# for x in str_arr:
-	# 	print(x.text)
-	# for e in str_arr.attrib:
-	# 	print(e.attrib)
+	# ready = my_input(u'请将要复制的内容拷贝到剪贴板后回车')
+	# copy_xml = checkClipContent(getClipBoardContent(),'xml')
+	# print('copy_xml',copy_xml)
 
 if __name__ == '__main__':
 	if len(sys.argv) == 1:
@@ -744,7 +809,9 @@ if __name__ == '__main__':
 		else:
 			main()
 	else:
-		print('@param1: src file')
-		print('@param2: config json')
+		print('how to install enviroment')
+		print('step1: install python 2.7')
+		print('step2: pip install lxml')
+		print('step3: [windows only] pip install pywin32')
 
 	pass
