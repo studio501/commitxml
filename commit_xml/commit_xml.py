@@ -353,12 +353,21 @@ def modify_file_xml(copy_xml,filename,group_name,is_blank_xml):
 
 	group_ele = None
 	# group_ele = root.find(group_name)
+	first_Check_No_Group = False
+	No_Group = False
 	for elem in root:
+		if not first_Check_No_Group:
+			first_Check_No_Group = True
+			No_Group = elem.tag != 'Group'
+
 		if elem.attrib.get('id') == group_name:
 			group_ele = elem
 			break
 	    # for subelem in elem:
 	    #     print(subelem.attrib)
+
+	if No_Group:
+		group_ele = root
 
 	ci_msg = None
 	if group_ele is not None:
@@ -404,12 +413,16 @@ def modify_file_xml(copy_xml,filename,group_name,is_blank_xml):
 			group_ele.append(x)
 			a_arr.append(x.attrib.get('id'))
 
+		Be_number = False
 		# sort
 		data = []
+		tk = 0
 		for elem in group_ele:
-		    key = int(elem.attrib.get('id'))
-		    if not table_contains(delete_list,key):
-		    	data.append((key, elem))
+			t_id = elem.attrib.get('id')
+			tk += 1
+			key = int(t_id) if is_number(t_id) else tk
+			if not table_contains(delete_list,key):
+				data.append((key, elem))
 
 		data.sort()
 
@@ -448,7 +461,7 @@ def modify_file_xml(copy_xml,filename,group_name,is_blank_xml):
 	# print(mydata_str)
 
 	after_rep = None
-	if is_blank_xml:
+	if is_blank_xml or No_Group:
 		mydata_str.insert(0,'<?xml version="1.0" encoding="UTF-8" standalone="no"?>')
 		after_rep = mydata_str
 
