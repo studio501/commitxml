@@ -238,9 +238,13 @@ def checkClipContent(str_content,file_type='xml',beSecondCheck=False):
 				ET_Check.fromstring(str_content)
 				return ET.fromstring(str_content)
 			return res
-	except:
+	except Exception as e:
 		if not beSecondCheck and file_type == 'xml':
 			return checkClipContent(str_content,file_type,True)
+
+		print(e)
+		if str(e).count("'ascii' codec can't encode character") > 0:
+			print(u"中文error")
 		raise_error(u"粘贴内容格式错误,请重新粘贴正确格式数据")
 	else:
 		print(u'数据格式正确')
