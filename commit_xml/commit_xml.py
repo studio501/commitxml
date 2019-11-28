@@ -8,10 +8,13 @@ from os.path import isfile, join
 import json
 import xml.etree.ElementTree as ET_Check
 from lxml import etree as ET
+import copy
 
 import subprocess
 
 import platform
+
+from Tkinter import *
 
 if platform.system() == 'Windows':
 	import win32clipboard
@@ -209,6 +212,7 @@ def getClipBoardContent():
 		data = win32clipboard.GetClipboardData()
 		win32clipboard.CloseClipboard()
 		td = data.decode('utf-8')
+		print('getClipBoardContent ', td)
 		return td
 	else:
 		p = subprocess.Popen(['pbpaste'], stdout=subprocess.PIPE)
@@ -219,6 +223,7 @@ def getClipBoardContent():
 
 def checkClipContent(str_content,file_type='xml',beSecondCheck=False):
 	# str_arr = str_content.split('\n')
+	print('str_content here',str_content,beSecondCheck)
 	try:
 		# for x in str_arr:
 		if file_type == 'xml':
@@ -233,6 +238,8 @@ def checkClipContent(str_content,file_type='xml',beSecondCheck=False):
 				ET_Check.fromstring(str_content)
 			res = ET.fromstring(str_content)
 
+			print('after fromstring ',res)
+
 			if res.tag == "ItemSpec":
 				str_content = '<temp_group__>\n' + str_content + '\n</temp_group__>'
 				ET_Check.fromstring(str_content)
@@ -240,6 +247,7 @@ def checkClipContent(str_content,file_type='xml',beSecondCheck=False):
 			return res
 	except Exception as e:
 		if not beSecondCheck and file_type == 'xml':
+			print('use second check,,,')
 			return checkClipContent(str_content,file_type,True)
 
 		print(e)
@@ -374,6 +382,7 @@ def modify_file_xml(copy_xml,filename,group_name,is_blank_xml):
 		group_ele = root
 
 	ci_msg = None
+	print('has group_ele',group_ele)
 	if group_ele is not None:
 		delete_list = []
 		udpate_list = []
@@ -412,6 +421,11 @@ def modify_file_xml(copy_xml,filename,group_name,is_blank_xml):
 			u_arr.append(new_xml.attrib.get('id'))
 
 		a_arr = []
+
+		print('add_list',add_list)
+		print('update_list',udpate_list)
+
+
 
 		for x in add_list:
 			group_ele.append(x)
@@ -706,10 +720,32 @@ def get_blank_xml(fileName):
 	with open(fileName,'w') as f:
 		f.write('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n<tns:database xmlns:tns="http://www.iw.com/sns/platform/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n</tns:database>\n')
 
+def show_menu(js_data):
+	pass
+
+	if not js_data.get('destination'):
+		raise_error(u'配置文件应该含有 destination')
+		return
+
+	for i,v in enumerate(js_data['destination']):
+		print(str(i+1) + ": " + v['nickname'])
+
+def has_choose(info):
+	for x in info.get('checks'):
+		if x.get() == True:
+			return True
+	return False
+
 def main():
 	pass
 
-	file_type = my_input(u'(1) 提交xml表、 (2) 提交多语言: ').rstrip()
+	js_data = None
+	try:
+		js_data = open_json_file("config.json")
+	except Exception as e:
+		raise_error(u'config.json 配置有误,请检查')
+
+	file_type = my_input(u'(1) 提交xml表、 (2) 提交多语言: ', True).rstrip()
 	file_is_xml = file_type == '1'
 	file_is_lang = file_type == '2'
 
@@ -733,17 +769,31 @@ def main():
 	if pub_file_len > 1:
 		all_lang_file = my_input(u'请拖入全语言文件: ').rstrip()
 		all_lang_json = open_json_file(all_lang_file)
-
-	js_data = open_json_file("config.json")
+	
+	choose_version(js_data['destination'])
 
 	for info in js_data['destination']:
-		ci_flag = my_input(u'是否提交 ' + info['nickname'] + ' (y/n)?') == 'y'
+		ci_flag = None
+		if file_is_lang:
+			ci_flag = my_input(u'是否复制到 ' + info['nickname'] + ' (y/n)?') == 'y'
+		else:
+			ci_flag = has_choose(info)
+		
 		if ci_flag:
 			fen_biao_flag = info.get('fen_biao') == True
 			ver_to_publish = None
 			if file_is_xml:
 				ver_to_publish = info.get('range')
-				ver_to_publish = ['.'] if table_is_empty(ver_to_publish) else ver_to_publish
+				if table_is_empty(ver_to_publish):
+					ver_to_publish = ['.']
+				else:
+					vp = []
+					for i,x in enumerate(info.get('checks')):
+						if x.get():
+							vp.append(ver_to_publish[i])
+					ver_to_publish = vp
+
+				# ver_to_publish = ['.'] if table_is_empty(ver_to_publish) else ver_to_publish
 			elif file_is_lang:
 				ver_to_publish = my_input(u'请输入发布版本 x~y 或 x,y,z: ').rstrip()
 				if ver_to_publish.count('~') == 1:
@@ -780,7 +830,7 @@ def main():
 
 
 							if os.path.exists(dst_file):
-								ci_msg1 = modify_file_xml(copy_xml,dst_file,group_name,blank_xml)
+								ci_msg1 = modify_file_xml(copy.deepcopy(copy_xml),dst_file,group_name,blank_xml)
 
 						elif file_is_lang:
 							for pb in pub_file_name:
@@ -797,18 +847,107 @@ def main():
 									if copy_txt:
 										ci_msg1 = modify_file_ini(copy_txt,dst_file,pb)
 
-						ci_msg2 = upgrade_ver(os.path.join(pt,'VERSION.txt'))
+						# /Users/tangwen/Documents/my_projects/cok/outerDyRes75/5.08.0
+						ci_msg2 = '' #upgrade_ver(os.path.join(pt,'VERSION.txt'))
 						if isStringNil(ci_msg):
 							ci_msg = ci_msg1 + '\n' + ci_msg2
 
-						svn_commit(str(pt),ci_msg)
+						ver_name = info.get('nickname') if ver == '.' else ver
+						is_check = yes_no_dialog(u"是否检查修改 " + ver_name)[0] == 'y'
+						print('is_check',is_check)
+						# my_input(u"是否检查修改 (y/n)?") == 'y'
+						if is_check:
+							subprocess.call(['svn','diff',dst_file])
+
+						is_commit = yes_no_dialog(u"是否提交 " + ver_name)[0] == 'y'
+						print('is_commit',is_commit)
+						# my_input(u"是否提交 (y/n)?") == 'y'
+						if is_commit:
+							svn_commit(str(pt),ci_msg)
+							pass
 					else:
-						raise_error(u'找不到对应文件 '+ pb,True)
+						raise_error(u'找不到对应文件 '+ pt,True)
 
+def yes_no_dialog(msg):
+	the_answer = []
 
+	tw = 350
+	th = 100
+	size_cfg = [str(tw),str(th)]
+	window = Tk()
+
+	window.geometry('x'.join(size_cfg))
+	window.title("提示")
+	lbl = Label(window, text=msg)
+	lbl.grid(column=1, row=0)
+	
+	def clickYes():
+		the_answer.append('y')
+		window.withdraw()
+		window.quit()
+		return 'y'
+	
+	btn = Button(window, text="Yes", bg="orange", fg="red",command=clickYes)
+	btn.grid(column=1, row=2)
+
+	def clickNo():
+		the_answer.append('n')
+		window.withdraw()
+		window.quit()
+	btn = Button(window, text="Cancel", bg="orange", fg="red",command=clickNo)
+	btn.grid(column=2, row=2)
+
+	window.mainloop()
+	return the_answer
+
+def choose_version(js_data):
+	window = Tk()
+
+	window.geometry('350x200')
+ 
+	window.title(u"请选择版本")
+
+	lbl = Label(window, text="Hello")
+	lbl.grid(column=0, row=0)
+
+	for i,x in enumerate(js_data):
+		lbl = Label(window, text=x['nickname'])
+		lbl.grid(column=i, row=1)
+
+		x['checks'] = []
+		if len(x['range']) > 0:
+			for j,y in enumerate(x['range']):
+
+				chk_state = BooleanVar()
+				 
+				chk_state.set(False) #set check state
+				 
+				chk = Checkbutton(window, text=y, var=chk_state)
+				
+				chk.grid(column=i, row=2+j)
+
+				x['checks'].append(chk_state)
+		else:
+			chk_state = BooleanVar()
+			chk_state.set(False) #set check state
+			chk = Checkbutton(window, text=x['nickname'], var=chk_state)
+			chk.grid(column=i, row=2+0)
+			x['checks'].append(chk_state)
+
+	def click():
+		pass
+		window.withdraw()
+		window.quit()
+	btn = Button(window, text="确定", bg="orange", fg="red",command=click)
+	btn.grid(column=1, row=20)
+
+	window.mainloop()
 
 def test():
 	pass
+	
+	js_data = open_json_file("config.json")
+	choose_version(js_data['destination'])	
 	# old_xml = [1,2,3]
 	# new_xml = ['4',5,6]
 	# old_xml[:] = [item for item in new_xml]
