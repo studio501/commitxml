@@ -212,7 +212,7 @@ def getClipBoardContent():
 		data = win32clipboard.GetClipboardData()
 		win32clipboard.CloseClipboard()
 		td = data.decode('utf-8')
-		print('getClipBoardContent ', td)
+		# print('getClipBoardContent ', td)
 		return td
 	else:
 		p = subprocess.Popen(['pbpaste'], stdout=subprocess.PIPE)
@@ -223,7 +223,7 @@ def getClipBoardContent():
 
 def checkClipContent(str_content,file_type='xml',beSecondCheck=False):
 	# str_arr = str_content.split('\n')
-	print('str_content here',str_content,beSecondCheck)
+	# print('str_content here',str_content,beSecondCheck)
 	try:
 		# for x in str_arr:
 		if file_type == 'xml':
@@ -238,7 +238,6 @@ def checkClipContent(str_content,file_type='xml',beSecondCheck=False):
 				ET_Check.fromstring(str_content)
 			res = ET.fromstring(str_content)
 
-			print('after fromstring ',res)
 
 			if res.tag == "ItemSpec":
 				str_content = '<temp_group__>\n' + str_content + '\n</temp_group__>'
@@ -247,7 +246,6 @@ def checkClipContent(str_content,file_type='xml',beSecondCheck=False):
 			return res
 	except Exception as e:
 		if not beSecondCheck and file_type == 'xml':
-			print('use second check,,,')
 			return checkClipContent(str_content,file_type,True)
 
 		print(e)
@@ -382,7 +380,6 @@ def modify_file_xml(copy_xml,filename,group_name,is_blank_xml):
 		group_ele = root
 
 	ci_msg = None
-	print('has group_ele',group_ele)
 	if group_ele is not None:
 		delete_list = []
 		udpate_list = []
@@ -421,9 +418,6 @@ def modify_file_xml(copy_xml,filename,group_name,is_blank_xml):
 			u_arr.append(new_xml.attrib.get('id'))
 
 		a_arr = []
-
-		print('add_list',add_list)
-		print('update_list',udpate_list)
 
 
 
@@ -854,13 +848,11 @@ def main():
 
 						ver_name = info.get('nickname') if ver == '.' else ver
 						is_check = yes_no_dialog(u"是否检查修改 " + ver_name)[0] == 'y'
-						print('is_check',is_check)
 						# my_input(u"是否检查修改 (y/n)?") == 'y'
 						if is_check:
 							subprocess.call(['svn','diff',dst_file])
 
 						is_commit = yes_no_dialog(u"是否提交 " + ver_name)[0] == 'y'
-						print('is_commit',is_commit)
 						# my_input(u"是否提交 (y/n)?") == 'y'
 						if is_commit:
 							svn_commit(str(pt),ci_msg)
