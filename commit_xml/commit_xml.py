@@ -924,7 +924,7 @@ def yes_no_dialog(msg):
 def choose_version(js_data):
 	window = Tk()
 
-	window.geometry('450x200+100+100')
+	window.geometry('900x300+100+100')
  
 	window.title(u"请选择版本")
 
