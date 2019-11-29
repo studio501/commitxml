@@ -230,6 +230,12 @@ def checkClipContent(str_content,file_type='xml',beSecondCheck=False):
 		if file_type == 'xml':
 			if beSecondCheck:
 				str_arr = str_content.split('\n')
+				res2 = []
+				for x in str_arr:
+					if len(x.split()) != 0:
+						res2.append(x)
+				str_arr = res2
+
 				for x in str_arr:
 					ET_Check.fromstring(x)
 				str_content = '<temp_group__>\n' + str_content + '\n</temp_group__>'
@@ -380,6 +386,8 @@ def modify_file_xml(copy_xml,filename,group_name,is_blank_xml):
 	if No_Group:
 		group_ele = root
 
+	id_len_before = len(group_ele)
+
 	ci_msg = None
 	if group_ele is not None:
 		delete_list = []
@@ -468,6 +476,8 @@ def modify_file_xml(copy_xml,filename,group_name,is_blank_xml):
 		ci_msg = 'new add: ' + ','.join(group_arr)
 	indent_xml(root)
 
+	id_len_after = len(group_ele)
+
 	mydata = ET.tostring(root)
 	mydata_str = mydata.split('\n')
 	# print(mydata_str[0])
@@ -493,7 +503,7 @@ def modify_file_xml(copy_xml,filename,group_name,is_blank_xml):
 			f.write(line)
 
 	print(ci_msg)
-	return ci_msg or 'auto commit.'
+	return [ci_msg or 'auto commit.',[id_len_before,id_len_after]]
 
 def get_group_name():
 	# return "effect_pool"
@@ -731,6 +741,13 @@ def has_choose(info):
 			return True
 	return False
 
+def get_id_change_desc(id_change):
+	if table_is_empty(id_change):
+		return u''
+	if len(id_change) == 2:
+		return u'\nid count before: ' + str(id_change[0]) + ', id count after: ' + str(id_change[1])
+	return u''
+
 def main():
 	pass
 
@@ -802,6 +819,7 @@ def main():
 			if not table_is_empty(ver_to_publish):
 				for ver in ver_to_publish:
 					pt = os.path.join(info['path'],ver)
+					id_change = None
 					if os.path.exists(pt):
 						svn_update(pt)
 
@@ -825,8 +843,9 @@ def main():
 
 
 							if os.path.exists(dst_file):
-								ci_msg1 = modify_file_xml(copy.deepcopy(copy_xml),dst_file,group_name,blank_xml)
-
+								modify_res = modify_file_xml(copy.deepcopy(copy_xml),dst_file,group_name,blank_xml)
+								ci_msg1 = modify_res[0]
+								id_change = modify_res[1]
 						elif file_is_lang:
 							for pb in pub_file_name:
 								dst_file = os.path.join(pt,pb)
@@ -848,7 +867,7 @@ def main():
 							ci_msg = ci_msg1 + '\n' + ci_msg2
 
 						ver_name = info.get('nickname') if ver == '.' else ver
-						is_check = yes_no_dialog(u"是否检查修改 " + ver_name)[0] == 'y'
+						is_check = yes_no_dialog(u"是否检查修改 " + ver_name + get_id_change_desc(id_change) if id_change else '')[0] == 'y'
 						# my_input(u"是否检查修改 (y/n)?") == 'y'
 						if is_check:
 							subprocess.call(['svn','diff',dst_file])
@@ -864,7 +883,7 @@ def main():
 def yes_no_dialog(msg):
 	the_answer = []
 
-	tw = 350
+	tw = 450
 	th = 100
 	size_cfg = [str(tw),str(th)]
 	window = Tk()
@@ -872,7 +891,7 @@ def yes_no_dialog(msg):
 	window.geometry('x'.join(size_cfg) + '+100+100')
 	window.title("提示")
 	lbl = Label(window, text=msg)
-	lbl.grid(column=1, row=0)
+	lbl.grid(column=0, row=0)
 	
 	def clickYes():
 		the_answer.append('y')
@@ -881,14 +900,14 @@ def yes_no_dialog(msg):
 		return 'y'
 	
 	btn = Button(window, text="Yes", bg="orange", fg="red",command=clickYes)
-	btn.grid(column=1, row=2)
+	btn.grid(column=0, row=2)
 
 	def clickNo():
 		the_answer.append('n')
 		window.withdraw()
 		window.quit()
 	btn = Button(window, text="Cancel", bg="orange", fg="red",command=clickNo)
-	btn.grid(column=2, row=2)
+	btn.grid(column=1, row=2)
 
 	window.mainloop()
 	return the_answer
@@ -896,7 +915,7 @@ def yes_no_dialog(msg):
 def choose_version(js_data):
 	window = Tk()
 
-	window.geometry('350x200+100+100')
+	window.geometry('450x200+100+100')
  
 	window.title(u"请选择版本")
 
@@ -952,7 +971,7 @@ def test():
 
 if __name__ == '__main__':
 	if len(sys.argv) == 1:
-		if True:
+		if False:
 			test()
 		else:
 			main()
