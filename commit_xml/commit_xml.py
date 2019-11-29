@@ -224,6 +224,7 @@ def getClipBoardContent():
 def checkClipContent(str_content,file_type='xml',beSecondCheck=False):
 	# str_arr = str_content.split('\n')
 	# print('str_content here',str_content,beSecondCheck)
+	str_content = str_content.lstrip().rstrip()
 	try:
 		# for x in str_arr:
 		if file_type == 'xml':
@@ -868,7 +869,7 @@ def yes_no_dialog(msg):
 	size_cfg = [str(tw),str(th)]
 	window = Tk()
 
-	window.geometry('x'.join(size_cfg))
+	window.geometry('x'.join(size_cfg) + '+100+100')
 	window.title("提示")
 	lbl = Label(window, text=msg)
 	lbl.grid(column=1, row=0)
@@ -895,7 +896,7 @@ def yes_no_dialog(msg):
 def choose_version(js_data):
 	window = Tk()
 
-	window.geometry('350x200')
+	window.geometry('350x200+100+100')
  
 	window.title(u"请选择版本")
 
@@ -937,9 +938,8 @@ def choose_version(js_data):
 
 def test():
 	pass
-	
-	js_data = open_json_file("config.json")
-	choose_version(js_data['destination'])	
+	# js_data = open_json_file("config.json")
+	# choose_version(js_data['destination'])	
 	# old_xml = [1,2,3]
 	# new_xml = ['4',5,6]
 	# old_xml[:] = [item for item in new_xml]
@@ -952,7 +952,7 @@ def test():
 
 if __name__ == '__main__':
 	if len(sys.argv) == 1:
-		if False:
+		if True:
 			test()
 		else:
 			main()
