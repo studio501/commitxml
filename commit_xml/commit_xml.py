@@ -133,7 +133,16 @@ def svn_update(dir):
 def svn_commit(dir,msg='auto commit by script.'):
 	if type(dir) is str:
 		# subprocess.call(['svn','ci',dir,'-m',msg])
-		print('svn','ci',dir,'-m',msg)
+		if platform.system() == 'Windows':
+			# TortoiseProc.exe /command:commit
+   #               /path:"c:\svn_wc\file1.txt*c:\svn_wc\file2.txt"
+   #               /logmsg:"test log message" /closeonend:0
+
+   			subprocess.call(['TortoiseProc.exe','/command:commit','/path:{}'.format(dir),
+   				'/logmsg:{}'.format(msg),'/closeonend:0'])
+
+		else:
+			print('svn','ci',dir,'-m',msg)
 	else:
 		raise_error('no such dir {}'.format(dir))
 
@@ -867,10 +876,10 @@ def main():
 							ci_msg = ci_msg1 + '\n' + ci_msg2
 
 						ver_name = info.get('nickname') if ver == '.' else ver
-						is_check = yes_no_dialog(u"是否检查修改 " + ver_name + get_id_change_desc(id_change) if id_change else '')[0] == 'y'
-						# my_input(u"是否检查修改 (y/n)?") == 'y'
-						if is_check:
-							subprocess.call(['svn','diff',dst_file])
+						# is_check = yes_no_dialog(u"是否检查修改 " + ver_name + get_id_change_desc(id_change) if id_change else '')[0] == 'y'
+						# # my_input(u"是否检查修改 (y/n)?") == 'y'
+						# if is_check:
+						# 	subprocess.call(['svn','diff',dst_file])
 
 						is_commit = yes_no_dialog(u"是否提交 " + ver_name)[0] == 'y'
 						# my_input(u"是否提交 (y/n)?") == 'y'
