@@ -139,7 +139,7 @@ def svn_commit(dir,msg='auto commit by script.'):
    #               /logmsg:"test log message" /closeonend:0
 
    			subprocess.call(['TortoiseProc.exe','/command:commit','/path:{}'.format(dir),
-   				'/logmsg:{}'.format(msg),'/closeonend:0'])
+   				'/logmsg:"{}"'.format(msg),'/closeonend:0'])
 
 		else:
 			print('svn','ci',dir,'-m',msg)
