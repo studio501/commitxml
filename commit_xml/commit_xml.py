@@ -230,6 +230,12 @@ def getClipBoardContent():
 		#这里的data为bytes类型，之后需要转成utf-8操作
 		return data.decode('utf-8')
 
+def trimCopyXmlBlank(copy_xml):
+	for elem_cp in copy_xml:
+		for x in elem_cp.attrib:
+			elem_cp.attrib[x] = elem_cp.attrib[x].lstrip().rstrip()
+	return copy_xml
+
 def checkClipContent(str_content,file_type='xml',beSecondCheck=False):
 	# str_arr = str_content.split('\n')
 	# print('str_content here',str_content,beSecondCheck)
@@ -258,7 +264,9 @@ def checkClipContent(str_content,file_type='xml',beSecondCheck=False):
 			if res.tag == "ItemSpec":
 				str_content = '<temp_group__>\n' + str_content + '\n</temp_group__>'
 				ET_Check.fromstring(str_content)
-				return ET.fromstring(str_content)
+				return trimCopyXmlBlank(ET.fromstring(str_content))
+
+			trimCopyXmlBlank(res)
 			return res
 	except Exception as e:
 		if not beSecondCheck and file_type == 'xml':
