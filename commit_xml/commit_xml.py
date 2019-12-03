@@ -835,7 +835,7 @@ def main():
 
 			if not table_is_empty(ver_to_publish):
 				for ver in ver_to_publish:
-					pt = os.path.join(info['path'],ver)
+					pt = os.path.join(info['path'].encode('utf-8'),ver)
 					id_change = None
 					if os.path.exists(pt):
 						svn_update(pt)
