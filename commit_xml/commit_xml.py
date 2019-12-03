@@ -128,7 +128,8 @@ def binarySearch(arr, l, r, x):
 	return arr[mid][1]
 
 def svn_update(dir):
-	subprocess.call(['svn','update',dir])
+	# subprocess.call(['svn','update',dir.encode('utf-8')])
+	subprocess.call(['svn','update',dir.encode(sys.getfilesystemencoding())])
 
 def svn_commit(dir,msg='auto commit by script.'):
 	if type(dir) is str:
@@ -138,7 +139,7 @@ def svn_commit(dir,msg='auto commit by script.'):
    #               /path:"c:\svn_wc\file1.txt*c:\svn_wc\file2.txt"
    #               /logmsg:"test log message" /closeonend:0
 
-   			subprocess.call(['TortoiseProc.exe','/command:commit','/path:{}'.format(dir),
+   			subprocess.call(['TortoiseProc.exe','/command:commit','/path:' + dir.encode(sys.getfilesystemencoding()),
    				'/logmsg:"{}"'.format(msg),'/closeonend:0'])
 
 		else:
@@ -835,7 +836,7 @@ def main():
 
 			if not table_is_empty(ver_to_publish):
 				for ver in ver_to_publish:
-					pt = os.path.join(info['path'].encode('utf-8'),ver)
+					pt = os.path.join(info['path'],ver)
 					id_change = None
 					if os.path.exists(pt):
 						svn_update(pt)
