@@ -13,6 +13,9 @@ MixBraceRe = re.compile(r'[{}]')
 # CommentInLineRe = re.compile(r'\/\/|\/\*')
 CommentCpp = ['//','/*']
 
+# cpp 语句结束符 ;
+Cpp_end_line_Re = re.compile(r';\s*$')
+
 # cpp 函数
 Cpp_Normal_Fun_Re = re.compile(r'(\w+)(\s+)(\w+)\((.*)\)')
 Cpp_ClassMember_Fun_Re = re.compile(r'(\w+)(\s+)(\w+)::(\w+)\((.*)\)')
@@ -24,6 +27,11 @@ ElseIf_Gramma_Re = re.compile(r'(^\s*\}?\s*else if|^\}?\s*else if)(.*)\((.*)\)')
 Else_Gramma_Re = re.compile(r'^\s*\}?\s*else\s*\{?$')
 Empty_Re = re.compile(r'^\s*{')
 
+SingleWord_If_Re = re.compile(r'^\s*if\s*\((.*)\)')
+SingleWord_ElseIf_Re = re.compile(r'^\s*\}?\s*else if\s*\((.*)\)')
+SingleWord_Else_Re = re.compile(r'^\s*\}?\s*else')
+SingleWord_Re_Arr = [SingleWord_If_Re,SingleWord_ElseIf_Re,SingleWord_Else_Re]
+
 # block 类型
 BlockRe2Type =  {Cpp_Normal_Fun_Re:"normal_function",
                 Cpp_ClassMember_Fun_Re:"cls_mem_function",
@@ -32,7 +40,11 @@ BlockRe2Type =  {Cpp_Normal_Fun_Re:"normal_function",
                 If_Gramma_Re:"if_gramma",
                 ElseIf_Gramma_Re:"elseif_gramma",
                 Else_Gramma_Re:"else_gramma",
+                SingleWord_If_Re:"if_gramma_sg",
+                SingleWord_ElseIf_Re:"elseif_gramma_sg",
+                SingleWord_Else_Re:"else_gramma_sg",
                 Empty_Re:"empty_block",
+
                 }
 
 # 以{ 结尾
@@ -176,11 +188,11 @@ class Cpp_code_block():
         if len(re_res) == 1:
             return True
         
-
-        next_line,_ = self.get_first_line(lines_arr,first_idx+1)
-        re_res = Start_With_Left_Brace.findall(next_line)
-        if len(re_res) == 1:
-            return True
+        if first_idx+1 < len(lines_arr):
+            next_line,next_line_idx = self.get_first_line(lines_arr,first_idx+1)
+            re_res = Start_With_Left_Brace.findall(next_line)
+            if len(re_res) == 1:
+                return True
 
         return False
 
@@ -193,6 +205,7 @@ class Cpp_code_block():
 
             line_idx = i
             return t_line,line_idx
+
     
     def checkValidBlock(self):
         if not self.is_followd_by_left_brace():
@@ -249,6 +262,50 @@ class Cpp_code_block():
             not self.m_sign_re or self.m_blockType != 'default'
         )
 
+# 单个语句block 主要用于 if else
+class single_word_block(Cpp_code_block):
+    def __init__(self, lines_arr,currentIdx,sign_re):
+        Cpp_code_block.__init__(self,lines_arr,currentIdx,sign_re)
+    
+    def checkValidBlock(self):
+        if not self.has_key_word():
+            return
+        
+        start_idx = self.m_currentIdx
+        end_idx = start_idx
+        for i in range(self.m_currentIdx,len(self.m_lines_arr)):
+            t_line = self.m_lines_arr[i]
+            if isStringNil(t_line):
+                continue
+            
+            has_semi = len(Cpp_end_line_Re.findall(trim_cpp_comment(t_line))) == 1
+            if has_semi:
+                end_idx = i
+
+                break
+        self.m_validBlock = [start_idx,end_idx]
+
+        self.parse_block_type()
+    
+    def has_key_word(self):
+        lines_arr = self.m_lines_arr
+        currentIdx = self.m_currentIdx
+        first_line,first_idx = self.get_first_line(lines_arr,currentIdx)
+
+        for x in SingleWord_Re_Arr:
+            re_res = x.findall(first_line)
+            if len(re_res) == 1:
+                return True
+        
+
+        next_line,_ = self.get_first_line(lines_arr,first_idx+1)
+        for x in SingleWord_Re_Arr:
+            re_res = x.findall(next_line)
+            if len(re_res) == 1:
+                return True
+
+        return False
+
 # 空block {}
 class empty_block(Cpp_code_block):
     def __init__(self, lines_arr,currentIdx):
@@ -290,12 +347,34 @@ class else_block_(Cpp_code_block):
     def __init__(self, lines_arr,currentIdx):
         Cpp_code_block.__init__(self,lines_arr,currentIdx,Else_Gramma_Re)
 
+# if block single key
+class if_block_single_key_(single_word_block):
+    def __init__(self, lines_arr,currentIdx):
+        single_word_block.__init__(self,lines_arr,currentIdx,SingleWord_If_Re)
+
+# else if block single key
+class elseif_block_single_key_(single_word_block):
+    def __init__(self, lines_arr,currentIdx):
+        single_word_block.__init__(self,lines_arr,currentIdx,SingleWord_ElseIf_Re)
+
+# else block single key
+class else_block_single_key_(single_word_block):
+    def __init__(self, lines_arr,currentIdx):
+        single_word_block.__init__(self,lines_arr,currentIdx,SingleWord_Else_Re)
+
+
 # if-else block
 class if_else_block():
     def __init__(self, lines_arr,currentIdx):
+        self.m_grammaMap = {
+            "if":{"arr":[if_block_,if_block_single_key_],"gramKey":"if_gramma"},
+            "else if":{"arr":[elseif_block_,else_block_single_key_],"gramKey":"elseif_gramma"},
+            "else":{"arr":[else_block_,else_block_single_key_],"gramKey":"else_gramma"},
+        }
         pass
-        if_block = if_block_(lines_arr,currentIdx)
-        if if_block.get_block_type() == 'if_gramma':
+        if_block = self.try_get_block('if',lines_arr,currentIdx)
+        # if_block_(lines_arr,currentIdx)
+        if if_block:
             self.m_blockType = 'if_block'
             block_arr = [if_block]
             self.m_block_arr = block_arr
@@ -306,19 +385,29 @@ class if_else_block():
             while True:
                 pass
                 end_flag = True
-                possible_else = else_block_(lines_arr,line_idx)
-                if possible_else.isValidBlock():
+                possible_else = self.try_get_block('else',lines_arr,line_idx)
+                if possible_else:
                     block_arr.append(possible_else)
                     break
                 
-                possible_elseif = elseif_block_(lines_arr,line_idx)
-                if possible_elseif.isValidBlock():
+                possible_elseif = self.try_get_block('else if',lines_arr,line_idx)
+                # elseif_block_(lines_arr,line_idx)
+                if possible_elseif:
                     block_arr.append(possible_elseif)
                     line_idx = possible_elseif.getValidBlock()[1]
                     end_flag = False
                 
                 if end_flag:
                     break
+    def try_get_block(self,blockName,lines_arr,currentIdx):
+        gramm_arr = self.m_grammaMap[blockName]
+        if gramm_arr:
+            for x in gramm_arr['arr']:
+                t = x(lines_arr,currentIdx)
+                if t.isValidBlock() and t.get_block_type().count(gramm_arr['gramKey']) == 1:
+                    return t
+        return None
+
 
     def get_block_type(self):
         return self.m_blockType if self.isValidBlock() else 'none'
@@ -369,6 +458,22 @@ def test():
     # if 需要 处理
     # if(true) return;
     # if(true) {return;}
+
+    func_str = '''if(a<b) 
+        x=1;//hahah
+    else if(a==b) 
+        x=2;
+    else x=3//good'''
+
+    a = if_else_block(func_str.split('\n'),0)
+    a1 = a.get_block_type()
+
+    # a = if_block_single_key_(func_str.split('\n'),0)
+    # a1 = a.get_block_type()
+    # b = elseif_block_single_key_(func_str.split('\n'),2)
+    # b1 = b.get_block_type()
+    # c = else_block_single_key_(func_str.split('\n'),4)
+    # c1 = c.get_block_type()
 
     func_str = '''CCArray *AchievementController::getVisbleAchievement(){
     CCArray *arr = CCArray::create();
