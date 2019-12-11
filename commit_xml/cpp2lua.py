@@ -3,6 +3,9 @@ import sys,os,re
 from os import listdir
 from os.path import isfile, join
 
+# 非空白字符
+NoneBlankRe = re.compile(r'\S')
+
 # 正则匹配表达式
 # re of '{' and '}'
 LeftBraceRe = re.compile(r'{')
@@ -13,19 +16,33 @@ MixBraceRe = re.compile(r'[{}]')
 # CommentInLineRe = re.compile(r'\/\/|\/\*')
 CommentCpp = ['//','/*']
 
+# cpp 声明变量语句
+DeclarRe = re.compile(r'^\w+\s+\*?\&?\w+\s*;+\s*$')
+
+# cpp 定义变量语句 含初始化
+DefiniteRe = re.compile(r'^(\w+)\s+\*?\&?(\w+)\s*=\s*(\S+)\s*;+\s*$')
+
+# cpp 去掉 iterator of map. eg: it->second => it 或者 (*it).second => it
+CppMapIterator1Re = re.compile(r'(\w+)->(second)')
+CppMapIterator2Re = re.compile(r'\(\s*\*(\w+)\s*\)\.(second)')
+
+# cpp -> 和 . 先使用 CppArrow2Func 再 CppArrow2Value
+CppArrow2Func = re.compile(r'(->)(\w+\(.*?\))')
+CppArrow2Value = re.compile(r'(->)(\w+)')
+
+
 # cpp 语句结束符 ;
 Cpp_end_line_Re = re.compile(r';\s*$')
 
 # cpp 函数
 Cpp_Normal_Fun_Re = re.compile(r'(\w+)(\s+)(\w+)\((.*)\)')
 Cpp_ClassMember_Fun_Re = re.compile(r'(\w+)(\s+)(\w+)::(\w+)\((.*)\)')
-Switch_Re = re.compile(r'(^\s*switch|^switch)(\s*)\((.*)\)')
-For_Gramma_Re = re.compile(r'(^\s*for|^for)(\s*)\((.*)\)')
-If_Gramma_Re = re.compile(r'(^\s*?if|^if)(\s*)\((.*)\)')
-ElseIf_Gramma_Re = re.compile(r'(^\s*\}?\s*else if|^\}?\s*else if)(.*)\((.*)\)')
-# Else_Gramma_Re = re.compile(r'(^\s*\}?\s*else|^\}?\s*else)')
-Else_Gramma_Re = re.compile(r'^\s*\}?\s*else\s*\{?$')
-Empty_Re = re.compile(r'^\s*{')
+Switch_Re = re.compile(r'^\s*switch(\s*)\((.*)\)')
+For_Gramma_Re = re.compile(r'^\s*for(\s*)\((.*)\)')
+If_Gramma_Re = re.compile(r'^\s*\}?if(\s*)\((.*)\)\s*\{?\s*\}?\s*$')
+ElseIf_Gramma_Re = re.compile(r'^\s*\}?\s*else if(\s*)\((.*)\)')
+Else_Gramma_Re = re.compile(r'^\s*\}?\s*else')
+Empty_Re = re.compile(r'^\s*\{\}?$')
 
 SingleWord_If_Re = re.compile(r'^\s*if\s*\((.*)\)')
 SingleWord_ElseIf_Re = re.compile(r'^\s*\}?\s*else if\s*\((.*)\)')
@@ -48,9 +65,10 @@ BlockRe2Type =  {Cpp_Normal_Fun_Re:"normal_function",
                 }
 
 # 以{ 结尾
-End_With_Left_Brace = re.compile(r'(.*)\{(\s*)')
+End_With_Left_Brace = re.compile(r'\{(\s*)$')
+End_With_Right_Brace = re.compile(r'\}(\s*)$')
 # 以{ 开头
-Start_With_Left_Brace = re.compile(r'(\s*)\{')
+Start_With_Left_Brace = re.compile(r'^(\s*)\{')
 
 # 公用函数
 def isStringNil(str):
@@ -76,20 +94,61 @@ def trim_cpp_comment(line):
             return line[:pos]
 
     return line
+
+class Line_class():
+    def __init__(self,line,sign_re):
+        self.m_line = line
+        self.m_sign_re = sign_re
+
+    def isValid(self):
+        if not self.m_sign_re:
+            return True
+
+        trim_comment_line = self.getTrimCommentLine()
+        sign_res = self.m_sign_re.findall(trim_comment_line)
+        return len(sign_res) == 1
+
+    def trans2lua(self):
+        return self.m_line
+
+    def getTrimCommentLine(self):
+        return trim_cpp_comment(self.m_line)
+    
+    def getLine_leftblank(self):
+        res = NoneBlankRe.search(self.m_line)
+        if res:
+            start_idx = res.start()
+            return self.m_line[:start_idx] if start_idx > -1 else ''
+
+    def handleArrow(self,srcStr):
+        srcStr = CppMapIterator1Re.sub(r'\1' ,srcStr)
+        srcStr = CppMapIterator2Re.sub(r'\1' ,srcStr)
+
+        srcStr = CppArrow2Func.sub(r':\2',srcStr)
+        srcStr = CppArrow2Value.sub(r'.\2',srcStr)
+
+        return srcStr
+
+class DeclarInLine(Line_class):
+    def __init__(self,line):
+        Line_class.__init__(self,line,DeclarRe)
+
+class DefiniteInLine(Line_class):
+    def __init__(self,line):
+        Line_class.__init__(self,line,DefiniteRe)
+
+    def trans2lua(self):
+        trim_comment_line = self.getTrimCommentLine()
+        sign_res = self.m_sign_re.findall(trim_comment_line)
+        if len(sign_res) == 1:
+            pass
+
+
 # 一行里的 花括号匹配
 class BraceInLine():
     def __init__(self,line):
         self.m_line = line
-        # self.m_arr = [[],[]]
         self.m_braceArr = MixBraceRe.findall(line)
-        # if line.count('{') > 0:
-        #     self.m_arr[0] = LeftBraceRe.findall(line)
-        
-        
-        # if line.count('}') > 0:
-        #     self.m_arr[1] = RightBraceRe.findall(line)
-
-        # self.m_hasBrace = line.count('{') > 0 or line.count('}') > 0
         self.m_hasBrace = len(self.m_braceArr) > 0
 
     def changeStack(self,outerStack):
@@ -104,55 +163,11 @@ class BraceInLine():
                     if len(outerStack) == 0:
                         break
 
-    # def detec_front_right_brace():
-    #     res = []
-    #     for x in self.m_braceArr:
-    #         if x == '}':
-    #             res.append(x)
-    #         else:
-    #             break
-
-    #     return res
-
-    # def judge_side(self,tell_end):
-        
-    #     left_len = len(self.m_arr[0])
-    #     right_len = len(self.m_arr[1])
-    #     detect_front_right = self.detec_front_right_brace()
-    #     len_front_is_right = len(detect_front_right)
-
-    #     if left_len == right_len:
-    #         if left_len == 0:
-    #             # return 'empty'
-    #             if tell_end and len_front_is_right > 0:
-    #                 return [-len_front_is_right,'right']
-
-    #             return [0,'empty']
-    #         else:
-    #             # return 'neutral'
-    #             return [0,'neutral']
-    #     else:
-    #         # return 'left' if right_len < left_len else 'right'
-    #         # neg : 'right'
-    #         # pos : 'left'
-    #         return [left_len - right_len,'left' if right_len < left_len else 'right']
-
-    # def brace_after_match(self,tell_end):
-
-    #     braces = []
-    #     side_res = self.judge_side(tell_end)
-    #     side_ct = side_res[0]
-    #     side_sign = side_res[1]
-    #     t_char = '{' if side_ct > 0 else '}'
-    #     for i in range(abs(side_ct)):
-    #         braces.append(t_char)
-        
-    #     self.m_afterMatch = [side_sign,braces]
-    #     return [side_sign,braces]
-
 
     def has_brace(self):
         return self.m_hasBrace
+
+    
 
 # cpp 里一个code block
 class Cpp_code_block():
@@ -160,6 +175,8 @@ class Cpp_code_block():
         self.m_blockType = "default"
         self.m_lines_arr = lines_arr
         self.m_currentIdx = currentIdx
+        self.m_blockStartIdx = currentIdx
+
         self.m_sign_re = sign_re
         self.m_validBlock = None
 
@@ -171,10 +188,14 @@ class Cpp_code_block():
         
         if self._isValidBlock():
             lines_arr = self.m_lines_arr
-            currentIdx = self.m_currentIdx
+            currentIdx = max(self.m_currentIdx,self.m_blockStartIdx) #self.m_currentIdx
             first_line,_ = self.get_first_line(lines_arr,currentIdx)
-            sign_res = self.m_sign_re.findall(trim_cpp_comment(first_line))
+            trim_line = trim_cpp_comment(first_line)
+            sign_res = self.m_sign_re.findall(trim_line)
             if len(sign_res) == 1:
+                if self.m_sign_re == Else_Gramma_Re:
+                    if trim_line.count('else if') == 1:
+                        return
                 self.m_blockType = BlockRe2Type[self.m_sign_re] or 'must_set'
 
     def get_block_type(self):
@@ -184,7 +205,8 @@ class Cpp_code_block():
         lines_arr = self.m_lines_arr
         currentIdx = self.m_currentIdx
         first_line,first_idx = self.get_first_line(lines_arr,currentIdx)
-        re_res = End_With_Left_Brace.findall(first_line)
+        re_res = End_With_Left_Brace.findall(trim_cpp_comment(first_line))
+        self.m_blockStartIdx = first_idx
         if len(re_res) == 1:
             return True
         
@@ -193,6 +215,17 @@ class Cpp_code_block():
             re_res = Start_With_Left_Brace.findall(next_line)
             if len(re_res) == 1:
                 return True
+            another_check_endbrace_chance = self.m_sign_re == ElseIf_Gramma_Re or self.m_sign_re == Else_Gramma_Re
+            if another_check_endbrace_chance:
+                re_res = End_With_Left_Brace.findall(trim_cpp_comment(next_line))
+                if len(re_res) == 1:
+                    self.m_blockStartIdx = next_line_idx
+                    return True
+                if next_line.count('{') == next_line.count('}'):
+                    re_res = End_With_Right_Brace.findall(trim_cpp_comment(next_line))
+                    if len(re_res) == 1:
+                        self.m_blockStartIdx = next_line_idx
+                        return True
 
         return False
 
@@ -214,9 +247,10 @@ class Cpp_code_block():
         # for i in range(self.m_currentIdx,len(self.m_lines_arr)):
         brace_stack = []
         check_flag = False
-        start_idx = self.m_currentIdx
+        start_block_idx = max(self.m_currentIdx,self.m_blockStartIdx)
+        start_idx = start_block_idx
         end_idx = start_idx
-        for i in range(self.m_currentIdx,len(self.m_lines_arr)):
+        for i in range(start_block_idx,len(self.m_lines_arr)):
             t_line = self.m_lines_arr[i]
             if isStringNil(t_line):
                 continue
@@ -228,6 +262,12 @@ class Cpp_code_block():
                     check_flag = True
                     start_idx = i
                     brace_stack.append('{')
+
+                    if t_line.count('{') == t_line.count('}'):
+                        re_res = End_With_Right_Brace.findall(trim_cpp_comment(t_line))
+                        if len(re_res) == 1:
+                            end_idx = i
+                            brace_stack.pop()
                 else:
                     brace_in_line.changeStack(brace_stack)
                 if len(brace_stack) == 0:
@@ -271,9 +311,11 @@ class single_word_block(Cpp_code_block):
         if not self.has_key_word():
             return
         
-        start_idx = self.m_currentIdx
+        start_idx = max(self.m_currentIdx,self.m_blockStartIdx)
         end_idx = start_idx
-        for i in range(self.m_currentIdx,len(self.m_lines_arr)):
+
+        start_ct_idx = start_idx
+        for i in range(start_ct_idx,len(self.m_lines_arr)):
             t_line = self.m_lines_arr[i]
             if isStringNil(t_line):
                 continue
@@ -286,19 +328,34 @@ class single_word_block(Cpp_code_block):
         self.m_validBlock = [start_idx,end_idx]
 
         self.parse_block_type()
+
+    def parse_block_type(self):
+        if not self.m_sign_re:
+            return
+        
+        if self._isValidBlock():
+            lines_arr = self.m_lines_arr
+            currentIdx = max(self.m_currentIdx,self.m_blockStartIdx)
+            first_line,_ = self.get_first_line(lines_arr,currentIdx)
+            sign_res = self.m_sign_re.findall(trim_cpp_comment(first_line))
+            if len(sign_res) == 1:
+                if self.m_sign_re == SingleWord_Else_Re and first_line.count('else if') == 1:
+                    return
+                self.m_blockType = BlockRe2Type[self.m_sign_re] or 'must_set'
     
     def has_key_word(self):
         lines_arr = self.m_lines_arr
         currentIdx = self.m_currentIdx
         first_line,first_idx = self.get_first_line(lines_arr,currentIdx)
-
+        self.m_blockStartIdx = first_idx
         for x in SingleWord_Re_Arr:
             re_res = x.findall(first_line)
             if len(re_res) == 1:
                 return True
         
 
-        next_line,_ = self.get_first_line(lines_arr,first_idx+1)
+        next_line,next_line_idx = self.get_first_line(lines_arr,first_idx+1)
+        self.m_blockStartIdx = next_line_idx
         for x in SingleWord_Re_Arr:
             re_res = x.findall(next_line)
             if len(re_res) == 1:
@@ -368,7 +425,7 @@ class if_else_block():
     def __init__(self, lines_arr,currentIdx):
         self.m_grammaMap = {
             "if":{"arr":[if_block_,if_block_single_key_],"gramKey":"if_gramma"},
-            "else if":{"arr":[elseif_block_,else_block_single_key_],"gramKey":"elseif_gramma"},
+            "else if":{"arr":[elseif_block_,elseif_block_single_key_],"gramKey":"elseif_gramma"},
             "else":{"arr":[else_block_,else_block_single_key_],"gramKey":"else_gramma"},
         }
         pass
@@ -435,12 +492,30 @@ def test():
     pass
 
 
-    # t_str = "}else {//abcd"
-    # r = Else_Gramma_Re.findall(trim_cpp_comment( t_str))
-    # r2 = ElseIf_Gramma_Re.findall(t_str)
+    t_str = "auto &a = it->second->refreshVisibleFlag()->f1()->good ;"
+    t_str2 = "auto &a = (*it).second->refreshVisibleFlag()->f2().abcd ;"
+    ta = re.compile(r'(\w+)->(second)')
+    tb = re.compile(r'\(\s*\*(\w+)\s*\)\.(second)')
 
-    # if True:
-    #     return
+    tc = re.compile(r'(->)(\w+\(.*?\))')
+    td = re.compile(r'(->)(\w+)')
+
+    a = ta.sub(r'\1' ,t_str)
+    b = tb.sub(r'\1' ,t_str2)
+
+    taa = tc.sub(r':\2',a)
+    taaa = td.sub(r'.\2',taa)
+
+    tq = Line_class(t_str)
+
+    tbb = tc.sub(r':',b)
+    tbbb = td.sub(r'.',tbb)
+    # a = t_str.replace('->second','')
+    # t_str.find(r'\s')
+    r2 = ElseIf_Gramma_Re.findall(t_str)
+
+    if True:
+        return
 
     # a = BlockRe2Type[Cpp_ClassMember_Fun_Re]
 
@@ -460,13 +535,18 @@ def test():
     # if(true) {return;}
 
     func_str = '''if(a<b) 
-        x=1;//hahah
-    else if(a==b) 
-        x=2;
-    else x=3//good'''
+    {
+        x=1;
+    }//hahah
+    else if(a==b) {
+        x = 2;
+        //to do ....
+    }
+    else x=3;//good'''
 
     a = if_else_block(func_str.split('\n'),0)
     a1 = a.get_block_type()
+    c = 10
 
     # a = if_block_single_key_(func_str.split('\n'),0)
     # a1 = a.get_block_type()
