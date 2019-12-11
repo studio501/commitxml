@@ -21,6 +21,8 @@ DeclarRe = re.compile(r'^\w+\s+\*?\&?\w+\s*;+\s*$')
 
 # cpp 定义变量语句 含初始化
 DefiniteRe = re.compile(r'^(\w+)\s+\*?\&?(\w+)\s*=\s*(\S+)\s*;+\s*$')
+# cpp 替换定义(初始化) 语句
+RepDefiniteRe = re.compile(r'(\w+)(\s+[\*&]?|[\*&]?\s+)(\w+)(.*)')
 
 # cpp 去掉 iterator of map. eg: it->second => it 或者 (*it).second => it
 CppMapIterator1Re = re.compile(r'(\w+)->(second)')
@@ -33,6 +35,8 @@ CppArrow2Value = re.compile(r'(->)(\w+)')
 
 # cpp 语句结束符 ;
 Cpp_end_line_Re = re.compile(r';\s*$')
+# 去掉 cpp 语句 ;
+Cpp_trim_end_semil_Re = re.compile(r'(.*)(;)\s*$')
 
 # cpp 函数
 Cpp_Normal_Fun_Re = re.compile(r'(\w+)(\s+)(\w+)\((.*)\)')
@@ -87,18 +91,32 @@ def read_file(fileName):
         file_data = f.readlines()
     return file_data
 
-def trim_cpp_comment(line):
+def trim_cpp_comment_full(line):
     for x in CommentCpp:
         pos = line.find(x)
         if pos > -1:
-            return line[:pos]
+            return line[:pos],line[pos:]
 
-    return line
+    return line,''
+
+def trim_cpp_comment(line):
+    content_part,comment_part = trim_cpp_comment_full(line)
+    return content_part
 
 class Line_class():
-    def __init__(self,line,sign_re):
+    def __init__(self,line,sign_re=None):
         self.m_line = line
         self.m_sign_re = sign_re
+        self.m_had_convert = False
+
+        # trim comment
+        self.m_luaLine,self.m_comment_part = trim_cpp_comment_full(line)
+        # trim semicolum
+        self.m_luaLine = self.trimSemi(self.m_luaLine)
+
+        self.getLuaLine()
+    def reset_convert_flag():
+        self.m_had_convert = False
 
     def isValid(self):
         if not self.m_sign_re:
@@ -129,6 +147,21 @@ class Line_class():
 
         return srcStr
 
+    def trimSemi(self,srcStr):
+        return Cpp_trim_end_semil_Re.sub(r'\1',srcStr)
+
+    def getLuaLine(self):
+        if not self.m_had_convert:
+            self.m_had_convert = True
+
+            self.trans2lua()
+        return self.m_luaLine
+
+    def trans2lua():
+        print("need implemente by subclass")
+        pass
+
+
 class DeclarInLine(Line_class):
     def __init__(self,line):
         Line_class.__init__(self,line,DeclarRe)
@@ -138,10 +171,13 @@ class DefiniteInLine(Line_class):
         Line_class.__init__(self,line,DefiniteRe)
 
     def trans2lua(self):
-        trim_comment_line = self.getTrimCommentLine()
-        sign_res = self.m_sign_re.findall(trim_comment_line)
+        sign_res = self.m_sign_re.findall(trim_cpp_comment( self.m_line))
         if len(sign_res) == 1:
             pass
+            self.m_luaLine = self.handleArrow(self.m_luaLine)
+            self.m_luaLine = RepDefiniteRe.sub(r'local \3\4',self.m_luaLine)
+            a = 100
+
 
 
 # 一行里的 花括号匹配
@@ -492,7 +528,11 @@ def test():
     pass
 
 
-    t_str = "auto &a = it->second->refreshVisibleFlag()->f1()->good ;"
+    t_str = "auto &a = it->second->refreshVisibleFlag()->f1()->good ;//haha"
+
+    ta = DefiniteInLine(t_str)
+
+
     t_str2 = "auto &a = (*it).second->refreshVisibleFlag()->f2().abcd ;"
     ta = re.compile(r'(\w+)->(second)')
     tb = re.compile(r'\(\s*\*(\w+)\s*\)\.(second)')
@@ -507,6 +547,7 @@ def test():
     taaa = td.sub(r'.\2',taa)
 
     tq = Line_class(t_str)
+    tq1 = tq.handleArrow(t_str)
 
     tbb = tc.sub(r':',b)
     tbbb = td.sub(r'.',tbb)
