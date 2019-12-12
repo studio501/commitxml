@@ -22,7 +22,7 @@ CommentCpp = ['//','/*']
 DeclarRe = re.compile(r'^(\w+)(\s+\*?\s*|\*?\s+)(\w+)\s*;+\s*$')
 
 # cpp 定义变量语句 含初始化
-DefiniteRe = re.compile(r'^(\w+)(\s+\*?\&?\s*|\*?\&?\s+)(\w+)\s*=\s*(\S+)\s*;+\s*$')
+DefiniteRe = re.compile(r'^(\w+)(\s+\*?\&?\s*|\*?\&?\s+)(\w+)\s*=\s*(.*?)\s*;+\s*$')
 # cpp 替换定义(初始化) 语句
 RepDefiniteRe = re.compile(r'(\w+)(\s+[\*&]?|[\*&]?\s+)(\w+)(.*)')
 
@@ -32,6 +32,23 @@ DefiniteArrRe = re.compile(r'^(\w+)(\s+\*?\s*|\*?\s+)(\w+)(\[\w+\])\s*=\s*(\{.*?
 
 # cpp 赋值语句
 AssignmentRe = re.compile(r'^(\S+)\s*=\s*(\S+)\s*;+\s*$')
+# CCARRAY_FOREACH => for _,x in ipairs() do
+CCARRAY_FOREACH_Re = re.compile(r'CCARRAY_FOREACH\s*\(\s*(\w+)\s*,\s*(\w+)\s*\)(.*)')
+# CCDICT_FOREACH => for _,x in pairs() do
+CCDICT_FOREACH_Re = re.compile(r'CCDICT_FOREACH\s*\(\s*(\w+)\s*,\s*(\w+)\s*\)(.*)')
+# CCARRAY_FOREACH_REVERSE => for _,x in ripairs() do
+CCARRAY_FOREACH_REVERSE_Re = re.compile(r'CCARRAY_FOREACH_REVERSE\s*\(\s*(\w+)\s*,\s*(\w+)\s*\)(.*)')
+# for(auto it=x.begin();it!=x.end();++id) = > for _,it in ipairs(x) do
+for_iterator_re = re.compile(r'for\s*\(\s*\w+\s+(\w+)\s*=\s*(\w+)\.begin.*\)(.*)')
+# for(int i=0;i<count;i++) => for i=0,count do
+for_normal_re = re.compile(r'for\s*\(\s*\w+\s+(\w+)\s*=\s*(\w+)\s*;\s*\w+\s*([\S])\s*(\w+)\s*;\s*(.*)\s*\)(.*)')
+
+# 转型
+# dynamic_cast<__String*>(arr->objectAtIndex(j))->_string
+
+
+# cpp CCArray,CCDictionary => {}
+Arr_Dic_Re = re.compile(r'((CCArray|CCDictionary):+create\(\s*\))')
 
 
 # cpp 去掉 iterator of map. eg: it->second => it 或者 (*it).second => it
@@ -155,9 +172,21 @@ class Line_class():
         
         return '',srcStr
     def handleArrow(self,srcStr):
+
         # ::getInstance => .getInstance
         r1 = re.compile(r'(::)(getInstance)')
         srcStr = r1.sub(r'.\2',srcStr)
+        
+        # ->_string => ''
+        srcStr = re.sub('->_string','',srcStr)
+
+        # cast => ''
+        srcStr = re.sub(r'(\w+_cast<.*?>)\s*\((.*)\)\s*',r'\2',srcStr)
+        
+        # arr->objectAtIndex(j) => arr[j]
+        srcStr = re.sub(r'(\w+)->objectAtIndex\(\s*(.*?)\s*\)',r'\1[\2]',srcStr)
+        
+
         # params->valueForKey("gold")->intValue() => params["gold"]
         r1 = re.compile(r'(\w+)->valueForKey\(\s*(\S+?)\s*\)->\w+Value\(.*?\)')
         srcStr = r1.sub(r'\1[\2]',srcStr)
@@ -207,6 +236,7 @@ class DefiniteInLine(Line_class):
             pass
             self.m_luaLine = self.handleArrow(self.m_no_comment_part)
             self.m_luaLine = RepDefiniteRe.sub(r'local \3\4',self.m_luaLine)
+            self.m_luaLine = Arr_Dic_Re.sub(r'{}',self.m_luaLine)
 
 class DeclarArrInLine(Line_class):
     def __init__(self,line):
@@ -239,6 +269,105 @@ class AssignmentInLine(Line_class):
             pass
             self.m_luaLine = self.handleArrow(self.m_no_comment_part)
             self.m_luaLine = self.m_sign_re.sub(r'\1 = \2',self.m_luaLine)
+
+class CCARRAY_FOREACH_InLine(Line_class):
+    def __init__(self,line):
+        Line_class.__init__(self,line,CCARRAY_FOREACH_Re)
+
+    def trans2lua(self):
+        sign_res = self.m_sign_re.findall(self.m_no_comment_part)
+        if len(sign_res) == 1:
+            pass
+            self.m_luaLine = self.handleArrow(self.m_no_comment_part)
+            def tFun(m):
+                if m.group(3).count('}') == 1:
+                    s = re.sub(r'\{([^;]*)(;+)\}',r'\1',m.group(3))
+                    return 'for _,{0} in ipairs( {1} ) do {2} end'.format(m.group(2),m.group(1),s)
+                else:
+                    return 'for _,{0} in ipairs( {1} ) do'.format(m.group(2),m.group(1))
+            self.m_luaLine = self.m_sign_re.sub(lambda m : tFun(m),self.m_luaLine)
+
+class CCARRAY_FOREACH_REVERSE_InLine(Line_class):
+    def __init__(self,line):
+        Line_class.__init__(self,line,CCARRAY_FOREACH_REVERSE_Re)
+
+    def trans2lua(self):
+        sign_res = self.m_sign_re.findall(self.m_no_comment_part)
+        if len(sign_res) == 1:
+            pass
+            self.m_luaLine = self.handleArrow(self.m_no_comment_part)
+            def tFun(m):
+                if m.group(3).count('}') == 1:
+                    s = re.sub(r'\{([^;]*)(;+)\}',r'\1',m.group(3))
+                    return 'for _,{0} in ripairs( {1} ) do {2} end'.format(m.group(2),m.group(1),s)
+                else:
+                    return 'for _,{0} in ripairs( {1} ) do'.format(m.group(2),m.group(1))
+            self.m_luaLine = self.m_sign_re.sub(lambda m : tFun(m),self.m_luaLine)
+
+
+class CCDICT_FOREACH_InLine(Line_class):
+    def __init__(self,line):
+        Line_class.__init__(self,line,CCDICT_FOREACH_Re)
+
+    def trans2lua(self):
+        sign_res = self.m_sign_re.findall(self.m_no_comment_part)
+        if len(sign_res) == 1:
+            pass
+            self.m_luaLine = self.handleArrow(self.m_no_comment_part)
+            def tFun(m):
+                if m.group(3).count('}') == 1:
+                    s = re.sub(r'\{([^;]*)(;+)\}',r'\1',m.group(3))
+                    return 'for _,{0} in pairs( {1} ) do {2} end'.format(m.group(2),m.group(1),s)
+                else:
+                    return 'for _,{0} in pairs( {1} ) do'.format(m.group(2),m.group(1))
+            self.m_luaLine = self.m_sign_re.sub(lambda m : tFun(m),self.m_luaLine)
+
+class for_iterator_InLine(Line_class):
+    def __init__(self,line):
+        Line_class.__init__(self,line,for_iterator_re)
+
+    def trans2lua(self):
+        sign_res = self.m_sign_re.findall(self.m_no_comment_part)
+        if len(sign_res) == 1:
+            pass
+            self.m_luaLine = self.handleArrow(self.m_no_comment_part)
+            def tFun(m):
+                if m.group(3).count('}') == 1:
+                    s = re.sub(r'\{([^;]*)(;+)\}',r'\1',m.group(3))
+                    return 'for _,{0} in ipairs( {1} ) do {2} end'.format(m.group(1),m.group(2),s)
+                else:
+                    return 'for _,{0} in ipairs( {1} ) do'.format(m.group(1),m.group(2))
+            self.m_luaLine = self.m_sign_re.sub(lambda m : tFun(m),self.m_luaLine)
+
+
+class for_normal_InLine(Line_class):
+    def __init__(self,line):
+        Line_class.__init__(self,line,for_normal_re)
+
+    def trans2lua(self):
+        sign_res = self.m_sign_re.findall(self.m_no_comment_part)
+        if len(sign_res) == 1:
+            pass
+            self.m_luaLine = self.handleArrow(self.m_no_comment_part)
+            def tFun(m):
+                inc = m.group(5)
+                inc_str = ''
+                if inc.count('++') == 1:
+                    inc_str = ''
+                elif inc.count('--') == 1:
+                    inc_str = ', -1'
+                elif inc.count('+=') == 1:
+                    inc_str = re.sub(r'\w+\s*\+=\s*(\w+)',r', \1',inc)
+                elif inc.count('-=') == 1:
+                    inc_str = re.sub(r'\w+\s*\-=\s*(\w+)',r', -\1',inc)
+                
+
+                if m.group(6).count('}') == 1:
+                    s = re.sub(r'\{([^;]*)(;+)\}',r'\1',m.group(6))
+                    return 'for {0} = {1}, {2}{3} do {4} end'.format(m.group(1),m.group(2),m.group(4),inc_str,s)
+                else:
+                    return 'for {0} = {1}, {2}{3} do'.format(m.group(1),m.group(2),m.group(4),inc_str)
+            self.m_luaLine = self.m_sign_re.sub(lambda m : tFun(m),self.m_luaLine)
 
 
 
@@ -590,17 +719,34 @@ def test():
     pass
 
 
-    t_str = 'GlobalData::shared()->playerInfo->payTotal = params->valueForKey("payTotal")->intValue();'
+    # t_str = 'CCARRAY_FOREACH(arr, obj) {xxx}'
+    t_str = 'string id1 = dynamic_cast<__String*>(arr->objectAtIndex(j+1))->_string;'
     t_str1 = "int a[10] = { 0 }  ;"
 
-    # r1 = re.compile(r'(::)(getInstance)')
-    # s1 = r1.sub(r'.\2',t_str)
+    # ->_string => ''
+    # t_str = re.sub('->_string','',t_str)
+
+    # # cast => ''
+    # t_str = re.sub(r'(\w+_cast<.*?>)\s*\((.*)\)\s*',r'\2',t_str)
+    # t_str = re.sub(r'(\w+)->objectAtIndex\(\s*(\w+)\s*\)',r'\1[\2]',t_str)
+
+    # r1 = re.compile(r'for\s*\(\s*\w+\s+(\w+)\s*=\s*(\w+)\.begin.*\)(.*)')
+    # def tFun(m):
+    #     if m.group(3).count('}') == 1:
+    #         s = re.sub(r'\{([^;]*)(;+)\}',r'\1',m.group(3))
+    #         return 'for _,{0} in ipairs({1}) do {2} end'.format(m.group(2),m.group(1),s)
+    #     else:
+    #         return 'for _,{0} in ipairs({1}) do'.format(m.group(2),m.group(1))
+    # s1 = r1.sub(lambda m : tFun(m),t_str)
+
+    ta = DefiniteInLine(t_str)
+    taa = ta.getLuaLine()
 
     # r1 = re.compile(r'(\w+)->valueForKey\(\s*(\S+?)\s*\)->\w+Value\(.*?\)')
     # s1 = r1.sub(r'\1[\2]',s1)
 
     # ta = DeclarInLine(t_str)
-    ta = AssignmentInLine(t_str)
+    ta = DefiniteInLine(t_str)
     taa = ta.getLuaLine()
     tb = DefiniteArrInLine(t_str1)
 
@@ -661,47 +807,7 @@ def test():
     a1 = a.get_block_type()
     c = 10
 
-    # a = if_block_single_key_(func_str.split('\n'),0)
-    # a1 = a.get_block_type()
-    # b = elseif_block_single_key_(func_str.split('\n'),2)
-    # b1 = b.get_block_type()
-    # c = else_block_single_key_(func_str.split('\n'),4)
-    # c1 = c.get_block_type()
 
-    func_str = '''CCArray *AchievementController::getVisbleAchievement(){
-    CCArray *arr = CCArray::create();
-    double nowTime = GlobalData::shared()->getWorldTime();
-    for (auto it = m_infos.begin(); it != m_infos.end(); it++) {
-        if(it->second->isVisible){
-            if (nowTime>=it->second->start && nowTime<=it->second->end) {//在时间范围内
-                arr->addObject(CCString::create(it->first));
-            }else if (it->second->state == ACHIEVEMENT_COMPELETE){//能领
-                arr->addObject(CCString::create(it->first));
-            }
-        }
-    }
-
-    {// 空代码块
-        auto a = 100;
-    }
-    return arr;
-}'''
-
-    a = if_else_block(func_str.split('\n'),5)
-    b = a.get_block_type()
-    a = function_block(func_str.split('\n'),0)
-    b = a.get_block_type()
-
-    # a = mem_function_block(func_str.split('\n'),0)
-    # b = a.get_block_type()
-
-    tc = empty_block(func_str.split('\n'),13)
-    b = tc.isValidBlock()
-    t1 = tc.getValidBlock()
-    # a = tc.is_followd_by_left_brace()
-    # t1 = BraceInLine(r'abcd {{{{{{{{{{}')
-    # print(t1.get_brace_arr())
-    # side = t1.judge_side()
 
     pass
 
