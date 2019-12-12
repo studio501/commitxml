@@ -3,6 +3,8 @@ import sys,os,re
 from os import listdir
 from os.path import isfile, join
 
+# thanks a lot to https://pythex.org/
+
 # 非空白字符
 NoneBlankRe = re.compile(r'\S')
 
@@ -17,12 +19,20 @@ MixBraceRe = re.compile(r'[{}]')
 CommentCpp = ['//','/*']
 
 # cpp 声明变量语句
-DeclarRe = re.compile(r'^\w+\s+\*?\&?\w+\s*;+\s*$')
+DeclarRe = re.compile(r'^(\w+)(\s+\*?\s*|\*?\s+)(\w+)\s*;+\s*$')
 
 # cpp 定义变量语句 含初始化
-DefiniteRe = re.compile(r'^(\w+)\s+\*?\&?(\w+)\s*=\s*(\S+)\s*;+\s*$')
+DefiniteRe = re.compile(r'^(\w+)(\s+\*?\&?\s*|\*?\&?\s+)(\w+)\s*=\s*(\S+)\s*;+\s*$')
 # cpp 替换定义(初始化) 语句
 RepDefiniteRe = re.compile(r'(\w+)(\s+[\*&]?|[\*&]?\s+)(\w+)(.*)')
+
+# cpp 声明 & 定义数组
+DecalrArrRe = re.compile(r'^(\w+)(\s+\*?\s*|\*?\s+)(\w+)(\[\w+\])\s*;+\s*$')
+DefiniteArrRe = re.compile(r'^(\w+)(\s+\*?\s*|\*?\s+)(\w+)(\[\w+\])\s*=\s*(\{.*?\})\s*;+\s*$')
+
+# cpp 赋值语句
+AssignmentRe = re.compile(r'^(\S+)\s*=\s*(\S+)\s*;+\s*$')
+
 
 # cpp 去掉 iterator of map. eg: it->second => it 或者 (*it).second => it
 CppMapIterator1Re = re.compile(r'(\w+)->(second)')
@@ -31,6 +41,7 @@ CppMapIterator2Re = re.compile(r'\(\s*\*(\w+)\s*\)\.(second)')
 # cpp -> 和 . 先使用 CppArrow2Func 再 CppArrow2Value
 CppArrow2Func = re.compile(r'(->)(\w+\(.*?\))')
 CppArrow2Value = re.compile(r'(->)(\w+)')
+DbSemi2One = re.compile(r'(::)')
 
 
 # cpp 语句结束符 ;
@@ -106,15 +117,18 @@ def trim_cpp_comment(line):
 class Line_class():
     def __init__(self,line,sign_re=None):
         self.m_line = line
+        self.m_luaLine = line
         self.m_sign_re = sign_re
         self.m_had_convert = False
 
+        # trim left blank
+        self.m_leftBlank,self.m_noLeftBlankLine = self.getLine_leftblank(line)
         # trim comment
-        self.m_luaLine,self.m_comment_part = trim_cpp_comment_full(line)
+        self.m_no_comment_part,self.m_comment_part = trim_cpp_comment_full(self.m_noLeftBlankLine)
+        # change lauguage rule
+        self.getLuaLine()
         # trim semicolum
         self.m_luaLine = self.trimSemi(self.m_luaLine)
-
-        self.getLuaLine()
     def reset_convert_flag():
         self.m_had_convert = False
 
@@ -132,18 +146,29 @@ class Line_class():
     def getTrimCommentLine(self):
         return trim_cpp_comment(self.m_line)
     
-    def getLine_leftblank(self):
-        res = NoneBlankRe.search(self.m_line)
+    def getLine_leftblank(self,srcStr):
+        res = NoneBlankRe.search(srcStr)
         if res:
             start_idx = res.start()
-            return self.m_line[:start_idx] if start_idx > -1 else ''
-
+            if start_idx > -1:
+                return srcStr[:start_idx],srcStr[start_idx:]
+        
+        return '',srcStr
     def handleArrow(self,srcStr):
+        # ::getInstance => .getInstance
+        r1 = re.compile(r'(::)(getInstance)')
+        srcStr = r1.sub(r'.\2',srcStr)
+        # params->valueForKey("gold")->intValue() => params["gold"]
+        r1 = re.compile(r'(\w+)->valueForKey\(\s*(\S+?)\s*\)->\w+Value\(.*?\)')
+        srcStr = r1.sub(r'\1[\2]',srcStr)
+
         srcStr = CppMapIterator1Re.sub(r'\1' ,srcStr)
         srcStr = CppMapIterator2Re.sub(r'\1' ,srcStr)
 
         srcStr = CppArrow2Func.sub(r':\2',srcStr)
         srcStr = CppArrow2Value.sub(r'.\2',srcStr)
+
+        srcStr = DbSemi2One.sub(':',srcStr)
 
         return srcStr
 
@@ -166,17 +191,54 @@ class DeclarInLine(Line_class):
     def __init__(self,line):
         Line_class.__init__(self,line,DeclarRe)
 
+    def trans2lua(self):
+        sign_res = self.m_sign_re.findall(self.m_no_comment_part)
+        if len(sign_res) == 1:
+            pass
+            self.m_luaLine = DeclarRe.sub(r'local \3',self.m_no_comment_part)
+
 class DefiniteInLine(Line_class):
     def __init__(self,line):
         Line_class.__init__(self,line,DefiniteRe)
 
     def trans2lua(self):
-        sign_res = self.m_sign_re.findall(trim_cpp_comment( self.m_line))
+        sign_res = self.m_sign_re.findall(self.m_no_comment_part)
         if len(sign_res) == 1:
             pass
-            self.m_luaLine = self.handleArrow(self.m_luaLine)
+            self.m_luaLine = self.handleArrow(self.m_no_comment_part)
             self.m_luaLine = RepDefiniteRe.sub(r'local \3\4',self.m_luaLine)
-            a = 100
+
+class DeclarArrInLine(Line_class):
+    def __init__(self,line):
+        Line_class.__init__(self,line,DecalrArrRe)
+
+    def trans2lua(self):
+        sign_res = self.m_sign_re.findall(self.m_no_comment_part)
+        if len(sign_res) == 1:
+            pass
+            self.m_luaLine = self.m_sign_re.sub(r'local \3 = {}',self.m_no_comment_part)
+
+class DefiniteArrInLine(Line_class):
+    def __init__(self,line):
+        Line_class.__init__(self,line,DefiniteArrRe)
+
+    def trans2lua(self):
+        sign_res = self.m_sign_re.findall(self.m_no_comment_part)
+        if len(sign_res) == 1:
+            pass
+            self.m_luaLine = self.handleArrow(self.m_no_comment_part)
+            self.m_luaLine = self.m_sign_re.sub(r'local \3 = \5',self.m_luaLine)
+
+class AssignmentInLine(Line_class):
+    def __init__(self,line):
+        Line_class.__init__(self,line,AssignmentRe)
+
+    def trans2lua(self):
+        sign_res = self.m_sign_re.findall(self.m_no_comment_part)
+        if len(sign_res) == 1:
+            pass
+            self.m_luaLine = self.handleArrow(self.m_no_comment_part)
+            self.m_luaLine = self.m_sign_re.sub(r'\1 = \2',self.m_luaLine)
 
 
 
@@ -528,9 +590,19 @@ def test():
     pass
 
 
-    t_str = "auto &a = it->second->refreshVisibleFlag()->f1()->good ;//haha"
+    t_str = 'GlobalData::shared()->playerInfo->payTotal = params->valueForKey("payTotal")->intValue();'
+    t_str1 = "int a[10] = { 0 }  ;"
 
-    ta = DefiniteInLine(t_str)
+    # r1 = re.compile(r'(::)(getInstance)')
+    # s1 = r1.sub(r'.\2',t_str)
+
+    # r1 = re.compile(r'(\w+)->valueForKey\(\s*(\S+?)\s*\)->\w+Value\(.*?\)')
+    # s1 = r1.sub(r'\1[\2]',s1)
+
+    # ta = DeclarInLine(t_str)
+    ta = AssignmentInLine(t_str)
+    taa = ta.getLuaLine()
+    tb = DefiniteArrInLine(t_str1)
 
 
     t_str2 = "auto &a = (*it).second->refreshVisibleFlag()->f2().abcd ;"
