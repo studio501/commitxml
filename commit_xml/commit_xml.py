@@ -16,6 +16,8 @@ import platform
 
 from Tkinter import *
 
+W_b_W_re = re.compile(r'(\w+)\s+(\w+)')
+
 if platform.system() == 'Windows':
 	import win32clipboard
 
@@ -525,7 +527,11 @@ def modify_file_xml(copy_xml,filename,group_name,is_blank_xml):
 
 def get_group_name():
 	# return "effect_pool"
-	return my_input(u'请输入表名')
+	input_str = my_input(u'请输入表名').lstrip().rstrip()
+	diff_name = W_b_W_re.match(input_str)
+	if diff_name:
+		return diff_name.groups()[1],diff_name.groups()[0]
+	return input_str,input_str
 
 def upgrade_ver(filename):
 	if not os.path.exists(filename):
@@ -784,9 +790,10 @@ def main():
 	pub_file_name = None
 	group_name = None
 	copy_xml = None
+	real_file_name = None
 	if file_is_xml:
 		pub_file_name = ['database.local.xml']
-		group_name = get_group_name()
+		group_name,real_file_name = get_group_name()
 		ready = my_input(u'请将要复制的内容拷贝到剪贴板后回车')
 		copy_xml = checkClipContent(getClipBoardContent(),'xml')
 
@@ -850,9 +857,9 @@ def main():
 							if fen_biao_flag:
 								pass
 								
-								dst_file = os.path.join(pt,group_name + '.xml')
+								dst_file = os.path.join(pt,real_file_name + '.xml')
 								all_xml = get_files_in_dir(pt)
-								if not table_contains(all_xml,group_name+'.xml'):
+								if not table_contains(all_xml,real_file_name+'.xml'):
 									blank_xml = True
 									get_blank_xml(dst_file)
 									subprocess.call(['svn','add',dst_file,'--force'])
