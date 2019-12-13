@@ -35,16 +35,83 @@ AssignmentRe = re.compile(r'^(\S+)\s*=\s*(\S+)\s*;+\s*$')
 # CCARRAY_FOREACH => for _,x in ipairs() do
 CCARRAY_FOREACH_Re = re.compile(r'CCARRAY_FOREACH\s*\(\s*(\w+)\s*,\s*(\w+)\s*\)(.*)')
 # CCDICT_FOREACH => for _,x in pairs() do
-CCDICT_FOREACH_Re = re.compile(r'CCDICT_FOREACH\s*\(\s*(\w+)\s*,\s*(\w+)\s*\)(.*)')
+CCDICT_FOREACH_Re = re.compile(r'CCDICT_FOREACH\w*\s*\(\s*(\w+)\s*,\s*(\w+)\s*\)(.*)')
 # CCARRAY_FOREACH_REVERSE => for _,x in ripairs() do
 CCARRAY_FOREACH_REVERSE_Re = re.compile(r'CCARRAY_FOREACH_REVERSE\s*\(\s*(\w+)\s*,\s*(\w+)\s*\)(.*)')
 # for(auto it=x.begin();it!=x.end();++id) = > for _,it in ipairs(x) do
 for_iterator_re = re.compile(r'for\s*\(\s*\w+\s+(\w+)\s*=\s*(\w+)\.begin.*\)(.*)')
+for_iterator_re2 = re.compile(r'for\s\(.*;\s*(\w+)\s*[!=]=\s*(\w+).end\(\s*\)\s*;.*\)(.*)')
 # for(int i=0;i<count;i++) => for i=0,count do
 for_normal_re = re.compile(r'for\s*\(\s*\w+\s+(\w+)\s*=\s*(\w+)\s*;\s*\w+\s*([\S])\s*(\w+)\s*;\s*(.*)\s*\)(.*)')
-
+# if or else if => lua if or elseif
+if_else_if_re = re.compile(r'(else\s+)?(if)\s*\((.*)\)')
 # 转型
-# dynamic_cast<__String*>(arr->objectAtIndex(j))->_string
+
+# 用户自定接口部分
+def _user_la_ForLua(m):
+    # r'\1ForLua:call("\2",\3)'
+    return '{0}ForLua:call("{1}"{2})'.format(m.group(1),m.group(2),'' if len( m.group(3).split()) == 0 else ', ' + m.group(3) )
+def _user_la(m):
+    return '{0}:call("{1}"{2})'.format(m.group(1),m.group(2),'' if len( m.group(3).split()) == 0 else ', ' + m.group(3) )
+
+def _user_LocalController_la(m):
+    return 'LocalController:call("shared"):call("DBXMLManager"):call("{0}"{1})'.format(m.group(2),'' if len( m.group(3).split()) == 0 else ', ' + m.group(3) )
+
+Equal_Map_of_find = {"=":'',"!":'not '}
+    
+def _user_find_la(m):
+    return '{0}table.findVar( {1}, {2})'.format(Equal_Map_of_find[m.group(3)],m.group(1),m.group(2))
+
+User_Custom_Part = [
+    # CCSafeNotificationCenter
+    {"pattern":re.compile(r'(CCSafeNotificationCenter\s*)(::sharedNotificationCenter\s*\(\s*\)\s*->\s*)(postNotification)'),"repl":r'\1:\3'},
+    # ::getInstance => .getInstance
+    {"pattern":re.compile(r'(::)(getInstance)'),"repl":r'.\2'},
+    # ->_string => ''
+    {"pattern":re.compile('->_string'),"repl":''},
+    # cast => ''
+    {"pattern":re.compile(r'(\w+_cast<.*?>)\s*\((.*)\)\s*'),"repl":r'\2'},
+    # arr->objectAtIndex(j) => arr[j]
+    {"pattern":re.compile(r'(\w+)->objectAtIndex\(\s*(.*?)\s*\)'),"repl":r'\1[\2]'},
+    # params->valueForKey("gold")->intValue() => params["gold"]
+    {"pattern":re.compile(r'(\w+)->valueForKey\(\s*(\S+?)\s*\)->\w+\(.*?\)'),"repl":r'\1[\2]'},
+    # CCCommonUtils::splitString => string.split
+    {"pattern":re.compile(r'CCCommonUtils\s*::\s*splitString\(\s*(\w+)\s*,\s*\"(.*)\"\s*,\s*(\w+)\s*\)'),"repl":r"\3 = string.split(\1,'\2')"},
+    # CCCommonUtils:: => CCCommonUtilsForLua:call
+    {"pattern":re.compile(r'(CCCommonUtils)\s*::\s*(\w+)\((.*?)\)'),"repl":lambda m: _user_la_ForLua(m)},
+    # GlobalData::shared() => GlobalData:call
+    {"pattern":re.compile(r'(GlobalData)\s*::shared\(\s*\)\s*->\s*(\w+)\((.*?)\)'),"repl":lambda m: _user_la(m)},
+    # CCXXX::create(y) => y
+    {"pattern":re.compile(r'CC(\w+)\s*::\s*create\s*\((.*?)\)'),"repl":r'\2'},
+    # arr->addObject(x) => table.insert(arr,x)
+    {"pattern":re.compile(r'(\w+)\s*->\s*addObject\s*\((.*)\)'),"repl":r'table.insert(\1,\2)'},
+    # it->first => key
+    {"pattern":re.compile(r'(\w+)\s*->\s*first'),"repl":r'\1_key'},
+    # it->second => it
+    {"pattern":re.compile(r'((\w+)\s*->\s*second)'),"repl":r'\1'},
+    # arr->count() => #arr
+    {"pattern":re.compile(r'(\w+)\s*->\s*count\(\s*\)'),"repl":r'#\1'},
+    # x.find() == x.end() => table.find
+    {"pattern":re.compile(r'(\w+)\s*\.\s*find\((\w+)\)\s*([!=])=\s*\1\s*\.\s*end\(\s*\)'),"repl":lambda m: _user_find_la(m)},
+    # NULL,nullptr => nil
+    {"pattern":re.compile(r'(NULL|nullptr)'),"repl":'nil'},
+    # CCLOG => cclog
+    {"pattern":re.compile(r'(CCLOG)'),"repl":'-- cclog'},
+    # 三元运算符 => lua and or
+    {"pattern":re.compile(r'=(.*?)\?(.*?):(.*)'),"repl":r'= \1 and \2 or \3'},
+    # .clear() => = {}
+    {"pattern":re.compile(r'(\w+)\s*\.\s*clear\(\s*\)'),"repl":r'\1 = {}'},
+    # getGroupByKey => CCCommonUtilsForLua:getGroupByKey
+    {"pattern":re.compile(r'(LocalController\s*::\s*shared\s*\(\s*\)\s*->\s*DBXMLManager\(\s*\))\s*->\s*getGroupByKey\s*\((.*)\)'),"repl":r'CCCommonUtilsForLua:getGroupByKey( \2 )'},
+    # LocalController = > lua LocalController
+    {"pattern":re.compile(r'(LocalController\s*::\s*shared\s*\(\s*\)\s*->\s*DBXMLManager\(\s*\))\s*->\s*(\w+)\s*\((.*)\)'),"repl":lambda m: _user_LocalController_la(m)},
+    # string append => lua string.join
+    # (\w+)\s*\.append\(\s*"(.*)"\s*\)
+    {"pattern":re.compile(r'(\w+)\s*\.append\(\s*"(.*)"\s*\)'),"repl":r"string.join('',\1,'\2')"},
+    # cmd class => utils.requestServer
+    # (.*)new\s+(\w+)Command\((.*)\)
+    {"pattern":re.compile(r'(.*)new\s+(\w+)(Command|Cmd)\((.*)\)'),"repl":r"utils.requestServer('\2',nil,nil,function (tbl) end)"},
+]
 
 
 # cpp CCArray,CCDictionary => {}
@@ -146,7 +213,7 @@ class Line_class():
         self.getLuaLine()
         # trim semicolum
         self.m_luaLine = self.trimSemi(self.m_luaLine)
-    def reset_convert_flag():
+    def reset_convert_flag(self):
         self.m_had_convert = False
 
     def isValid(self):
@@ -156,9 +223,6 @@ class Line_class():
         trim_comment_line = self.getTrimCommentLine()
         sign_res = self.m_sign_re.findall(trim_comment_line)
         return len(sign_res) == 1
-
-    def trans2lua(self):
-        return self.m_line
 
     def getTrimCommentLine(self):
         return trim_cpp_comment(self.m_line)
@@ -173,23 +237,31 @@ class Line_class():
         return '',srcStr
     def handleArrow(self,srcStr):
 
-        # ::getInstance => .getInstance
-        r1 = re.compile(r'(::)(getInstance)')
-        srcStr = r1.sub(r'.\2',srcStr)
+        # # ::getInstance => .getInstance
+        # r1 = re.compile(r'(::)(getInstance)')
+        # srcStr = r1.sub(r'.\2',srcStr)
         
-        # ->_string => ''
-        srcStr = re.sub('->_string','',srcStr)
+        # # ->_string => ''
+        # srcStr = re.sub('->_string','',srcStr)
 
-        # cast => ''
-        srcStr = re.sub(r'(\w+_cast<.*?>)\s*\((.*)\)\s*',r'\2',srcStr)
+        # # cast => ''
+        # srcStr = re.sub(r'(\w+_cast<.*?>)\s*\((.*)\)\s*',r'\2',srcStr)
         
-        # arr->objectAtIndex(j) => arr[j]
-        srcStr = re.sub(r'(\w+)->objectAtIndex\(\s*(.*?)\s*\)',r'\1[\2]',srcStr)
-        
+        # # arr->objectAtIndex(j) => arr[j]
+        # srcStr = re.sub(r'(\w+)->objectAtIndex\(\s*(.*?)\s*\)',r'\1[\2]',srcStr)
 
-        # params->valueForKey("gold")->intValue() => params["gold"]
-        r1 = re.compile(r'(\w+)->valueForKey\(\s*(\S+?)\s*\)->\w+Value\(.*?\)')
-        srcStr = r1.sub(r'\1[\2]',srcStr)
+        # # params->valueForKey("gold")->intValue() => params["gold"]
+        # r1 = re.compile(r'(\w+)->valueForKey\(\s*(\S+?)\s*\)->\w+Value\(.*?\)')
+        # srcStr = r1.sub(r'\1[\2]',srcStr)
+
+        # User cumstom handles
+        for x in User_Custom_Part:
+            re_cp = x["pattern"]
+            repl = x["repl"]
+            srcStr = re_cp.sub(repl,srcStr)
+
+            # self.m_luaLine = self.m_sign_re.sub(lambda m : tFun(m),self.m_luaLine)
+
 
         srcStr = CppMapIterator1Re.sub(r'\1' ,srcStr)
         srcStr = CppMapIterator2Re.sub(r'\1' ,srcStr)
@@ -211,9 +283,8 @@ class Line_class():
             self.trans2lua()
         return self.m_luaLine
 
-    def trans2lua():
-        print("need implemente by subclass")
-        pass
+    def trans2lua(self):
+        self.m_luaLine = self.handleArrow(self.m_no_comment_part)
 
 
 class DeclarInLine(Line_class):
@@ -306,8 +377,8 @@ class CCARRAY_FOREACH_REVERSE_InLine(Line_class):
 
 
 class CCDICT_FOREACH_InLine(Line_class):
-    def __init__(self,line):
-        Line_class.__init__(self,line,CCDICT_FOREACH_Re)
+    def __init__(self,line,sign_re = CCDICT_FOREACH_Re):
+        Line_class.__init__(self,line,sign_re)
 
     def trans2lua(self):
         sign_res = self.m_sign_re.findall(self.m_no_comment_part)
@@ -317,27 +388,47 @@ class CCDICT_FOREACH_InLine(Line_class):
             def tFun(m):
                 if m.group(3).count('}') == 1:
                     s = re.sub(r'\{([^;]*)(;+)\}',r'\1',m.group(3))
-                    return 'for _,{0} in pairs( {1} ) do {2} end'.format(m.group(2),m.group(1),s)
+                    return 'for {3},{0} in pairs( {1} ) do {2} end'.format(m.group(2),m.group(1),s,m.group(1) + '_key')
                 else:
-                    return 'for _,{0} in pairs( {1} ) do'.format(m.group(2),m.group(1))
+                    return 'for {2},{0} in pairs( {1} ) do'.format(m.group(2),m.group(1),m.group(1) + '_key')
             self.m_luaLine = self.m_sign_re.sub(lambda m : tFun(m),self.m_luaLine)
 
 class for_iterator_InLine(Line_class):
     def __init__(self,line):
+        self.m_sign_re2 = for_iterator_re2
         Line_class.__init__(self,line,for_iterator_re)
 
     def trans2lua(self):
+        use_rep = self.m_sign_re
         sign_res = self.m_sign_re.findall(self.m_no_comment_part)
+        if len(sign_res) == 0:
+            use_rep = self.m_sign_re2
+            sign_res = use_rep.findall(self.m_no_comment_part)
+
+            
         if len(sign_res) == 1:
             pass
             self.m_luaLine = self.handleArrow(self.m_no_comment_part)
             def tFun(m):
                 if m.group(3).count('}') == 1:
                     s = re.sub(r'\{([^;]*)(;+)\}',r'\1',m.group(3))
-                    return 'for _,{0} in ipairs( {1} ) do {2} end'.format(m.group(1),m.group(2),s)
+                    return 'for {3},{0} in ipairs( {1} ) do {2} end'.format(m.group(1),m.group(2),s,m.group(1) + '_key')
                 else:
-                    return 'for _,{0} in ipairs( {1} ) do'.format(m.group(1),m.group(2))
-            self.m_luaLine = self.m_sign_re.sub(lambda m : tFun(m),self.m_luaLine)
+                    return 'for {2},{0} in ipairs( {1} ) do'.format(m.group(1),m.group(2),m.group(1) + '_key')
+            self.m_luaLine = use_rep.sub(lambda m : tFun(m),self.m_luaLine)
+
+    def isValid(self):
+        trim_comment_line = self.getTrimCommentLine()
+        sign_res = self.m_sign_re.findall(trim_comment_line)
+        if len(sign_res) == 1:
+            return True
+
+        sign_res = self.m_sign_re2.findall(trim_comment_line)
+        if len(sign_res) == 1:
+            return True
+
+        return False
+        
 
 
 class for_normal_InLine(Line_class):
@@ -367,6 +458,24 @@ class for_normal_InLine(Line_class):
                     return 'for {0} = {1}, {2}{3} do {4} end'.format(m.group(1),m.group(2),m.group(4),inc_str,s)
                 else:
                     return 'for {0} = {1}, {2}{3} do'.format(m.group(1),m.group(2),m.group(4),inc_str)
+            self.m_luaLine = self.m_sign_re.sub(lambda m : tFun(m),self.m_luaLine)
+
+class if_else_if_InLine(Line_class):
+    def __init__(self,line):
+        Line_class.__init__(self,line,if_else_if_re)
+
+    def trans2lua(self):
+        sign_res = self.m_sign_re.findall(self.m_no_comment_part)
+        if len(sign_res) == 1:
+            pass
+            self.m_luaLine = self.handleArrow(self.m_no_comment_part)
+            def tFun(m):
+                head_str = m.group(1).rstrip() + m.group(2) if m.group(1) else m.group(2)
+                content_str = m.group(3)
+                content_str = re.sub('!=','~=',content_str)
+                content_str = re.sub('&&',' and ',content_str)
+                content_str = re.sub(r'\|\|',' or ',content_str)
+                return head_str + ' ' + content_str
             self.m_luaLine = self.m_sign_re.sub(lambda m : tFun(m),self.m_luaLine)
 
 
@@ -720,33 +829,10 @@ def test():
 
 
     # t_str = 'CCARRAY_FOREACH(arr, obj) {xxx}'
-    t_str = 'string id1 = dynamic_cast<__String*>(arr->objectAtIndex(j+1))->_string;'
+    t_str = 'CCCommonUtils::splitString(color1,  ",",strVec);'
     t_str1 = "int a[10] = { 0 }  ;"
 
-    # ->_string => ''
-    # t_str = re.sub('->_string','',t_str)
-
-    # # cast => ''
-    # t_str = re.sub(r'(\w+_cast<.*?>)\s*\((.*)\)\s*',r'\2',t_str)
-    # t_str = re.sub(r'(\w+)->objectAtIndex\(\s*(\w+)\s*\)',r'\1[\2]',t_str)
-
-    # r1 = re.compile(r'for\s*\(\s*\w+\s+(\w+)\s*=\s*(\w+)\.begin.*\)(.*)')
-    # def tFun(m):
-    #     if m.group(3).count('}') == 1:
-    #         s = re.sub(r'\{([^;]*)(;+)\}',r'\1',m.group(3))
-    #         return 'for _,{0} in ipairs({1}) do {2} end'.format(m.group(2),m.group(1),s)
-    #     else:
-    #         return 'for _,{0} in ipairs({1}) do'.format(m.group(2),m.group(1))
-    # s1 = r1.sub(lambda m : tFun(m),t_str)
-
-    ta = DefiniteInLine(t_str)
-    taa = ta.getLuaLine()
-
-    # r1 = re.compile(r'(\w+)->valueForKey\(\s*(\S+?)\s*\)->\w+Value\(.*?\)')
-    # s1 = r1.sub(r'\1[\2]',s1)
-
-    # ta = DeclarInLine(t_str)
-    ta = DefiniteInLine(t_str)
+    ta = Line_class(t_str)
     taa = ta.getLuaLine()
     tb = DefiniteArrInLine(t_str1)
 
