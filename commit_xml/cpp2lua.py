@@ -19,19 +19,19 @@ MixBraceRe = re.compile(r'[{}]')
 CommentCpp = ['//','/*']
 
 # cpp 声明变量语句
-DeclarRe = re.compile(r'^(\w+)(\s+\*?\s*|\*?\s+)(\w+)\s*;+\s*$')
+DeclarRe = re.compile(r'(\w+)(\s+\*?\s*|\*?\s+)(\w+)\s*;+\s*')
 
 # cpp 定义变量语句 含初始化
-DefiniteRe = re.compile(r'^(\w+)(\s+\*?\&?\s*|\*?\&?\s+)(\w+)\s*=\s*(.*?)\s*;+\s*$')
+DefiniteRe = re.compile(r'(\w+)(\s+\*?\&?\s*|\*?\&?\s+)(\w+)\s*=\s*(.*?)\s*;+\s*')
 # cpp 替换定义(初始化) 语句
 RepDefiniteRe = re.compile(r'(\w+)(\s+[\*&]?|[\*&]?\s+)(\w+)(.*)')
 
 # cpp 声明 & 定义数组
-DecalrArrRe = re.compile(r'^(\w+)(\s+\*?\s*|\*?\s+)(\w+)(\[\w+\])\s*;+\s*$')
-DefiniteArrRe = re.compile(r'^(\w+)(\s+\*?\s*|\*?\s+)(\w+)(\[\w+\])\s*=\s*(\{.*?\})\s*;+\s*$')
+DecalrArrRe = re.compile(r'(\w+)(\s+\*?\s*|\*?\s+)(\w+)(\[\w+\])\s*;+\s*')
+DefiniteArrRe = re.compile(r'(\w+)(\s+\*?\s*|\*?\s+)(\w+)(\[\w+\])\s*=\s*(\{.*?\})\s*;+\s*')
 
 # cpp 赋值语句
-AssignmentRe = re.compile(r'^(\S+)\s*=\s*(\S+)\s*;+\s*$')
+AssignmentRe = re.compile(r'(\S+)\s*=\s*(\S+)\s*;+\s*')
 # CCARRAY_FOREACH => for _,x in ipairs() do
 CCARRAY_FOREACH_Re = re.compile(r'CCARRAY_FOREACH\s*\(\s*(\w+)\s*,\s*(\w+)\s*\)(.*)')
 # CCDICT_FOREACH => for _,x in pairs() do
@@ -62,6 +62,9 @@ Equal_Map_of_find = {"=":'',"!":'not '}
 def _user_find_la(m):
     return '{0}table.findVar( {1}, {2})'.format(Equal_Map_of_find[m.group(3)],m.group(1),m.group(2))
 
+def _user_enum_la(m):
+    pass
+
 User_Custom_Part = [
     # CCSafeNotificationCenter
     {"pattern":re.compile(r'(CCSafeNotificationCenter\s*)(::sharedNotificationCenter\s*\(\s*\)\s*->\s*)(postNotification)'),"repl":r'\1:\3'},
@@ -82,7 +85,7 @@ User_Custom_Part = [
     # GlobalData::shared() => GlobalData:call
     {"pattern":re.compile(r'(GlobalData)\s*::shared\(\s*\)\s*->\s*(\w+)\((.*?)\)'),"repl":lambda m: _user_la(m)},
     # CCXXX::create(y) => y
-    {"pattern":re.compile(r'CC(\w+)\s*::\s*create\s*\((.*?)\)'),"repl":r'\2'},
+    {"pattern":re.compile(r'CC(\w+)\s*::\s*create\s*\((\s*\S+\s*)\)'),"repl":r'\2'},
     # arr->addObject(x) => table.insert(arr,x)
     {"pattern":re.compile(r'(\w+)\s*->\s*addObject\s*\((.*)\)'),"repl":r'table.insert(\1,\2)'},
     # it->first => key
@@ -111,6 +114,9 @@ User_Custom_Part = [
     # cmd class => utils.requestServer
     # (.*)new\s+(\w+)Command\((.*)\)
     {"pattern":re.compile(r'(.*)new\s+(\w+)(Command|Cmd)\((.*)\)'),"repl":r"utils.requestServer('\2',nil,nil,function (tbl) end)"},
+    # enum => enum
+    # \s*enum\s+(\w+)\s*[{]?\n+(\s*(\w+)\s*,?\n+)+\s*\}\s*;
+    {"pattern":re.compile(r'enum\s+(\w+)\s*[{]?\n+(\s*(\w+)\s*,?\n+)+\s*\}\s*;'),"repl":r"utils.requestServer('\2',nil,nil,function (tbl) end)"},
 ]
 
 
@@ -135,17 +141,21 @@ Cpp_trim_end_semil_Re = re.compile(r'(.*)(;)\s*$')
 
 # cpp 函数
 Cpp_Normal_Fun_Re = re.compile(r'(\w+)(\s+)(\w+)\((.*)\)')
-Cpp_ClassMember_Fun_Re = re.compile(r'(\w+)(\s+)(\w+)::(\w+)\((.*)\)')
+Cpp_ClassMember_Fun_Re = re.compile(r'(.*?)\s*\n*\s*[*&]?\s*\n*\s*(\w+)\s*\n*\s*::\s*\n*\s*(\w+)\s*\n*\s*\(\s*\n*\s*((?:.*?\n*){0,100}?)\n*\s*\n*\)\s*\n*\{',re.MULTILINE)
 Switch_Re = re.compile(r'^\s*switch(\s*)\((.*)\)')
-For_Gramma_Re = re.compile(r'^\s*for(\s*)\((.*)\)')
-If_Gramma_Re = re.compile(r'^\s*\}?if(\s*)\((.*)\)\s*\{?\s*\}?\s*$')
-ElseIf_Gramma_Re = re.compile(r'^\s*\}?\s*else if(\s*)\((.*)\)')
-Else_Gramma_Re = re.compile(r'^\s*\}?\s*else')
-Empty_Re = re.compile(r'^\s*\{\}?$')
+For_Gramma_Re = re.compile(r'^\s*for\s*\n*\s*\n*\((.*)\n*(.*)\n*(.*)\)\{?',re.MULTILINE)
 
-SingleWord_If_Re = re.compile(r'^\s*if\s*\((.*)\)')
-SingleWord_ElseIf_Re = re.compile(r'^\s*\}?\s*else if\s*\((.*)\)')
-SingleWord_Else_Re = re.compile(r'^\s*\}?\s*else')
+If_Gramma_Re = re.compile(r'^\s*if\s*\n*\s*\((.*?)\)\s*\n*(\{+)\s*\n*',re.MULTILINE)
+ElseIf_Gramma_Re = re.compile(r'^\s*\}?\s*else if\s*\n*\s*\((.*?)\)\s*\n*(\{+)\s*\n*',re.MULTILINE)
+Else_Gramma_Re = re.compile(r'^\s*\}?\s*else\s*\n*\s*\n*(\{+)\s*\n*',re.MULTILINE)
+
+Empty_Re = re.compile(r'^\s*\{\}?$')
+Enum_Re = re.compile(r'\s*enum\{?')
+Class_Re = re.compile(r'\s*class\s+(\w+)\s*:\n*\s*public\s+(\w+)\s*\n*\{',re.MULTILINE)
+
+SingleWord_If_Re = re.compile(r'^\s*if\s*\n*\s*\((.*)\)\s*\n*(.*;)',re.MULTILINE)
+SingleWord_ElseIf_Re = re.compile(r'^\s*\}?\s*else if\s*\n*\s*\((.*)\)\s*\n*(.*;)',re.MULTILINE)
+SingleWord_Else_Re = re.compile(r'^\s*\}?\s*else\s*\n*\s*\n*(.*;)',re.MULTILINE)
 SingleWord_Re_Arr = [SingleWord_If_Re,SingleWord_ElseIf_Re,SingleWord_Else_Re]
 
 # block 类型
@@ -160,6 +170,8 @@ BlockRe2Type =  {Cpp_Normal_Fun_Re:"normal_function",
                 SingleWord_ElseIf_Re:"elseif_gramma_sg",
                 SingleWord_Else_Re:"else_gramma_sg",
                 Empty_Re:"empty_block",
+                Enum_Re:"enum_block",
+                Class_Re:"class_block",
 
                 }
 
@@ -168,6 +180,11 @@ End_With_Left_Brace = re.compile(r'\{(\s*)$')
 End_With_Right_Brace = re.compile(r'\}(\s*)$')
 # 以{ 开头
 Start_With_Left_Brace = re.compile(r'^(\s*)\{')
+
+# 头文件 .h member func
+Header_H_memFunc = re.compile(r'(.*?)\s+(\w+)\s*\(.*?\)\s*;')
+# 头文件 .h member func
+Header_H_memValue = re.compile(r'(.*?)\s+(\w+)\s*;')
 
 # 公用函数
 def isStringNil(str):
@@ -281,7 +298,7 @@ class Line_class():
             self.m_had_convert = True
 
             self.trans2lua()
-        return self.m_luaLine
+        return self.m_leftBlank + self.m_luaLine
 
     def trans2lua(self):
         self.m_luaLine = self.handleArrow(self.m_no_comment_part)
@@ -478,7 +495,22 @@ class if_else_if_InLine(Line_class):
                 return head_str + ' ' + content_str
             self.m_luaLine = self.m_sign_re.sub(lambda m : tFun(m),self.m_luaLine)
 
+Line_parse_order = [
+    CCARRAY_FOREACH_InLine,
+    CCARRAY_FOREACH_REVERSE_InLine,
+    CCDICT_FOREACH_InLine,
+    for_iterator_InLine,
+    for_normal_InLine,
+    if_else_if_InLine,
+    DeclarArrInLine,
+    DefiniteArrInLine,
+    DeclarInLine,
+    DefiniteInLine,
+    AssignmentInLine,
 
+
+    Line_class,
+]
 
 # 一行里的 花括号匹配
 class BraceInLine():
@@ -507,16 +539,21 @@ class BraceInLine():
 
 # cpp 里一个code block
 class Cpp_code_block():
-    def __init__(self,lines_arr,currentIdx,sign_re=None):
+    def __init__(self,lines_arr,currentIdx,sign_re=None,class_def=[]):
         self.m_blockType = "default"
         self.m_lines_arr = lines_arr
         self.m_currentIdx = currentIdx
         self.m_blockStartIdx = currentIdx
 
         self.m_sign_re = sign_re
+        self.m_class_def = class_def
         self.m_validBlock = None
 
         self.checkValidBlock()
+
+    def get_head_gap(self):
+        # return '\n'.join(self.m_lines_arr[self.m_currentIdx:min(self.m_blockStartIdx+1,len(self.m_lines_arr))])
+        return self.m_multi_line_head
 
     def parse_block_type(self):
         if not self.m_sign_re:
@@ -526,13 +563,17 @@ class Cpp_code_block():
             lines_arr = self.m_lines_arr
             currentIdx = max(self.m_currentIdx,self.m_blockStartIdx) #self.m_currentIdx
             first_line,_ = self.get_first_line(lines_arr,currentIdx)
-            trim_line = trim_cpp_comment(first_line)
-            sign_res = self.m_sign_re.findall(trim_line)
-            if len(sign_res) == 1:
-                if self.m_sign_re == Else_Gramma_Re:
-                    if trim_line.count('else if') == 1:
-                        return
-                self.m_blockType = BlockRe2Type[self.m_sign_re] or 'must_set'
+            
+            t_trim_line = trim_cpp_comment(first_line)
+            pts = [self.m_multi_line_head,t_trim_line]
+            for trim_line in pts:
+                sign_res = self.m_sign_re.findall(trim_line)
+                if len(sign_res) == 1:
+                    if self.m_sign_re == Else_Gramma_Re:
+                        if trim_line.count('else if') == 1:
+                            return
+                    self.m_blockType = BlockRe2Type[self.m_sign_re] or 'must_set'
+                    break
 
     def get_block_type(self):
         return self.m_blockType if self._isValidBlock() else 'none'
@@ -540,28 +581,50 @@ class Cpp_code_block():
     def is_followd_by_left_brace(self):
         lines_arr = self.m_lines_arr
         currentIdx = self.m_currentIdx
-        first_line,first_idx = self.get_first_line(lines_arr,currentIdx)
-        re_res = End_With_Left_Brace.findall(trim_cpp_comment(first_line))
-        self.m_blockStartIdx = first_idx
+
+        self.m_blockStartIdx = currentIdx
+        multi_line_endIdx = currentIdx
+        trim_lines = []
+        for i in range(currentIdx,len(lines_arr)):
+            t_line = lines_arr[i]
+            trim_lines.append(trim_cpp_comment(t_line))
+            if t_line.count('{') == 1:
+                multi_line_endIdx = i
+                self.multi_line_endIdx = multi_line_endIdx
+                break
+
+        multi_lines = '\n'.join(trim_lines)
+        self.m_multi_line_head = multi_lines
+        re_res = self.m_sign_re.findall(multi_lines)
         if len(re_res) == 1:
             return True
+
+
+        # first_line,first_idx = self.get_first_line(lines_arr,currentIdx)
+        # re_res = End_With_Left_Brace.findall(trim_cpp_comment(first_line))
+        # self.m_blockStartIdx = first_idx
+        # if len(re_res) == 1:
+        #     return True
+
         
-        if first_idx+1 < len(lines_arr):
-            next_line,next_line_idx = self.get_first_line(lines_arr,first_idx+1)
-            re_res = Start_With_Left_Brace.findall(next_line)
-            if len(re_res) == 1:
-                return True
-            another_check_endbrace_chance = self.m_sign_re == ElseIf_Gramma_Re or self.m_sign_re == Else_Gramma_Re
-            if another_check_endbrace_chance:
-                re_res = End_With_Left_Brace.findall(trim_cpp_comment(next_line))
-                if len(re_res) == 1:
-                    self.m_blockStartIdx = next_line_idx
-                    return True
-                if next_line.count('{') == next_line.count('}'):
-                    re_res = End_With_Right_Brace.findall(trim_cpp_comment(next_line))
-                    if len(re_res) == 1:
-                        self.m_blockStartIdx = next_line_idx
-                        return True
+        
+        # if first_idx+1 < len(lines_arr):
+        #     next_line,next_line_idx = self.get_first_line(lines_arr,first_idx+1)
+        #     next_line = trim_cpp_comment(next_line)
+        #     re_res = Start_With_Left_Brace.findall(next_line)
+        #     if len(re_res) == 1:
+        #         return True
+        #     another_check_endbrace_chance = self.m_sign_re == ElseIf_Gramma_Re or self.m_sign_re == Else_Gramma_Re
+        #     if another_check_endbrace_chance:
+        #         re_res = End_With_Left_Brace.findall(trim_cpp_comment(next_line))
+        #         if len(re_res) == 1:
+        #             self.m_blockStartIdx = next_line_idx
+        #             return True
+        #         if next_line.count('{') == next_line.count('}'):
+        #             re_res = End_With_Right_Brace.findall(trim_cpp_comment(next_line))
+        #             if len(re_res) == 1:
+        #                 self.m_blockStartIdx = next_line_idx
+        #                 return True
 
         return False
 
@@ -609,20 +672,6 @@ class Cpp_code_block():
                 if len(brace_stack) == 0:
                     end_idx = i
                     break
-                # brace_res = brace_in_line.brace_after_match(check_flag)
-                # if brace_res[0] != 'neutral' :
-                #     if brace_res[0] == 'left':
-                #         if not check_flag:
-                #             check_flag = True
-                #             start_idx = i
-                #         append_by_table(brace_stack,brace_res[1])
-                #     else:
-                #         for vi in range(len(brace_res[1])):
-                #             brace_stack.pop()
-
-                #         if len(brace_stack) == 0 and check_flag:
-                #             end_idx = i
-                #             break
         self.m_validBlock = [start_idx,end_idx]
 
         self.parse_block_type()
@@ -637,6 +686,8 @@ class Cpp_code_block():
         return self._isValidBlock() and (
             not self.m_sign_re or self.m_blockType != 'default'
         )
+    def head_line_to_lua(self):
+        return Line_class(self.m_multi_line_head).getLuaLine()
 
 # 单个语句block 主要用于 if else
 class single_word_block(Cpp_code_block):
@@ -670,32 +721,53 @@ class single_word_block(Cpp_code_block):
             return
         
         if self._isValidBlock():
-            lines_arr = self.m_lines_arr
-            currentIdx = max(self.m_currentIdx,self.m_blockStartIdx)
-            first_line,_ = self.get_first_line(lines_arr,currentIdx)
-            sign_res = self.m_sign_re.findall(trim_cpp_comment(first_line))
+            # lines_arr = self.m_lines_arr
+            # currentIdx = max(self.m_currentIdx,self.m_blockStartIdx)
+            # first_line,_ = self.get_first_line(lines_arr,currentIdx)
+            # sign_res = self.m_sign_re.findall(trim_cpp_comment(first_line))
+            sign_res = self.m_sign_re.findall(self.m_multi_line_head)
             if len(sign_res) == 1:
-                if self.m_sign_re == SingleWord_Else_Re and first_line.count('else if') == 1:
+                if self.m_sign_re == SingleWord_If_Re and first_line.count('else if') == 1:
                     return
                 self.m_blockType = BlockRe2Type[self.m_sign_re] or 'must_set'
     
     def has_key_word(self):
         lines_arr = self.m_lines_arr
         currentIdx = self.m_currentIdx
-        first_line,first_idx = self.get_first_line(lines_arr,currentIdx)
-        self.m_blockStartIdx = first_idx
-        for x in SingleWord_Re_Arr:
-            re_res = x.findall(first_line)
-            if len(re_res) == 1:
-                return True
+
+        self.m_blockStartIdx = currentIdx
+        multi_line_endIdx = currentIdx
+        trim_lines = []
+        for i in range(currentIdx,len(lines_arr)):
+            t_line = lines_arr[i]
+            trim_lines.append(trim_cpp_comment(t_line))
+            if t_line.count(';') == 1:
+                multi_line_endIdx = i
+                self.multi_line_endIdx = multi_line_endIdx
+                break
+
+        multi_lines = '\n'.join(trim_lines)
+        self.m_multi_line_head = multi_lines
+        re_res = self.m_sign_re.findall(multi_lines)
+        if len(re_res) == 1:
+            return True
         
 
-        next_line,next_line_idx = self.get_first_line(lines_arr,first_idx+1)
-        self.m_blockStartIdx = next_line_idx
-        for x in SingleWord_Re_Arr:
-            re_res = x.findall(next_line)
-            if len(re_res) == 1:
-                return True
+
+        # first_line,first_idx = self.get_first_line(lines_arr,currentIdx)
+        # self.m_blockStartIdx = first_idx
+        # for x in SingleWord_Re_Arr:
+        #     re_res = x.findall(first_line)
+        #     if len(re_res) == 1:
+        #         return True
+        
+
+        # next_line,next_line_idx = self.get_first_line(lines_arr,first_idx+1)
+        # self.m_blockStartIdx = next_line_idx
+        # for x in SingleWord_Re_Arr:
+        #     re_res = x.findall(next_line)
+        #     if len(re_res) == 1:
+        #         return True
 
         return False
 
@@ -706,14 +778,69 @@ class empty_block(Cpp_code_block):
 
 # 普通函数block
 class function_block(Cpp_code_block):
-    def __init__(self, lines_arr,currentIdx,sign_re=None):
-        Cpp_code_block.__init__(self,lines_arr,currentIdx,sign_re or Cpp_Normal_Fun_Re)
+    def __init__(self, lines_arr,currentIdx,sign_re=None,class_def=[]):
+        Cpp_code_block.__init__(self,lines_arr,currentIdx,sign_re or Cpp_Normal_Fun_Re,class_def)
 
 # 类成员函数block
 class mem_function_block(function_block):
-    def __init__(self, lines_arr,currentIdx):
-        function_block.__init__(self,lines_arr,currentIdx,Cpp_ClassMember_Fun_Re)
+    def __init__(self, lines_arr,currentIdx,class_def):
+        function_block.__init__(self,lines_arr,currentIdx,Cpp_ClassMember_Fun_Re,class_def)
 
+    def start_parse(self):
+        lines_arr = self.m_lines_arr
+        valid_block = self.getValidBlock()
+        head_gap = self.get_head_gap()
+
+        result = []
+        def mem_fn_(m):
+            pass
+            params = re.sub(r'(?:\s*.*?[*&]?\s+[*&]?(\w+\s*,?))',r'\1',m.group(4))
+            return 'function {0}:{1}( {2} )'.format(m.group(2),m.group(3),params)
+        self.m_mem_func_name = self.m_sign_re.sub(lambda m: mem_fn_(m),head_gap)
+        result.append(self.m_mem_func_name)
+
+        block_arr = [if_else_block,for_block,switch_block,empty_block]
+        # lineparse_arr = []
+        i = valid_block[0] + 1
+        while i < valid_block[1] + 1:
+            t_block = None
+            if i == 4:
+                a = 100
+                b = 10
+            while True:
+                for block_type in block_arr:
+                    block = block_type(lines_arr,i)
+                    if block.isValidBlock():
+                        t_block = block
+                        break
+                
+
+
+
+                # line
+                break
+
+            inc_delta = 1
+            if t_block:
+                result.append(t_block.head_line_to_lua())
+                pass
+            else:
+                pass
+                for x in Line_parse_order:
+                    if x == DefiniteInLine:
+                        tb = 20
+                    tx = x(lines_arr[i])
+                    if tx.isValid():
+                        lua_line = tx.getLuaLine()
+                        result.append(lua_line)
+                        break
+
+            i = i + inc_delta
+            
+
+        q = 100
+
+    
 
 # switch block
 class switch_block(Cpp_code_block):
@@ -724,6 +851,11 @@ class switch_block(Cpp_code_block):
 class for_block(Cpp_code_block):
     def __init__(self, lines_arr,currentIdx):
         Cpp_code_block.__init__(self,lines_arr,currentIdx,For_Gramma_Re)
+
+    def head_line_to_lua(self):
+        for_res = for_iterator_InLine(self.m_multi_line_head)
+        return for_res.getLuaLine()
+
 
 # if block
 class if_block_(Cpp_code_block):
@@ -755,6 +887,68 @@ class else_block_single_key_(single_word_block):
     def __init__(self, lines_arr,currentIdx):
         single_word_block.__init__(self,lines_arr,currentIdx,SingleWord_Else_Re)
 
+# enum block
+class enum_block(Cpp_code_block):
+    def __init__(self, lines_arr,currentIdx):
+        Cpp_code_block.__init__(self,lines_arr,currentIdx,Enum_Re)
+
+# class block
+class class_block(Cpp_code_block):
+    def __init__(self, lines_arr,currentIdx):
+        self.m_member_res = [Header_H_memFunc,Header_H_memValue]
+        self.m_memFuncs = None
+        self.m_memValues = None
+        Cpp_code_block.__init__(self,lines_arr,currentIdx,Class_Re)
+
+    def is_followd_by_left_brace(self):
+        lines_arr = self.m_lines_arr
+        currentIdx = self.m_currentIdx
+        first_line,first_idx = self.get_first_line(lines_arr,currentIdx)
+        for i in range(first_idx,len(lines_arr)):
+            re_res = End_With_Left_Brace.findall(trim_cpp_comment(lines_arr[i]))
+            if len(re_res) == 1:
+                self.m_blockStartIdx = i
+                return True
+
+        return False
+
+    def parse_block_type(self):
+        if not self.m_sign_re:
+            return
+        
+        if self._isValidBlock():
+            lines_arr = self.m_lines_arr
+
+            currentIdx = self.m_currentIdx
+            idx_arr = []
+            for i in range(self.m_currentIdx,self.m_blockStartIdx+1):
+                idx_arr.append(trim_cpp_comment(lines_arr[i]))
+
+            first_line = '\n'.join(idx_arr)
+            sign_res = self.m_sign_re.findall(first_line)
+            if len(sign_res) == 1:
+                self.m_blockType = BlockRe2Type[self.m_sign_re] or 'must_set'
+                self.m_className = self.m_sign_re.sub(r'\1',first_line)
+    
+    def getMembers(self):
+        if self.m_memFuncs != None and self.m_memValues != None:
+            return self.m_memFuncs,self.m_memValues
+        
+        self.m_memFuncs = []
+        self.m_memValues = []
+        for i in range(self.m_blockStartIdx+1,len(self.m_lines_arr)):
+            t_line = self.m_lines_arr[i]
+            for j,mem_re in enumerate(self.m_member_res):
+                mem_res = mem_re.findall(t_line)
+                if len(mem_res) == 1:
+                    t_arr = self.m_memFuncs if j == 0 else self.m_memValues
+                    t_arr.append(mem_re.sub(r'\2',t_line))
+                    break
+
+        return self.m_memFuncs,self.m_memValues
+
+
+
 
 # if-else block
 class if_else_block():
@@ -764,6 +958,7 @@ class if_else_block():
             "else if":{"arr":[elseif_block_,elseif_block_single_key_],"gramKey":"elseif_gramma"},
             "else":{"arr":[else_block_,else_block_single_key_],"gramKey":"else_gramma"},
         }
+        self.m_block_arr = []
         pass
         if_block = self.try_get_block('if',lines_arr,currentIdx)
         # if_block_(lines_arr,currentIdx)
@@ -827,10 +1022,79 @@ class if_else_block():
 def test():
     pass
 
-
     # t_str = 'CCARRAY_FOREACH(arr, obj) {xxx}'
-    t_str = 'CCCommonUtils::splitString(color1,  ",",strVec);'
+    t_str = '''class AchievementController :
+public CCObject
+{
+public:
+    static AchievementController *getInstance();
+    LUA_ALL_EXPORT_DEF()
+    
+    void init();
+    void updateAchievement(CCArray *arr);
+    void updateAchievement(CCDictionary *dict, bool postNotification = true);
+    void initMedalInfo(CCArray *arr);
+    void updateMyMedalInfo();
+    void refreshAllAchievementVisibleFlag();
+    CCArray *getVisbleAchievement();
+    __Array *getSortedAchievement();
+    std::string getKeyByItemId(std::string itemId);
+    std::map<std::string, CCSafeObject<AchievementInfo> > m_infos;
+    std::map<string, MedalInfo> m_myMedalInfos;
+    std::map<string, MedalInfo> m_otherMedalInfos;
+    bool isDataBack;
+    bool isNeedPostCompleteAchievementToGoogle;
+    void purgeData();
+    void getReward(std::string itemId);
+    void getDataFromServer();
+    void getMedalDataFormServer();
+    void doWhenComplete(std::string itemId);
+    void doOpenGooglePlay();
+    void doOpenGooglePlayAchievement();
+    void postCompleteAchievement(CCObject *obj = NULL);
+    void postCompleteAchievementToGoogle();
+    std::map<std::string, int> allCompelete;
+    int openFlag;
+    bool firstOpen;
+    void setOpenFlag(int i);
+    void getOtherMedalInfo(CCArray* a);
+    CCArray* getOtherMedalInfo();
+    CCArray* getMyMedalInfo();
+    float getAchieveProgress();
+    void getAchieveProgress(pair<int, int>& p);
+    int getMedalComCnt();
+    int getMedalTotalCnt();
+    string getMedalIconName(string medalId, int type);
+    void changePlayerMedalId();
+    void firstOpenPopup();
+    int getRewardAchieve();
+    void getMedalIconColor(string medalId, map<int, vector<float>> &colorMap);
+};'''
+    t_str_cpp = '''CCArray *AchievementController::
+    getVisbleAchievement(int a){
+    CCArray *arr = CCArray::create();
+    double nowTime = GlobalData::shared()->getWorldTime();
+    for (auto it = m_infos.begin(); it != m_infos.end(); it++) {
+        if(it->second->isVisible){
+            if (nowTime>=it->second->start && nowTime<=it->second->end) {//在时间范围内
+                arr->addObject(CCString::create(it->first));
+            }else if (it->second->state == ACHIEVEMENT_COMPELETE){//能领
+                arr->addObject(CCString::create(it->first));
+            }
+        }
+    }
+    return arr;
+}'''
     t_str1 = "int a[10] = { 0 }  ;"
+
+    # ta = if_else_block(t_str_cpp.split('\n'),4)
+    # tb = ta.get_block_type()
+
+    ta = class_block(t_str.split('\n'),0)
+    ta1,ta2 = ta.getMembers()
+
+    tb = mem_function_block(t_str_cpp.split('\n'),0,[ta])
+    tb.start_parse()
 
     ta = Line_class(t_str)
     taa = ta.getLuaLine()
