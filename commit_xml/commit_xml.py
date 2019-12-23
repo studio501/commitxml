@@ -16,6 +16,8 @@ import platform
 
 from Tkinter import *
 
+import pandas as pd
+
 W_b_W_re = re.compile(r'(\w+)\s+(\w+)')
 
 if platform.system() == 'Windows':
@@ -982,6 +984,25 @@ def choose_version(js_data):
 
 def test():
 	pass
+	xl_file = pd.ExcelFile('test.xlsx')
+
+	dfs = {sheet_name: xl_file.parse(sheet_name) 
+          for sheet_name in xl_file.sheet_names}
+	b = dfs['Sheet1']
+	b1 = len( b.columns )
+	c = b.iloc[2]
+	a = 100
+	print(pd.isna(b))
+	for i in range(b.shape[0]):
+		s = b.iloc[i]
+		s1 = s[0]
+		print(s1.isnull())
+
+	for i,j in b.iterrows():
+		print(i,j)
+		print()
+
+	
 	# js_data = open_json_file("config.json")
 	# choose_version(js_data['destination'])	
 	# old_xml = [1,2,3]
@@ -996,7 +1017,7 @@ def test():
 
 if __name__ == '__main__':
 	if len(sys.argv) == 1:
-		if False:
+		if True:
 			test()
 		else:
 			main()
