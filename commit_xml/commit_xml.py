@@ -19,6 +19,7 @@ from Tkinter import *
 import pandas as pd
 
 W_b_W_re = re.compile(r'(\w+)\s+(\w+)')
+IdEqual_re = re.compile(r'(.*)=\s*(.*)')
 
 if platform.system() == 'Windows':
 	import win32clipboard
@@ -642,9 +643,9 @@ def save_ini_file(dst_file,file_keys_order):
 	pass
 
 def reCompLine(txt_id,txt_content):
-	print(txt_id)
-	print(txt_content)
-	return u'='.join((txt_id, txt_content)).encode('utf-8').strip() + '\n'
+	# print(txt_id)
+	# print(txt_content)
+	return u'='.join((txt_id, str_to_raw( txt_content ) )).encode('utf-8').strip() + '\n'
 	# return u''+ txt_id + u'=' + txt_content + u'\n'
 
 def modify_file_ini(copy_txt,dst_file,pb):
@@ -800,28 +801,30 @@ def main():
 		copy_xml = checkClipContent(getClipBoardContent(),'xml')
 
 	elif file_is_lang:
-		is_all = my_input(u'是否发布全语言 (y/n)?') == 'y'
+		is_all = True #my_input(u'是否发布全语言 (y/n)?') == 'y'
 		pub_file_name = get_lang_arr(is_all)
 
 	pub_file_len = len(pub_file_name)
 	all_lang_json = None
 	if pub_file_len > 1:
-		all_lang_file = my_input(u'请拖入全语言文件: ').rstrip()
-		all_lang_json = open_json_file(all_lang_file)
+		all_lang_file = my_input(u'请拖入全语言xlsx文件: ').rstrip()
+		all_lang_json = get_lang_from_xlsx(all_lang_file)
+		# open_json_file(all_lang_file)
 	
 	choose_version(js_data['destination'])
 
 	for info in js_data['destination']:
 		ci_flag = None
 		if file_is_lang:
-			ci_flag = my_input(u'是否复制到 ' + info['nickname'] + ' (y/n)?') == 'y'
+			ci_flag = has_choose(info)
+			# my_input(u'是否复制到 ' + info['nickname'] + ' (y/n)?') == 'y'
 		else:
 			ci_flag = has_choose(info)
 		
 		if ci_flag:
 			fen_biao_flag = info.get('fen_biao') == True
 			ver_to_publish = None
-			if file_is_xml:
+			if file_is_xml or file_is_lang:
 				ver_to_publish = info.get('range')
 				if table_is_empty(ver_to_publish):
 					ver_to_publish = ['.']
@@ -833,20 +836,21 @@ def main():
 					ver_to_publish = vp
 
 				# ver_to_publish = ['.'] if table_is_empty(ver_to_publish) else ver_to_publish
-			elif file_is_lang:
-				ver_to_publish = my_input(u'请输入发布版本 x~y 或 x,y,z: ').rstrip()
-				if ver_to_publish.count('~') == 1:
-					ver_to_publish = get_ver_range(ver_to_publish)
-				else:
-					ver_to_publish = ver_to_publish.split(',')
+			# elif file_is_lang:
+				# ver_to_publish = info.get('range')
+				# ver_to_publish = my_input(u'请输入发布版本 x~y 或 x,y,z: ').rstrip()
+				# if ver_to_publish.count('~') == 1:
+				# 	ver_to_publish = get_ver_range(ver_to_publish)
+				# else:
+				# 	ver_to_publish = ver_to_publish.split(',')
 
-				for i,v in enumerate(ver_to_publish):
-					ver_to_publish[i] = get_safe_ver(v)
+				# for i,v in enumerate(ver_to_publish):
+				# 	ver_to_publish[i] = get_safe_ver(v)
 
 			if not table_is_empty(ver_to_publish):
 				for ver in ver_to_publish:
 					pt = os.path.join(info['path'],ver)
-					id_change = None
+					# id_change = None
 					if os.path.exists(pt):
 						svn_update(pt)
 
@@ -872,18 +876,18 @@ def main():
 							if os.path.exists(dst_file):
 								modify_res = modify_file_xml(copy.deepcopy(copy_xml),dst_file,group_name,blank_xml)
 								ci_msg1 = modify_res[0]
-								id_change = modify_res[1]
+								# id_change = modify_res[1]
 						elif file_is_lang:
 							for pb in pub_file_name:
 								dst_file = os.path.join(pt,pb)
 								if os.path.exists(dst_file):
 									copy_txt = None
 
-									if pub_file_len == 1:
-										my_input(u'请将要复制的内容拷贝到剪贴板后回车')
-										copy_txt = getClipBoardContent().rstrip().split('\n')
-									else:
-										copy_txt = all_lang_json.get(pb)
+									# if pub_file_len == 1:
+									# 	my_input(u'请将要复制的内容拷贝到剪贴板后回车')
+									# 	copy_txt = getClipBoardContent().rstrip().split('\n')
+									# else:
+									copy_txt = all_lang_json.get(pb)
 									
 									if copy_txt:
 										ci_msg1 = modify_file_ini(copy_txt,dst_file,pb)
@@ -982,6 +986,55 @@ def choose_version(js_data):
 
 	window.mainloop()
 
+def trim_language(in_str):
+	if in_str.count('=') == 1:
+		return IdEqual_re.sub(r'\2',in_str).rstrip()
+	else:
+		return in_str.lstrip().rstrip()
+
+def get_lang_from_xlsx(xlsx_file_name):
+	xl_file = pd.ExcelFile(xlsx_file_name)
+	sheets = xl_file.sheet_names
+	sheet_name = sheets[0]
+	if len(sheets) > 1:
+		print(sheets)
+		chos = my_input(u'多于一个清单 请选择(数字 从1开始)',True)
+		sheet_name = sheets[int(chos) - 1]
+	
+	df = xl_file.parse(sheet_name)
+
+	row_num = df.shape[0]
+	col_num = df.shape[1]
+	columns = df.columns
+	null_map = pd.isna(df)
+	
+	lang_map = {}
+	for i in range(row_num):
+		if null_at(null_map,i,0):
+			continue
+		if i == 0:
+			continue
+
+		# for j in range(col_num):
+		for j in range(1,2):
+			lang_name = columns[j]
+			# print('lang_name',lang_name,columns[j])
+			if not lang_map.get(lang_name):
+				lang_map[lang_name] = []
+			# encode(sys.getfilesystemencoding() )
+			# '{0}='.format(df.iloc[i][0]) +
+			lang_map[lang_name].append(u'{0}='.format(df.iloc[i][0]) + trim_language(df.iloc[i][j]))
+			print(df.iloc[i][j])
+	
+	return lang_map
+
+def null_at(nfs,row,col):
+	return nfs.iloc[row][col]
+
+def str_to_raw(s):
+    raw_map = {8:r'\b', 7:r'\a', 12:r'\f', 10:r'\n', 13:r'\r', 9:r'\t', 11:r'\v'}
+    return r''.join(i if ord(i) > 32 else raw_map.get(ord(i), i) for i in s)
+
 def test():
 	pass
 	xl_file = pd.ExcelFile('test.xlsx')
@@ -1017,7 +1070,7 @@ def test():
 
 if __name__ == '__main__':
 	if len(sys.argv) == 1:
-		if True:
+		if False:
 			test()
 		else:
 			main()
