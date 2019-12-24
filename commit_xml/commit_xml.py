@@ -2,7 +2,7 @@
 
 from __future__ import division
 from __future__ import print_function
-import sys,os,re
+import sys,os,re,math
 from os import listdir
 from os.path import isfile, join
 import json
@@ -649,7 +649,7 @@ def reCompLine(txt_id,txt_content):
 	# return u''+ txt_id + u'=' + txt_content + u'\n'
 
 def to_int(str):
-	return int(float(str))
+	return int(math.floor(float(str)))
 
 def modify_file_ini(copy_txt,dst_file,pb):
 	file_contents = None
@@ -701,7 +701,7 @@ def modify_file_ini(copy_txt,dst_file,pb):
 		for i,line in enumerate(file_contents):
 			txt_id = get_dialog_id(line)
 			if txt_id and txt_id == x:
-				file_contents[i] = reCompLine(x,copy_keys[x])
+				file_contents[i] = reCompLine(try_get_int(x),copy_keys[x])
 
 	file_contents_len = len(file_contents)
 	file_max_idx = file_contents_len - 1
@@ -722,7 +722,7 @@ def modify_file_ini(copy_txt,dst_file,pb):
 							break
 					if next_id and (txt_id != next_id) and is_number(txt_id) and is_number(next_id):
 						if to_int(x) > to_int(txt_id) and to_int(x) < to_int(next_id):
-							file_contents.insert(i+1,reCompLine(x,copy_keys[x]))
+							file_contents.insert(i+1,reCompLine(try_get_int(x),copy_keys[x]))
 							if not very_start:
 								very_start = i
 							break
@@ -897,7 +897,7 @@ def main():
 									copy_txt = all_lang_json.get(pb)
 									
 									if copy_txt:
-										print(u'开始修改' + pb)
+										print(u'正在修改 ' + pb + '......')
 										ci_msg1 = modify_file_ini(copy_txt,dst_file,pb)
 
 						# /Users/tangwen/Documents/my_projects/cok/outerDyRes75/5.08.0
@@ -1000,6 +1000,11 @@ def trim_language(in_str):
 	else:
 		return in_str.lstrip().rstrip()
 
+def try_get_int(in_str):
+	if is_number(in_str):
+		return str(to_int(in_str))
+	return in_str
+
 def get_lang_from_xlsx(xlsx_file_name):
 	xl_file = pd.ExcelFile(xlsx_file_name)
 	sheets = xl_file.sheet_names
@@ -1026,7 +1031,7 @@ def get_lang_from_xlsx(xlsx_file_name):
 			lang_name = columns[j]
 			if not lang_map.get(lang_name):
 				lang_map[lang_name] = []
-			lang_map[lang_name].append(u'{0}='.format(df.iloc[i][0]) + trim_language(df.iloc[i][j]))
+			lang_map[lang_name].append(u'{0}='.format(try_get_int(df.iloc[i][0])) + trim_language(df.iloc[i][j]))
 	
 	return lang_map
 
