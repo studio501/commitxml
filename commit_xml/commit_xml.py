@@ -997,8 +997,7 @@ def get_lang_from_xlsx(xlsx_file_name):
 	sheets = xl_file.sheet_names
 	sheet_name = sheets[0]
 	if len(sheets) > 1:
-		print(sheets)
-		chos = my_input(u'多于一个清单 请选择(数字 从1开始)',True)
+		chos = 0 #my_input(u'多于一个清单 请选择(数字 从1开始)',True)
 		sheet_name = sheets[int(chos) - 1]
 	
 	df = xl_file.parse(sheet_name)
@@ -1016,7 +1015,7 @@ def get_lang_from_xlsx(xlsx_file_name):
 			continue
 
 		# for j in range(col_num):
-		for j in range(1,2):
+		for j in range(1,col_num):
 			lang_name = columns[j]
 			# print('lang_name',lang_name,columns[j])
 			if not lang_map.get(lang_name):
@@ -1079,5 +1078,7 @@ if __name__ == '__main__':
 		print('step1: install python 2.7')
 		print('step2: pip install lxml')
 		print('step3: [windows only] pip install pywin32')
+		print('step4: [commit language only] pip install pandas')
+		print('step4: [commit language only] pip install xlrd')
 
 	pass
