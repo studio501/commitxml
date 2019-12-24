@@ -648,6 +648,9 @@ def reCompLine(txt_id,txt_content):
 	return u'='.join((txt_id, str_to_raw( txt_content ) )).encode('utf-8').strip() + '\n'
 	# return u''+ txt_id + u'=' + txt_content + u'\n'
 
+def to_int(str):
+	return int(float(str))
+
 def modify_file_ini(copy_txt,dst_file,pb):
 	file_contents = None
 	with open(dst_file,'r') as f:
@@ -702,10 +705,12 @@ def modify_file_ini(copy_txt,dst_file,pb):
 
 	file_contents_len = len(file_contents)
 	file_max_idx = file_contents_len - 1
+
+	very_start = None
 	for x in add_list:
-		print('is_number',is_number(x))
+		# print('is_number',is_number(x))
 		if is_number(x):
-			for i,line in enumerate(file_contents):
+			for i,line in enumerate(file_contents if not very_start else file_contents[very_start:]):
 				txt_id = get_dialog_id(line)
 				if txt_id:
 					next_id = None
@@ -716,8 +721,10 @@ def modify_file_ini(copy_txt,dst_file,pb):
 						if next_id:
 							break
 					if next_id and (txt_id != next_id) and is_number(txt_id) and is_number(next_id):
-						if int(x) > int(txt_id) and int(x) < int(next_id):
+						if to_int(x) > to_int(txt_id) and to_int(x) < to_int(next_id):
 							file_contents.insert(i+1,reCompLine(x,copy_keys[x]))
+							if not very_start:
+								very_start = i
 							break
 
 	with open(dst_file,'w') as f:
@@ -890,6 +897,7 @@ def main():
 									copy_txt = all_lang_json.get(pb)
 									
 									if copy_txt:
+										print(u'开始修改' + pb)
 										ci_msg1 = modify_file_ini(copy_txt,dst_file,pb)
 
 						# /Users/tangwen/Documents/my_projects/cok/outerDyRes75/5.08.0
