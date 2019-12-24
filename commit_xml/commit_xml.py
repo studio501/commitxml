@@ -1014,16 +1014,11 @@ def get_lang_from_xlsx(xlsx_file_name):
 		if i == 0:
 			continue
 
-		# for j in range(col_num):
 		for j in range(1,col_num):
 			lang_name = columns[j]
-			# print('lang_name',lang_name,columns[j])
 			if not lang_map.get(lang_name):
 				lang_map[lang_name] = []
-			# encode(sys.getfilesystemencoding() )
-			# '{0}='.format(df.iloc[i][0]) +
 			lang_map[lang_name].append(u'{0}='.format(df.iloc[i][0]) + trim_language(df.iloc[i][j]))
-			print(df.iloc[i][j])
 	
 	return lang_map
 
