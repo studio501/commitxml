@@ -651,7 +651,7 @@ def reCompLine(txt_id,txt_content):
 def to_int(str):
 	return int(math.floor(float(str)))
 
-def modify_file_ini(copy_txt,dst_file,pb):
+def modify_file_ini(copy_txt,dst_file,pb,very_start=None):
 	file_contents = None
 	with open(dst_file,'r') as f:
 		file_contents = f.readlines()
@@ -671,13 +671,11 @@ def modify_file_ini(copy_txt,dst_file,pb):
 	for x in copy_keys:
 		if file_keys.get(x):
 			print('Exist id={0}'.format(x))
-			# print('Exist id={0} Origin{1} Replace{2}'.format(x,file_keys[x],copy_keys[x]))
-			# print('已经存在id='+x+' '+ '原始值'+file_keys[x]+' '+'替换值'+copy_keys[x])
 			has_same = True
-	if has_same:
-		is_replace = my_input(u'是否要替换已有多语言 (y/n)?').rstrip() == 'y'
-		if not is_replace:
-			sys.exit()
+	# if has_same:
+	# 	is_replace = my_input(u'是否要替换已有多语言 (y/n)?').rstrip() == 'y'
+	# 	if not is_replace:
+	# 		sys.exit()
 
 
 	add_list = []
@@ -706,7 +704,7 @@ def modify_file_ini(copy_txt,dst_file,pb):
 	file_contents_len = len(file_contents)
 	file_max_idx = file_contents_len - 1
 
-	very_start = None
+	return_very_start = None
 	for x in add_list:
 		# print('is_number',is_number(x))
 		if is_number(x):
@@ -723,8 +721,8 @@ def modify_file_ini(copy_txt,dst_file,pb):
 					if next_id and (txt_id != next_id) and is_number(txt_id) and is_number(next_id):
 						if to_int(x) > to_int(txt_id) and to_int(x) < to_int(next_id):
 							file_contents.insert(i+1,reCompLine(try_get_int(x),copy_keys[x]))
-							if not very_start:
-								very_start = i
+							if not return_very_start:
+								return_very_start = i
 							break
 
 	with open(dst_file,'w') as f:
@@ -742,7 +740,7 @@ def modify_file_ini(copy_txt,dst_file,pb):
 		ci_msg += 'delete: ' + str(delete_list)
 
 	print(ci_msg)
-	return ci_msg
+	return ci_msg,return_very_start
 
 def get_files_in_dir(sourceDir):
 	file_list = []
@@ -820,39 +818,26 @@ def main():
 	
 	choose_version(js_data['destination'])
 
+	lang_decsion = 'init'
+	lang_very_start = {}
+
 	for info in js_data['destination']:
-		ci_flag = None
-		if file_is_lang:
-			ci_flag = has_choose(info)
-			# my_input(u'是否复制到 ' + info['nickname'] + ' (y/n)?') == 'y'
-		else:
-			ci_flag = has_choose(info)
+		ci_flag = has_choose(info)
 		
 		if ci_flag:
 			fen_biao_flag = info.get('fen_biao') == True
 			ver_to_publish = None
-			if file_is_xml or file_is_lang:
-				ver_to_publish = info.get('range')
-				if table_is_empty(ver_to_publish):
-					ver_to_publish = ['.']
-				else:
-					vp = []
-					for i,x in enumerate(info.get('checks')):
-						if x.get():
-							vp.append(ver_to_publish[i])
-					ver_to_publish = vp
 
-				# ver_to_publish = ['.'] if table_is_empty(ver_to_publish) else ver_to_publish
-			# elif file_is_lang:
-				# ver_to_publish = info.get('range')
-				# ver_to_publish = my_input(u'请输入发布版本 x~y 或 x,y,z: ').rstrip()
-				# if ver_to_publish.count('~') == 1:
-				# 	ver_to_publish = get_ver_range(ver_to_publish)
-				# else:
-				# 	ver_to_publish = ver_to_publish.split(',')
+			ver_to_publish = info.get('range')
+			if table_is_empty(ver_to_publish):
+				ver_to_publish = ['.']
+			else:
+				vp = []
+				for i,x in enumerate(info.get('checks')):
+					if x.get():
+						vp.append(ver_to_publish[i])
+				ver_to_publish = vp
 
-				# for i,v in enumerate(ver_to_publish):
-				# 	ver_to_publish[i] = get_safe_ver(v)
 
 			if not table_is_empty(ver_to_publish):
 				for ver in ver_to_publish:
@@ -885,20 +870,39 @@ def main():
 								ci_msg1 = modify_res[0]
 								# id_change = modify_res[1]
 						elif file_is_lang:
+							has_same = False
 							for pb in pub_file_name:
 								dst_file = os.path.join(pt,pb)
 								if os.path.exists(dst_file):
-									copy_txt = None
+									possible_same = try_find_same_lang_id(all_lang_json.get(pb),dst_file)
+									if len(possible_same) > 0:
+										if not has_same:
+											has_same = True
+										print(u'已经存在相同id',pb,possible_same)
+										print(u'将覆盖旧id' if lang_decsion == 'override' else '')
+							if has_same:
+								if lang_decsion == 'init':
+									replace_force = yes_no_dialog(u"是否覆盖已存在id")[0] == 'y'
+									if not replace_force:
+										print(u'请确定没有重复id后再提交')
+										sys.exit()
+									else:
+										lang_decsion = 'override'
+									
 
-									# if pub_file_len == 1:
-									# 	my_input(u'请将要复制的内容拷贝到剪贴板后回车')
-									# 	copy_txt = getClipBoardContent().rstrip().split('\n')
-									# else:
-									copy_txt = all_lang_json.get(pb)
+							for pb in pub_file_name:
+								dst_file = os.path.join(pt,pb)
+								if os.path.exists(dst_file):
+									copy_txt = copy.deepcopy(all_lang_json.get(pb))
 									
 									if copy_txt:
 										print(u'正在修改 ' + pb + '......')
-										ci_msg1 = modify_file_ini(copy_txt,dst_file,pb)
+										very_start = lang_very_start.get(pb)
+										st = math.max(0,very_start - 500) if very_start else None
+										return_very_start = None
+										ci_msg1,return_very_start = modify_file_ini(copy_txt,dst_file,pb,st)
+										if not very_start and return_very_start:
+											lang_very_start[pb] = return_very_start
 
 						# /Users/tangwen/Documents/my_projects/cok/outerDyRes75/5.08.0
 						ci_msg2 = '' #upgrade_ver(os.path.join(pt,'VERSION.txt'))
@@ -918,6 +922,22 @@ def main():
 							pass
 					else:
 						raise_error(u'找不到对应文件 '+ pt,True)
+
+def try_find_same_lang_id(lang_arr,lang_file):
+	with open(lang_file,'r') as f:
+		fd = f.read()
+
+		fd_type = type(fd)
+		res = []
+		for x in lang_arr:
+			if len(IdEqual_re.findall(x)) == 1:
+				s = IdEqual_re.sub(r'\1=',x).encode('utf-8')
+				s_typ = type(s)
+				if fd.count(s) > 0:
+					res.append(IdEqual_re.sub(r'\1',x))
+
+		return res
+
 
 def yes_no_dialog(msg):
 	the_answer = []
@@ -1024,8 +1044,8 @@ def get_lang_from_xlsx(xlsx_file_name):
 	for i in range(row_num):
 		if null_at(null_map,i,0):
 			continue
-		if i == 0:
-			continue
+		# if i == 0 :
+		# 	continue
 
 		for j in range(1,col_num):
 			lang_name = columns[j]
