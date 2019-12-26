@@ -731,13 +731,13 @@ def modify_file_ini(copy_txt,dst_file,pb,very_start=None):
 
 	ci_msg = ''
 	if len(add_list) > 0:
-		ci_msg += 'add: ' + str(add_list) + '\n'
+		ci_msg += 'add: ' + str(len(add_list)) + '\n'
 
 	if len(udpate_list) > 0:
-		ci_msg += 'update: ' + str(udpate_list) + '\n'
+		ci_msg += 'update: ' + str(len(udpate_list)) + '\n'
 
 	if len(delete_list) > 0:
-		ci_msg += 'delete: ' + str(delete_list)
+		ci_msg += 'delete: ' + str(len(delete_list))
 
 	print(ci_msg)
 	return ci_msg,return_very_start
@@ -812,7 +812,7 @@ def main():
 	pub_file_len = len(pub_file_name)
 	all_lang_json = None
 	if pub_file_len > 1:
-		all_lang_file = my_input(u'请拖入全语言xlsx文件: ').rstrip()
+		all_lang_file = my_input(u'请拖入全语言excel文件: ').rstrip()
 		all_lang_json = get_lang_from_xlsx(all_lang_file)
 		# open_json_file(all_lang_file)
 	
