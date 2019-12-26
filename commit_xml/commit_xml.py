@@ -898,7 +898,7 @@ def main():
 									if copy_txt:
 										print(u'正在修改 ' + pb + '......')
 										very_start = lang_very_start.get(pb)
-										st = math.max(0,very_start - 500) if very_start else None
+										st = max(0,very_start - 500) if very_start else None
 										return_very_start = None
 										ci_msg1,return_very_start = modify_file_ini(copy_txt,dst_file,pb,st)
 										if not very_start and return_very_start:
