@@ -14,6 +14,7 @@ import os.path
 import shutil,json
 import subprocess
 from xml.dom import minidom
+import Tkinter as tk_lib
 # from PIL import Image
 
 OldRes_notWith_face = ['goods','avatar_icon','ArtUseRes']
@@ -1499,6 +1500,118 @@ def get_split_png_group(atlas_file):
 
 	return temp_pngs
 
+def gen_pack_zip_file():
+	res = {}
+
+	window = tk_lib.Tk()
+
+	window.geometry('900x300+100+100')
+ 
+	window.title(u"生成打包资源")
+
+	lbl = tk_lib.Label(window, text="Hello")
+	lbl.grid(column=0, row=0)
+
+	lbl = tk_lib.Label(window, text="皮肤名:")
+	lbl.grid(column=0, row=1)
+
+	skin_name_field = tk_lib.Entry(window)
+	skin_name_field.grid(row=1, column=1)
+
+	lbl = tk_lib.Label(window, text="皮肤类型:")
+	lbl.grid( row=2, column=0)
+	variable = tk_lib.StringVar(window)
+	variable.set(u'请选择')
+	pack_types = ['外城','翅膀']
+	skin_type = tk_lib.OptionMenu(window, variable, *["one", "two", "three"])
+
+	skin_type.pack()
+	skin_type.grid(row=2, column=1,sticky="W")
+
+	# for i,x in enumerate(js_data):
+	# 	lbl = Label(window, text=x['nickname'])
+	# 	lbl.grid(column=i, row=1)
+
+	# 	x['checks'] = []
+	# 	if len(x['range']) > 0:
+	# 		for j,y in enumerate(x['range']):
+
+	# 			chk_state = BooleanVar()
+				 
+	# 			chk_state.set(False) #set check state
+				 
+	# 			chk = Checkbutton(window, text=y, var=chk_state)
+				
+	# 			chk.grid(column=i, row=2+j)
+
+	# 			x['checks'].append(chk_state)
+	# 	else:
+	# 		chk_state = BooleanVar()
+	# 		chk_state.set(False) #set check state
+	# 		chk = Checkbutton(window, text=x['nickname'], var=chk_state)
+	# 		chk.grid(column=i, row=2+0)
+	# 		x['checks'].append(chk_state)
+
+	def click():
+		pass
+
+		res['skin_name'] = skin_name_field.get()
+
+
+		window.withdraw()
+		window.quit()
+	btn = tk_lib.Button(window, text="确定", bg="orange", fg="red",command=click)
+	btn.grid(column=1, row=20)
+
+	window.mainloop()
+
+	return res
+
+def yes_no_dialog(msg):
+	the_answer = []
+
+	tw = 450
+	th = 100
+	size_cfg = [str(tw),str(th)]
+	window = tk_lib.Tk()
+
+	window.geometry('x'.join(size_cfg) + '+100+100')
+	window.title("提示")
+	lbl = tk_lib.Label(window, text=msg)
+	lbl.grid(column=0, row=0)
+	
+	def clickYes():
+		the_answer.append('y')
+		window.withdraw()
+		window.quit()
+		return 'y'
+	
+	btn = tk_lib.Button(window, text="Yes", bg="orange", fg="red",command=clickYes)
+	btn.grid(column=0, row=2)
+
+	def clickNo():
+		the_answer.append('n')
+		window.withdraw()
+		window.quit()
+	btn = tk_lib.Button(window, text="Cancel", bg="orange", fg="red",command=clickNo)
+	btn.grid(column=1, row=2)
+
+	window.mainloop()
+	return the_answer
+
+def gui_gen_zip():
+
+	res = []
+	while True:
+		r = gen_pack_zip_file()
+		res.append(r)
+		continue_flag = yes_no_dialog(u'是否继续?')[0] == 'y'
+
+		if not continue_flag:
+			break
+	
+	return res
+
 def test(a = 'abcd'):
 	pass
 	tstr = "123{n}"
@@ -1561,8 +1674,11 @@ def test(a = 'abcd'):
 
 if __name__ == '__main__':
 	use_test = False
+	use_gui = True
 	if use_test:
 		test()
+	elif use_gui:
+		gui_gen_zip()
 	else:
 		main()
 	# main()
