@@ -289,6 +289,8 @@ def add_kv_to_str(str1,k,v):
 
 
 def find_sk_json_file(src,json_ext='.json'):
+	if not os.path.isdir(src):
+		return None
 	# json_ext = '.json'
 	for f in os.listdir(src):
 		if file_extension(f) == json_ext:
@@ -604,6 +606,25 @@ def pack_icon():
 	
 def pack_icon_with_file(json_cfg):
 	subprocess.call(['svn','update',os.getenv('InnerDyRes')])
+
+	if len(json_cfg.split()) == 0:
+		print(u'打包图标并提交')
+		dists = ['goods_03','avatar_icon','goods_02','goods_01','goods']
+		current_dir = os.getcwd()
+
+		for dist in dists:
+			dst_full_path = os.path.join( current_dir,'../dynamicResource/',dist)
+			modify_flag = subprocess.check_output(['svn','st',dst_full_path]) != ''
+			if not modify_flag:
+				continue
+			
+			print(u'更新并提交',dist)
+			subprocess.call(['svn','update', dst_full_path])
+			subprocess.check_call(['sh','./auto_packer_lz4.sh',dst_full_path])
+			post_packer(os.path.basename(dist),'auto commit LUA.txt.')
+			svn_add_and_commit(dst_full_path)
+		return
+
 	js_data = open_json_file(json_cfg)
 
 	dists = []
@@ -662,6 +683,9 @@ def pack_multi_skin_and_commit(skins):
 
 		if dist.count('goods_') == 1 or dist.count('avatar_icon') == 1:
 			svn_add_and_commit(dst_full_path)
+
+	# auto pack icon
+	pack_icon_with_file('')
 
 	print(msgs)
 
@@ -758,7 +782,6 @@ def get_image_dir(src):
 			return p
 	raise_error('cannot find any image dir in' + src)
 
-
 def pack_dynamic_res():
 	pass
 	dst = my_input(u"请输入动态资源包名字: ").rstrip()
@@ -791,11 +814,11 @@ def pack_dynamic_res():
 		pd = dst if one_dir else bs
 		png_dir = os.path.join(dst_full_path,pd) 
 		print('png_dir is ',png_dir)
-
-
 		try_create_dir(png_dir)
+
 		# 拷贝小图
 		copy_file(img_dir,png_dir,['.png'])
+
 
 		# 创建tps文件
 		tps_name = '_alpha_{}.tps'.format(sk_name)
@@ -831,7 +854,7 @@ def pack_skin_with_animation(skinName,srcs,outPostfix,pos,noClean=False,cfg_type
 	without_gen_config = my_input(u"不产生 config 文件(y/n)? ").rstrip() == 'y'
 
 	# 是否使用多atlas
-	use_multi_atlas = my_input(u"是否合并多个atlas (y/n)? ").rstrip() == 'y'
+	use_multi_atlas = False #my_input(u"是否合并多个atlas (y/n)? ").rstrip() == 'y'
 
 	# if no_need_modify_tps == 'y':
 	# 	print('pack & copy & commit')
@@ -898,8 +921,8 @@ def pack_skin_with_animation(skinName,srcs,outPostfix,pos,noClean=False,cfg_type
 		anims = []
 		for k in json_data['animations']:
 			anims.append(k)
-		ti = idx * 2;
-		tj = idx * 2 + 1;
+		ti = idx * 2
+		tj = idx * 2 + 1
 		px = pos[ti]
 		py = pos[tj]
 
@@ -1614,14 +1637,6 @@ def gui_gen_zip():
 
 def test(a = 'abcd'):
 	pass
-	tstr = "123{n}"
-	sidx = tstr.find('{n}')
-	print(sidx)
-	print(tstr[:sidx])
-	# tstr = '/Users/mac/Documents/my_projects/cok/client/IF/Resources/cocos/init.lua'
-	# print(os.path.basename(tstr))
-	# print(os.path.splitext(os.path.basename(tstr))[0] )
-	# print(os.path.splitext(os.path.basename(tstr))[1] )
 
 	# global driver
 	# # driver = webdriver.Firefox()
@@ -1674,7 +1689,6 @@ def test(a = 'abcd'):
 
 if __name__ == '__main__':
 	use_test = False
-	use_gui = True
 	if use_test:
 		test()
 	elif use_gui:
