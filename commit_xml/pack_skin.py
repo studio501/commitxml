@@ -1543,10 +1543,10 @@ def gen_pack_zip_file():
 
 	lbl = tk_lib.Label(window, text="皮肤类型:")
 	lbl.grid( row=2, column=0)
-	variable = tk_lib.StringVar(window)
-	variable.set(u'请选择')
-	pack_types = ['外城','翅膀']
-	skin_type = tk_lib.OptionMenu(window, variable, *["one", "two", "three"])
+	pack_type_v = tk_lib.StringVar(window)
+	pack_type_v.set(u'请选择')
+	pack_types = [u'外城',u'翅膀']
+	skin_type = tk_lib.OptionMenu(window, pack_type_v, *pack_types)
 
 	skin_type.pack()
 	skin_type.grid(row=2, column=1,sticky="W")
@@ -1579,6 +1579,7 @@ def gen_pack_zip_file():
 		pass
 
 		res['skin_name'] = skin_name_field.get()
+		res['skin_type'] = pack_type_v.get()
 
 
 		window.withdraw()
@@ -1587,6 +1588,9 @@ def gen_pack_zip_file():
 	btn.grid(column=1, row=20)
 
 	window.mainloop()
+
+	if res['skin_type'] == u'外城':
+		a = 100
 
 	return res
 
@@ -1689,6 +1693,7 @@ def test(a = 'abcd'):
 
 if __name__ == '__main__':
 	use_test = False
+	use_gui = True
 	if use_test:
 		test()
 	elif use_gui:
