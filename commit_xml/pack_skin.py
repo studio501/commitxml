@@ -1592,8 +1592,13 @@ class GenZipGUI():
 	def __init__(self):
 		self.m_res = {}
 		self.m_curRow = 0
+		self.m_pack_types = [u'外城',u'翅膀']
 		self.m_json_tabs = []
 		self.m_json_files = []
+		self.m_animaOpv = []
+		self.m_actOpv = []
+		self.m_positionField = []
+		self.m_json_start_raw = 4
 
 	def show(self):
 		res = {}
@@ -1617,7 +1622,7 @@ class GenZipGUI():
 		lbl.grid(column=0, row=1)
 
 		skin_name_field = tk_lib.Entry(window)
-		skin_name_field.grid(row=1, column=1)
+		skin_name_field.grid(row=1, column=1,sticky="W")
 
 		# 皮肤类型 label
 		lbl = tk_lib.Label(window, text="皮肤类型:")
@@ -1660,7 +1665,7 @@ class GenZipGUI():
 			window.withdraw()
 			window.quit()
 		btn = tk_lib.Button(window, text="确定", bg="orange", fg="red",command=click)
-		btn.grid(column=1, row=20)
+		btn.grid(column=20, row=20)
 
 		window.mainloop()
 
@@ -1669,8 +1674,8 @@ class GenZipGUI():
 
 		return res
 
-	def make_option(self,trace_func,pack_types):
-		window = self.m_window
+	def make_option(self,trace_func,pack_types,parentNode=None):
+		window = parentNode if parentNode else self.m_window
 		pack_type_v = tk_lib.StringVar(window)
 		pack_type_v.set(u'请选择')
 		pack_type_v.trace('w',trace_func)
@@ -1684,10 +1689,11 @@ class GenZipGUI():
 		pass
 
 	def select_skin_type(self,*args):
-		if self.m_pack_type_v.get() == u'外城':
-			self.m_lbl1.grid_remove()
-		else:
-			self.m_lbl1.grid()
+		pass
+		# if self.m_pack_type_v.get() == u'外城':
+		# 	self.m_lbl1.grid_remove()
+		# else:
+		# 	self.m_lbl1.grid()
 
 	def select_json_num(self,*args):
 		pass
@@ -1698,36 +1704,87 @@ class GenZipGUI():
 		pass
 
 	def create_json_tab(self,t_num):
-		for x in self.m_json_tabs:
-			for y in x:
-				y.grid_remove()
-		self.m_json_tabs = []
-		self.m_json_files = []
-		self.m_animaOpv = []
+		prev_len = len(self.m_json_tabs)
+		if t_num == prev_len:
+			return
 
-		start_row = 4
+		if t_num < prev_len:
+			for i in range(t_num,prev_len):
+				for y in self.m_json_tabs[i]:
+					y.grid_remove()
+
+			self.m_json_tabs = self.m_json_tabs[:t_num]
+			self.m_json_files = self.m_json_files[:t_num]
+			self.m_animaOpv = self.m_animaOpv[:t_num]
+			self.m_actOpv = self.m_actOpv[:t_num]
+			self.m_positionField = self.m_positionField[:t_num]
+
+			return
+
+		# self.m_json_tabs = []
+		# self.m_json_files = []
+		# self.m_animaOpv = []
+
+		start_row = self.m_json_start_raw
 		window = self.m_window
-		for i in range(t_num):
+		for i in range(prev_len,t_num):
 			self.m_json_files.append('')
 
+			row_num = start_row + i
+
+			# json file x:
+			t_label0 = tk_lib.Label(window, text = "json file {0}:".format(i+1))
+			t_label0.grid(column = 0, row = row_num,sticky="W")
+
+			# open file
 			t_label = tk_lib.LabelFrame(window, text = "Open File")
-			t_label.grid(column = 0, row = start_row + i,sticky="W")
+			t_label.grid(column = 1, row = row_num,sticky="W")
 
+			# bowse file btn
 			t_btn = tk_lib.Button(t_label, text = "Browse A File",command = partial(self.fileDialog,i))
-			t_btn.grid(column = 1, row = start_row + i,sticky="W")
+			t_btn.grid(column = 2, row = row_num,sticky="W")
 			
-
+			# file name text
 			t_label1 = tk_lib.Label(t_label, text = "")
-			t_label1.grid(column = 2, row = start_row + i,sticky="W")
+			t_label1.grid(column = 3, row = row_num,sticky="W")
 
-			op,opv = self.make_option(partial(self.chooseAnima,i),[''])
-			# json_num,json_num_v = self.make_option(self.select_json_num,la)
-			# op,opv = self.make_option(self.chooseAnima,[''])
-			op.grid(column = 3, row = start_row + i)
-
-			self.m_json_tabs.append([t_label,t_btn,t_label1,op])
+			# select animation opt
+			op,opv = self.make_option(partial(self.chooseAnima,i),[''],t_label)
+			op.grid(column = 4, row = row_num)
+			op.grid_remove()
 			self.m_animaOpv.append(opv)
-			# self.fileLabel.configure(text = self.filename)
+
+			# position
+			pos_label = tk_lib.LabelFrame(t_label, text = "position:x,y")
+			pos_label.grid(column = 5, row = row_num,sticky="W")
+			pos_label.grid_remove()
+			pos_arr = []
+			for pos_i in range(2):
+				t_field = tk_lib.Entry(master=pos_label,width=5)
+				t_field.grid(row=0, column=pos_i)
+				t_field.insert(tk_lib.END,'0')
+				pos_arr.append(t_field)
+			self.m_positionField.append(pos_arr)
+
+			# select 动作
+			opAct,opActv = self.make_option(partial(self.chooseAct,i),[''],t_label)
+			opAct.grid(column = 6, row = row_num)
+			opAct.grid_remove()
+			self.m_actOpv.append(opActv)
+
+			self.m_json_tabs.append([
+			t_label, #0
+			t_btn, #1
+			t_label1, #2
+			op, #3
+			t_label0, #4
+			pos_label, #5
+			opAct #6
+			])
+
+	def chooseAct(self,index,*args):
+		pass
+		print('chooseAct,,,,',index)		
 
 	def chooseAnima(self,index,*args):
 		pass
@@ -1737,22 +1794,33 @@ class GenZipGUI():
 		# print(tv.get())
 
 	def fileDialog(self,index):
-		print(index)
 		tab = self.m_json_tabs[index]
 		self.m_json_files[index] = askopenfilename(initialdir =  "/", title = "Select A File" )
-		# self.fileLabel = tk_lib.Label(self.chooseFileLabel, text = "")
-		# self.fileLabel.grid(column = 20, row = 3)
 		tab[2].configure(text = os.path.basename(self.m_json_files[index]))
 
+		# op
 		op,opv = tab[3],self.m_animaOpv[index]
+		op.grid()
 		opv.set(u'请选择')
-
 		op['menu'].delete(0,'end')
-
 		animas = get_animation_names(self.m_json_files[index])
-		# new_choices = ('one', 'two', 'three')
 		for choice in animas:
 			op['menu'].add_command(label=choice, command=tk_lib._setit(opv, choice))
+		
+		# pos
+		pos_label = tab[5]
+		pos_label.grid()
+
+		# 外城
+		is_outer_castle = self.m_pack_type_v.get() == u'外城'
+		if is_outer_castle:
+			opAct,opActv = tab[6],self.m_actOpv[index]
+			opAct.grid()
+			opActv.set(u'待机')
+			opAct['menu'].delete(0,'end')
+			animas = [u'待机',u'攻击']
+			for choice in animas:
+				opAct['menu'].add_command(label=choice, command=tk_lib._setit(opActv, choice))
 
 def gen_pack_zip_file():
 	pass
@@ -1808,16 +1876,12 @@ def gui_gen_zip():
 def test(a = 'abcd'):
 	pass
 
+	la = [1,2,3,4]
+	lb = la[:3]
+	lc = la[2:]
+	print(lb)
+	print(lc)
 
-	file_names = ['/Users/mac/Documents/my_projects/cok/ccbDyRes/dynamicResource/SuckBloodGhost_face/_alpha_sk_SuckBloodGhost_face_out1.tps',
-	'/Users/mac/Documents/my_projects/cok/ccbDyRes/dynamicResource/SuckBloodGhost_face/_alpha_sk_SuckBloodGhost_face_out2.tps']
-	
-	for file_name in file_names:
-		adjust_tps_file_scale(file_name)
-
-
-	
-	b = 100
 
 	# global driver
 	# # driver = webdriver.Firefox()
