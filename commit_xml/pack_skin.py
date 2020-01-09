@@ -15,12 +15,21 @@ import shutil,json
 import subprocess
 from xml.dom import minidom
 import Tkinter as tk_lib
+from tkFileDialog import askopenfilename
 # from PIL import Image
+# from io import StringIO
+import warnings
+import numpy
+from functools import partial
+
+from cStringIO import StringIO
 
 OldRes_notWith_face = ['goods','avatar_icon','ArtUseRes']
 
 
 Re1 = re.compile(r'realtime_(.+)_version=(.+)')
+TpWarningRe = re.compile(r'TexturePacker:: warning:.*-\s*\((\d+)x(\d+)\)')
+Number_re = re.compile(r'([+-]?\d+(?:\.\d+)?)')
 
 InputNotice = [u"请输入皮肤名字: ",u"请输入铭牌名字: ",u"请输入聊天气泡名字: "]
 
@@ -828,6 +837,13 @@ def pack_dynamic_res():
 def change_file_ext(file_path,new_ext):
 	return os.path.join(os.path.dirname(file_path),os.path.splitext(os.path.basename(file_path))[0] + new_ext )
 
+def get_animation_names(json_file):
+	json_data = open_json_file(json_file)
+	anims = []
+	for k in json_data['animations']:
+		anims.append(k)
+	return anims
+
 def check_all_animas(srcs):
 	for idx,src in enumerate(srcs):
 		json_file = find_sk_json_file(src)
@@ -939,15 +955,8 @@ def pack_skin_with_animation(skinName,srcs,outPostfix,pos,noClean=False,cfg_type
 		# tps_files.append(tps_file)
 		# gen_tps_file(sk_name,dst_full_path,tps_name,tmp_tps_file)
 
-	# wrong_tps = []
-	# for x in tps_files:
-	# 	if not check_tps_file(x):
-	# 		wrong_tps.append(x)
-	# if len(wrong_tps) > 0:
-	# 	msg = u'';
-	# 	for x in wrong_tps:
-	# 		msg += (u'资源过大,一张图合图放不下 '+ os.path.basename(x) + '\n')
-	# 	raise_error(msg)
+	for x in tps_files:
+		adjust_tps_file_scale(x)
 
 	is_modify_tps = my_input(u"是否需要修改 tps 文件 (y/n)?")
 	if is_modify_tps == 'y':
@@ -1326,20 +1335,76 @@ def is_dir_exist_non_case_sensible(dst_root,dir_name):
 		return False
 	return False
 
+def runProcess(exe):    
+    p = subprocess.Popen(exe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while(True):
+        # returns None while subprocess is running
+        retcode = p.poll() 
+        line = p.stdout.readline()
+        yield line
+        if retcode is not None:
+            break
+
 def check_tps_file(tpath):
-	pass
-	try:
-		out_msg = subprocess.check_call(['texturepacker',tpath])
-	except Exception as e:
-		# raise_error(u'资源过大,一张图合图放不下 '+ os.path.basename(tpath))
-		return False
-	else:
-		pass
-	finally:
-		pass
-	
+	lines = []
+	for line in runProcess(['TexturePacker',tpath]):
+		lines.append(line)
+
+	for x in lines:
+		if x.count('Not all sprites could be packed into the texture') == 1:
+			return False
+
 	return True
 
+def set_tps_file_scale(tpath,t_scale):
+	lines = None
+	with open(tpath,'r') as f:
+		lines = f.readlines()
+		for i,line in enumerate(lines):
+			if line.count('<struct type="SpriteSettings">') == 1:
+				scale_line = lines[i+2]
+				lines[i+2] = Number_re.sub(str(t_scale),scale_line)
+				break
+
+	if not table_is_empty(lines):
+		with open(tpath,'w') as f:
+			for line in lines:
+				f.write(line)
+
+def try_tps_scale(tpath,tscale):
+	max_scale = 1.0
+	avg_scale = round((tscale + max_scale) / 2,2)
+
+	for ts in numpy.arange(avg_scale,tscale - 0.01,-0.01):
+		set_tps_file_scale(tpath,ts)
+		if check_tps_file(tpath):
+			break
+
+
+def adjust_tps_file_scale(tpath):
+	lines = []
+	for line in runProcess(['TexturePacker',tpath]):
+		lines.append(line)
+
+	outer_size = []
+	for x in lines:
+		if len(TpWarningRe.findall(x)) == 1:
+			outer_size.append(TpWarningRe.sub(r'\1,\2',x).split())
+
+	outer_size_total = 0
+	for x in outer_size:
+		w_h = x[0].split(',')
+		w = int(w_h[0])
+		h = int(w_h[1])
+		outer_size_total += w * h
+
+	if outer_size_total > 0:
+		max_size = float(2048 * 2048)
+		t_s = float(max_size / (max_size + outer_size_total))
+		t_s = round(t_s,2)
+
+		try_tps_scale(tpath,t_s)
+	
 
 def my_input(msg,needNumber = False,skipCheckFace = False):
 	face_flag = isinstance(msg,unicode) and table_contains(InputNotice,msg) and (not skipCheckFace)
@@ -1523,76 +1588,174 @@ def get_split_png_group(atlas_file):
 
 	return temp_pngs
 
-def gen_pack_zip_file():
-	res = {}
+class GenZipGUI():
+	def __init__(self):
+		self.m_res = {}
+		self.m_curRow = 0
+		self.m_json_tabs = []
+		self.m_json_files = []
 
-	window = tk_lib.Tk()
+	def show(self):
+		res = {}
+		self.m_res = res
 
-	window.geometry('900x300+100+100')
- 
-	window.title(u"生成打包资源")
+		window = tk_lib.Tk()
+		self.m_window = window
 
-	lbl = tk_lib.Label(window, text="Hello")
-	lbl.grid(column=0, row=0)
+		window.geometry('900x300+100+100')
 
-	lbl = tk_lib.Label(window, text="皮肤名:")
-	lbl.grid(column=0, row=1)
+		# 标题
+		window.title(u"生成打包资源")
 
-	skin_name_field = tk_lib.Entry(window)
-	skin_name_field.grid(row=1, column=1)
+		# hello label
+		lbl = tk_lib.Label(window, text="Hello")
+		lbl.grid(column=0, row=0)
+		self.m_lbl1 = lbl
 
-	lbl = tk_lib.Label(window, text="皮肤类型:")
-	lbl.grid( row=2, column=0)
-	pack_type_v = tk_lib.StringVar(window)
-	pack_type_v.set(u'请选择')
-	pack_types = [u'外城',u'翅膀']
-	skin_type = tk_lib.OptionMenu(window, pack_type_v, *pack_types)
+		# 皮肤名 label
+		lbl = tk_lib.Label(window, text="皮肤名:")
+		lbl.grid(column=0, row=1)
 
-	skin_type.pack()
-	skin_type.grid(row=2, column=1,sticky="W")
+		skin_name_field = tk_lib.Entry(window)
+		skin_name_field.grid(row=1, column=1)
 
-	# for i,x in enumerate(js_data):
-	# 	lbl = Label(window, text=x['nickname'])
-	# 	lbl.grid(column=i, row=1)
+		# 皮肤类型 label
+		lbl = tk_lib.Label(window, text="皮肤类型:")
+		lbl.grid( row=2, column=0)
+		skin_type,pack_type_v = self.make_option(self.select_skin_type,[u'外城',u'翅膀'])
+		# pack_type_v = tk_lib.StringVar(window)
+		# pack_type_v.set(u'请选择')
+		# pack_type_v.trace('w',self.select_skin_type)
+		self.m_pack_type_v = pack_type_v
+		# pack_types = [u'外城',u'翅膀']
+		# skin_type = tk_lib.OptionMenu(window, pack_type_v, *pack_types)
 
-	# 	x['checks'] = []
-	# 	if len(x['range']) > 0:
-	# 		for j,y in enumerate(x['range']):
+		# skin_type.pack()
+		skin_type.grid(row=2, column=1,sticky="W")
 
-	# 			chk_state = BooleanVar()
-				 
-	# 			chk_state.set(False) #set check state
-				 
-	# 			chk = Checkbutton(window, text=y, var=chk_state)
-				
-	# 			chk.grid(column=i, row=2+j)
+		# json 文件数量
+		lbl = tk_lib.Label(window, text="json文件数量:")
+		lbl.grid( row=3, column=0)
+		la = []
+		for i in range(1,10):
+			la.append(i)
+		json_num,json_num_v = self.make_option(self.select_json_num,la)
+		json_num.grid(row=3, column=1,sticky="W")
+		self.m_json_num_v = json_num_v
 
-	# 			x['checks'].append(chk_state)
-	# 	else:
-	# 		chk_state = BooleanVar()
-	# 		chk_state.set(False) #set check state
-	# 		chk = Checkbutton(window, text=x['nickname'], var=chk_state)
-	# 		chk.grid(column=i, row=2+0)
-	# 		x['checks'].append(chk_state)
+		# 选择文件
+		# self.chooseFileLabel = tk_lib.LabelFrame(window, text = "Open File")
+		# self.chooseFileLabel.grid(column = 0, row = 3)
 
-	def click():
+		# self.chooseFileButton = tk_lib.Button(self.chooseFileLabel, text = "Browse A File",command = self.fileDialog)
+		# self.chooseFileButton.grid(column = 1, row = 3)
+
+		def click():
+			pass
+
+			res['skin_name'] = skin_name_field.get()
+			res['skin_type'] = pack_type_v.get()
+
+
+			window.withdraw()
+			window.quit()
+		btn = tk_lib.Button(window, text="确定", bg="orange", fg="red",command=click)
+		btn.grid(column=1, row=20)
+
+		window.mainloop()
+
+		if res['skin_type'] == u'外城':
+			a = 100
+
+		return res
+
+	def make_option(self,trace_func,pack_types):
+		window = self.m_window
+		pack_type_v = tk_lib.StringVar(window)
+		pack_type_v.set(u'请选择')
+		pack_type_v.trace('w',trace_func)
+		# self.m_pack_type_v = pack_type_v
+		# pack_types = [u'外城',u'翅膀']
+		skin_type = tk_lib.OptionMenu(window, pack_type_v, *pack_types)
+		# skin_type.pack()
+		return skin_type,pack_type_v
+
+	def reset_option(self):
 		pass
 
-		res['skin_name'] = skin_name_field.get()
-		res['skin_type'] = pack_type_v.get()
+	def select_skin_type(self,*args):
+		if self.m_pack_type_v.get() == u'外城':
+			self.m_lbl1.grid_remove()
+		else:
+			self.m_lbl1.grid()
 
+	def select_json_num(self,*args):
+		pass
+		# print(self.m_json_num_v.get())
+		self.create_json_tab(int(self.m_json_num_v.get()))
 
-		window.withdraw()
-		window.quit()
-	btn = tk_lib.Button(window, text="确定", bg="orange", fg="red",command=click)
-	btn.grid(column=1, row=20)
+	def select_spine(self):
+		pass
 
-	window.mainloop()
+	def create_json_tab(self,t_num):
+		for x in self.m_json_tabs:
+			for y in x:
+				y.grid_remove()
+		self.m_json_tabs = []
+		self.m_json_files = []
+		self.m_animaOpv = []
 
-	if res['skin_type'] == u'外城':
-		a = 100
+		start_row = 4
+		window = self.m_window
+		for i in range(t_num):
+			self.m_json_files.append('')
 
-	return res
+			t_label = tk_lib.LabelFrame(window, text = "Open File")
+			t_label.grid(column = 0, row = start_row + i,sticky="W")
+
+			t_btn = tk_lib.Button(t_label, text = "Browse A File",command = partial(self.fileDialog,i))
+			t_btn.grid(column = 1, row = start_row + i,sticky="W")
+			
+
+			t_label1 = tk_lib.Label(t_label, text = "")
+			t_label1.grid(column = 2, row = start_row + i,sticky="W")
+
+			op,opv = self.make_option(partial(self.chooseAnima,i),[''])
+			# json_num,json_num_v = self.make_option(self.select_json_num,la)
+			# op,opv = self.make_option(self.chooseAnima,[''])
+			op.grid(column = 3, row = start_row + i)
+
+			self.m_json_tabs.append([t_label,t_btn,t_label1,op])
+			self.m_animaOpv.append(opv)
+			# self.fileLabel.configure(text = self.filename)
+
+	def chooseAnima(self,index,*args):
+		pass
+		print('chooseAnima,,,,',index)
+
+		# tv = self.m_animaOpv[index]
+		# print(tv.get())
+
+	def fileDialog(self,index):
+		print(index)
+		tab = self.m_json_tabs[index]
+		self.m_json_files[index] = askopenfilename(initialdir =  "/", title = "Select A File" )
+		# self.fileLabel = tk_lib.Label(self.chooseFileLabel, text = "")
+		# self.fileLabel.grid(column = 20, row = 3)
+		tab[2].configure(text = os.path.basename(self.m_json_files[index]))
+
+		op,opv = tab[3],self.m_animaOpv[index]
+		opv.set(u'请选择')
+
+		op['menu'].delete(0,'end')
+
+		animas = get_animation_names(self.m_json_files[index])
+		# new_choices = ('one', 'two', 'three')
+		for choice in animas:
+			op['menu'].add_command(label=choice, command=tk_lib._setit(opv, choice))
+
+def gen_pack_zip_file():
+	pass
 
 def yes_no_dialog(msg):
 	the_answer = []
@@ -1630,7 +1793,9 @@ def gui_gen_zip():
 
 	res = []
 	while True:
-		r = gen_pack_zip_file()
+		wd = GenZipGUI()
+
+		r = wd.show()
 		res.append(r)
 		continue_flag = yes_no_dialog(u'是否继续?')[0] == 'y'
 
@@ -1639,8 +1804,20 @@ def gui_gen_zip():
 	
 	return res
 
+
 def test(a = 'abcd'):
 	pass
+
+
+	file_names = ['/Users/mac/Documents/my_projects/cok/ccbDyRes/dynamicResource/SuckBloodGhost_face/_alpha_sk_SuckBloodGhost_face_out1.tps',
+	'/Users/mac/Documents/my_projects/cok/ccbDyRes/dynamicResource/SuckBloodGhost_face/_alpha_sk_SuckBloodGhost_face_out2.tps']
+	
+	for file_name in file_names:
+		adjust_tps_file_scale(file_name)
+
+
+	
+	b = 100
 
 	# global driver
 	# # driver = webdriver.Firefox()
