@@ -1600,6 +1600,9 @@ class GenZipGUI():
 		self.m_positionField = []
 		self.m_json_start_raw = 4
 
+	def getPackTypeByName(typeName):
+		return self.m_pack_types.index(typeName)
+
 	def show(self):
 		res = {}
 		self.m_res = res
@@ -1689,6 +1692,8 @@ class GenZipGUI():
 		pass
 
 	def select_skin_type(self,*args):
+		self.m_selectTypeName = self.m_pack_type_v.get()
+		self.m_selectType = self.getPackTypeByName(self.m_selectTypeName)
 		pass
 		# if self.m_pack_type_v.get() == u'外城':
 		# 	self.m_lbl1.grid_remove()
@@ -1795,7 +1800,10 @@ class GenZipGUI():
 
 	def fileDialog(self,index):
 		tab = self.m_json_tabs[index]
-		self.m_json_files[index] = askopenfilename(initialdir =  "/", title = "Select A File" )
+		file_path = askopenfilename(initialdir =  "/", title = "Select A File" )
+		if file_path == '' or file_extension(file_path) != '.json':
+			return
+		self.m_json_files[index] = file_path
 		tab[2].configure(text = os.path.basename(self.m_json_files[index]))
 
 		# op
