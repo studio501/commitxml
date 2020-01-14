@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*
 
+# https://stackoverflow.com/questions/25427347/how-to-install-and-use-tkdnd-with-python-tkinter-on-osx
+
 from __future__ import print_function
 import sys,os,re
 import os
@@ -10,6 +12,8 @@ import subprocess
 import Tkinter as tk_lib
 from tkFileDialog import askopenfilename
 from functools import partial
+
+from TkinterDnD2 import *
 
 def is_number(str):
     try:
@@ -174,7 +178,8 @@ class GenZipGUI():
 		res = {}
 		self.m_res = res
 
-		window = tk_lib.Tk()
+		window = TkinterDnD.Tk()
+		# tk_lib.Tk()
 		self.m_window = window
 
 		window.geometry('900x300+100+100')
@@ -252,6 +257,20 @@ class GenZipGUI():
 
 		return res
 
+	def gen_file_input(self,root,entry_sv,call_back,dropMsg = 'Drop Here...',in_width=80):
+		pass
+		root = root if root else self.m_window
+
+		def drop(event):
+			entry_sv.set(event.data)
+
+		entry_sv.set(dropMsg)
+		entry = tk_lib.Entry(root, textvar=entry_sv, width=in_width)
+		entry.drop_target_register(DND_FILES)
+		entry.dnd_bind('<<Drop>>', call_back if call_back else drop)
+
+		return entry
+
 	def make_option(self,trace_func,pack_types,parentNode=None):
 		window = parentNode if parentNode else self.m_window
 		pack_type_v = tk_lib.StringVar(window)
@@ -277,6 +296,8 @@ class GenZipGUI():
 
 	def select_hava_icon(self,*args):
 		pass
+		self.m_haveIcon = self.m_iconOpt_v.get() == u'有'
+		self.create_icon_tab(self.m_haveIcon)
 
 	def select_json_num(self,*args):
 		pass
@@ -329,6 +350,7 @@ class GenZipGUI():
 			t_label, #0
 			t_btn, #1
 			t_label1, #2
+			t_label0, #3
 			])
 
 	def create_json_tab(self,t_num):
@@ -548,8 +570,6 @@ def gui_gen_zip():
 
 def test(a = 'abcd'):
 	pass
-
-
 
 if __name__ == '__main__':
 	use_test = False
