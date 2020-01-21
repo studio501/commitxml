@@ -160,10 +160,6 @@ def try_create_dir(dst):
 	if not os.path.exists(dst):
 		os.makedirs(dst)
 
-def find_ch_in_str(s,ch):
-	res = [i for i, ltr in enumerate(s) if ltr == ch]
-	return table_is_empty(res) and -1 or res[0]
-
 def write_to_file(f,str):
 	f = open(f, "w")
 	f.write(str)
@@ -213,7 +209,7 @@ class GenZipGUI():
 	def __init__(self):
 		self.m_res = {}
 		self.m_curRow = 0
-		self.m_pack_types = [u'外城',u'翅膀',u'铭牌',u'光环']
+		self.m_pack_types = [u'外城',u'翅膀',u'铭牌',u'光环',u'行军队列',u'城堡特效',u'聊天气泡']
 		# json files
 		self.m_json_tabs = []
 		self.m_json_files = []
@@ -404,9 +400,9 @@ class GenZipGUI():
 		self.create_file_tab__(has_icon,self.dragIconDir)
 
 	def create_plist_tab(self,has_plist):
-		self.create_file_tab__(has_plist,self.dragPlistDir,'m_plist_tabs','m_plist_files','m_plist_strat_row')
+		self.create_file_tab__(has_plist,self.dragPlistDir,'m_plist_tabs','m_plist_files','m_plist_strat_row',True)
 
-	def create_file_tab__(self,has_icon,drag_func,tabmem_name='m_icon_tabs',filemem_name='m_icon_files',strat_row='m_icon_strat_row'):
+	def create_file_tab__(self,has_icon,drag_func,tabmem_name='m_icon_tabs',filemem_name='m_icon_files',strat_row='m_icon_strat_row',posFlag=False):
 		prev_has_icon = len(getattr(self,tabmem_name)) > 0
 		if has_icon == prev_has_icon:
 			return
@@ -446,6 +442,20 @@ class GenZipGUI():
 			# file name text
 			t_label1 = tk_lib.Label(t_label, text = "")
 			t_label1.grid(column = 3, row = row_num,sticky="W")
+
+			# position
+			if posFlag:
+				pos_label = tk_lib.LabelFrame(t_label, text = "position:x,y")
+				pos_label.grid(column = 4, row = row_num,sticky="W")
+				pos_label.grid_remove()
+				pos_arr = []
+				t_label.m_pos_arr = pos_arr
+				for pos_i in range(2):
+					t_field = tk_lib.Entry(master=pos_label,width=5)
+					t_field.grid(row=0, column=pos_i)
+					t_field.insert(tk_lib.END,'0')
+					pos_arr.append(t_field)
+				# self.m_positionField.append(pos_arr)
 
 
 			getattr(self,tabmem_name).append([
@@ -567,6 +577,10 @@ class GenZipGUI():
 
 		for x in png_path:
 			self.m_plist_files[index].append(x)
+
+		pos_arr = tab[0].m_pos_arr
+		for x in pos_arr:
+			x.grid()
 
 		print(self.m_plist_files[index])
 
