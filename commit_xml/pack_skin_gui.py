@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*
 
+# https://stackoverflow.com/questions/25427347/how-to-install-and-use-tkdnd-with-python-tkinter-on-osx
+
 from __future__ import print_function
 import sys,os,re
 import os
 import os.path
-import shutil,json
+import shutil,json,plistlib
 import subprocess
 
 import Tkinter as tk_lib
 from tkFileDialog import askopenfilename
 from functools import partial
+
+from TkinterDnD2 import *
 
 def is_number(str):
     try:
@@ -22,6 +26,86 @@ def is_number(str):
 
 def isStringNil(str):
 	return (not str) or str == ''
+
+def find_ch_in_str(s,ch):
+	res = [i for i, ltr in enumerate(s) if ltr == ch]
+	return table_is_empty(res) and -1 or res[0]
+
+def check_png_name_(f,endKey = '_',dot = '.'):
+	bn = os.path.basename(f)
+	if bn[find_ch_in_str(bn,dot)-1] != endKey:
+		return 1
+	
+	for x in bn:
+		if ord(x) > 255:
+			return 2
+
+	return None
+
+def find_ext_file(src,file_ext='.json',sub_names=None,all_flag=False):
+	if not os.path.isdir(src):
+		return None
+	
+	res = []
+	if not sub_names:
+		for f in os.listdir(src):
+			if file_extension(f) == file_ext:
+				find_file = os.path.join(src,f)
+				if not all_flag:
+					return find_file
+				res.append(find_file)
+	else:
+		for export_dir in sub_names:
+			export_dir = os.path.join(src,export_dir)
+			if os.path.exists(export_dir):
+				for f in os.listdir(export_dir):
+					if file_extension(f) == file_ext:
+						find_file = os.path.join(export_dir,f)
+						if not all_flag:
+							return find_file
+
+						res.append(find_file)
+	if all_flag:
+		return res
+
+def find_sk_image_file(src):
+	image_dirs = ['images','image','Images','Image']
+	exist_dir = None
+	for x in image_dirs:
+		if os.path.exists(os.path.join(src,x)):
+			exist_dir = x
+			break
+	if exist_dir:
+		return find_ext_file(src,'.png',[exist_dir],True)
+
+def find_sk_json_file(src):
+	return find_ext_file(src,'.json',['export','exports','Export','Exports'])
+
+def find_icon_file(src):
+	res = find_ext_file(src,'.png',None,True)
+	if not table_is_empty(res):
+		r = []
+		for x in res:
+			if x.count('94') == 1 or x.count('128') == 1:
+				r.append(x)
+
+		return r
+
+def find_plist_file(src):
+	res = find_ext_file(src,'.plist',None,True)
+	pngs = []
+	if not table_is_empty(res):
+		for f in res:
+			s = plistlib.readPlist(f)
+			pngs.append(s['textureFileName'])
+
+		return res,pngs
+		# r = []
+		# for x in res:
+		# 	if x.count('94') == 1 or x.count('128') == 1:
+		# 		r.append(x)
+
+		# return r
 
 
 def open_json_file(f):
@@ -55,28 +139,6 @@ def table_contains_string(tb,s):
 			return True
 	return False
 
-def check_png_name_(f,onlyWarning = False):
-	dot = '.'
-	endKey = '_'
-	bn = os.path.basename(f)
-	if f.count('_') > 0 and f[find_ch_in_str(f,dot)-1] != endKey:
-		raise_error('{} not end with {}'.format(f,endKey),onlyWarning)
-
-def check_png_name(sourceDir,prevs = None,endKey = '_'):
-	pngExt = '.png'
-	dot = '.'
-	res = []
-	for f in os.listdir(sourceDir):
-		# print(f,pngExt,file_extension(f))
-		ft = file_extension(f)
-		if ft.lower() == pngExt and ft != pngExt:
-			raise_error('{} not name with lower case'.format(os.path.basename(f)))
-		if pngExt == file_extension(f):
-			# print(f[find_ch_in_str(f,dot)-1])
-			check_png_name_(f)
-			res.append(os.path.basename(f))
-	return res
-
 def copy_file(sourceDir, targetDir, defList, ensureLastCh = '', specFiles = None):
 	for f in os.listdir(sourceDir):
 		sourceF = os.path.join(sourceDir,f)
@@ -88,7 +150,7 @@ def copy_file(sourceDir, targetDir, defList, ensureLastCh = '', specFiles = None
 				do_copy_file(sourceF,targetF)
 		if os.path.isdir(sourceF):
 			try_create_dir(sourceF)
-			copy_file(sourceF,TargetDir,defList,ensureLastCh,specFiles)
+			copy_file(sourceF,targetDir,defList,ensureLastCh,specFiles)
 
 def do_copy_file(src_file, dst):
 	shutil.copy(src_file, dst)
@@ -97,10 +159,6 @@ def try_create_dir(dst):
 	pass
 	if not os.path.exists(dst):
 		os.makedirs(dst)
-
-def find_ch_in_str(s,ch):
-	res = [i for i, ltr in enumerate(s) if ltr == ch]
-	return table_is_empty(res) and -1 or res[0]
 
 def write_to_file(f,str):
 	f = open(f, "w")
@@ -151,7 +209,7 @@ class GenZipGUI():
 	def __init__(self):
 		self.m_res = {}
 		self.m_curRow = 0
-		self.m_pack_types = [u'外城',u'翅膀',u'铭牌',u'光环']
+		self.m_pack_types = [u'外城',u'翅膀',u'铭牌',u'光环',u'行军队列',u'城堡特效',u'聊天气泡']
 		# json files
 		self.m_json_tabs = []
 		self.m_json_files = []
@@ -163,9 +221,17 @@ class GenZipGUI():
 		self.m_icon_tabs = []
 		self.m_icon_files = []
 
+		# plist files
+		self.m_plist_tabs = []
+		self.m_plist_files = []
+
 		# rows
 		self.m_json_start_raw = 4
 		self.m_icon_strat_row = 20
+		self.m_plist_strat_row = 30
+
+		# 
+		self.m_selectTypeName = ''
 
 	def getPackTypeByName(self,typeName):
 		return self.m_pack_types.index(typeName)
@@ -174,10 +240,11 @@ class GenZipGUI():
 		res = {}
 		self.m_res = res
 
-		window = tk_lib.Tk()
+		window = TkinterDnD.Tk()
+		# tk_lib.Tk()
 		self.m_window = window
 
-		window.geometry('900x300+100+100')
+		window.geometry('900x800+100+100')
 
 		# 标题
 		window.title(u"生成打包资源")
@@ -226,6 +293,14 @@ class GenZipGUI():
 		iconOpt.grid(row=self.m_icon_strat_row, column=1,sticky="W")
 		self.m_iconOpt_v = iconOpt_v
 
+		# 粒子
+		lbl = tk_lib.Label(window, text="粒子文件*:")
+		lbl.grid( row=self.m_plist_strat_row, column=0)
+		la = [u'有',u'无']
+		plistOpt,plistOpt_v = self.make_option(self.select_hava_plist,la)
+		plistOpt.grid(row=self.m_plist_strat_row, column=1,sticky="W")
+		self.m_plistOpt_v = plistOpt_v
+
 		# 选择文件
 		# self.chooseFileLabel = tk_lib.LabelFrame(window, text = "Open File")
 		# self.chooseFileLabel.grid(column = 0, row = 3)
@@ -238,6 +313,21 @@ class GenZipGUI():
 
 			res['skin_name'] = skin_name_field.get()
 			res['skin_type'] = pack_type_v.get()
+			res['spine_cfg'] = []
+			for i,x in enumerate(self.m_json_files):
+				t = {}
+				t['src_dir'] = x
+				act_v = self.m_animaOpv[i].get()
+				if act_v == u'待机':
+					t['act'] = 'out'
+				elif act_v == u'攻击':
+					t['act'] = 'out_gongji'
+				t['position'] = [self.m_positionField[i][0].get(),self.m_positionField[i][1].get()]
+				res['spine_cfg'].append(t)
+
+			res['icon_src'] = '' if table_is_empty(self.m_icon_files) else self.m_icon_files[0]
+			res['plist_src'] = '' if table_is_empty(self.m_plist_files) else self.m_plist_files[0]
+
 
 
 			window.withdraw()
@@ -251,6 +341,20 @@ class GenZipGUI():
 			a = 100
 
 		return res
+
+	def gen_file_input(self,root,entry_sv,call_back,dropMsg = 'Drop Here...',in_width=5):
+		pass
+		root = root if root else self.m_window
+
+		def drop(event):
+			entry_sv.set(event.data)
+
+		entry_sv.set(dropMsg)
+		entry = tk_lib.Entry(root, textvar=entry_sv, width=in_width)
+		entry.drop_target_register(DND_FILES)
+		entry.dnd_bind('<<Drop>>', call_back if call_back else drop)
+
+		return entry
 
 	def make_option(self,trace_func,pack_types,parentNode=None):
 		window = parentNode if parentNode else self.m_window
@@ -277,39 +381,52 @@ class GenZipGUI():
 
 	def select_hava_icon(self,*args):
 		pass
+		self.m_haveIcon = self.m_iconOpt_v.get() == u'有'
+		self.create_icon_tab(self.m_haveIcon)
+
+	def select_hava_plist(self,*args):
+		pass
+		self.m_havePlist = self.m_plistOpt_v.get() == u'有'
+		self.create_plist_tab(self.m_havePlist)
 
 	def select_json_num(self,*args):
 		pass
-		# print(self.m_json_num_v.get())
 		self.create_json_tab(int(self.m_json_num_v.get()))
 
 	def select_spine(self):
 		pass
 
 	def create_icon_tab(self,has_icon):
-		prev_has_icon = len(self.m_icon_tabs) > 0
+		self.create_file_tab__(has_icon,self.dragIconDir)
+
+	def create_plist_tab(self,has_plist):
+		self.create_file_tab__(has_plist,self.dragPlistDir,'m_plist_tabs','m_plist_files','m_plist_strat_row',True)
+
+	def create_file_tab__(self,has_icon,drag_func,tabmem_name='m_icon_tabs',filemem_name='m_icon_files',strat_row='m_icon_strat_row',posFlag=False):
+		prev_has_icon = len(getattr(self,tabmem_name)) > 0
 		if has_icon == prev_has_icon:
 			return
 
 		if not has_icon:
-			for i in range(2):
-				for y in self.m_icon_tabs[i]:
+			for i in range(1):
+				for y in getattr(self,tabmem_name)[i]:
 					y.grid_remove()
 			
-			self.m_icon_tabs = []
-			self.m_icon_files = []
+			setattr(self,tabmem_name,[])
+			setattr(self,filemem_name,[])
 			return
-		
-		start_row = self.m_icon_strat_row + 1
+
+		start_row = getattr(self,strat_row) + 1
 		window = self.m_window
 
-		for i in range(2):
-			self.m_icon_files.append('')
+		for i in range(1):
+			getattr(self,filemem_name).append('')
+			# self.m_icon_files.append('')
 
 			row_num = start_row + i
 
 			# json file x:
-			t_label0 = tk_lib.Label(window, text = "icon {0}:".format('94' if i == 0 else '128'))
+			t_label0 = tk_lib.Label(window, text = '*')
 			t_label0.grid(column = 0, row = row_num,sticky="W")
 
 			# open file
@@ -317,18 +434,35 @@ class GenZipGUI():
 			t_label.grid(column = 1, row = row_num,sticky="W")
 
 			# bowse file btn
-			t_btn = tk_lib.Button(t_label, text = "Browse A File",command = partial(self.iconFileDialog,i))
+			file_sv = tk_lib.StringVar()
+			t_btn = self.gen_file_input(t_label,file_sv,partial(drag_func,i),'Drop Here...',10)
+			# t_btn = tk_lib.Button(t_label, text = "Browse A File",command = partial(self.iconFileDialog,i))
 			t_btn.grid(column = 2, row = row_num,sticky="W")
 			
 			# file name text
 			t_label1 = tk_lib.Label(t_label, text = "")
 			t_label1.grid(column = 3, row = row_num,sticky="W")
 
+			# position
+			if posFlag:
+				pos_label = tk_lib.LabelFrame(t_label, text = "position:x,y")
+				pos_label.grid(column = 4, row = row_num,sticky="W")
+				pos_label.grid_remove()
+				pos_arr = []
+				t_label.m_pos_arr = pos_arr
+				for pos_i in range(2):
+					t_field = tk_lib.Entry(master=pos_label,width=5)
+					t_field.grid(row=0, column=pos_i)
+					t_field.insert(tk_lib.END,'0')
+					pos_arr.append(t_field)
+				# self.m_positionField.append(pos_arr)
 
-			self.m_icon_tabs.append([
+
+			getattr(self,tabmem_name).append([
 			t_label, #0
 			t_btn, #1
 			t_label1, #2
+			t_label0, #3
 			])
 
 	def create_json_tab(self,t_num):
@@ -369,8 +503,12 @@ class GenZipGUI():
 			t_label.grid(column = 1, row = row_num,sticky="W")
 
 			# bowse file btn
-			t_btn = tk_lib.Button(t_label, text = "Browse A File",command = partial(self.fileDialog,i))
+			# t_btn = tk_lib.Button(t_label, text = "Browse A File",command = partial(self.fileDialog,i))
+			file_sv = tk_lib.StringVar()
+			# gen_file_input(self,root,entry_sv,call_back,dropMsg = 'Drop Here...',in_width=80)
+			t_btn = self.gen_file_input(t_label,file_sv,partial(self.dragJsonDir,i),'Drop Here...',10)
 			t_btn.grid(column = 2, row = row_num,sticky="W")
+
 			
 			# file name text
 			t_label1 = tk_lib.Label(t_label, text = "")
@@ -421,25 +559,74 @@ class GenZipGUI():
 		# tv = self.m_animaOpv[index]
 		# print(tv.get())
 
-	def iconFileDialog(self,index):
+	def iconFileDialog(self,index,file_path):
 		tab = self.m_icon_tabs[index]
-		file_path = askopenfilename(initialdir =  "/", title = "Select A File" )
-		
-		if file_path == '':
-			return
-
-		file_ext = file_extension(file_path)
-		is_png = file_ext == '.png'
-
-		if not is_png:
-			return
-
 		self.m_icon_files[index] = file_path
-		tab[2].configure(text = os.path.basename(self.m_icon_files[index]))
+		r = []
+		for x in file_path:
+			r.append(os.path.basename(x))
+		tab[2].configure(text = ';'.join(r))
 
-	def fileDialog(self,index):
+	def plistFileDialog(self,index,file_path,png_path):
+		tab = self.m_plist_tabs[index]
+		self.m_plist_files[index] = file_path
+		r = []
+		for x in file_path:
+			r.append(os.path.basename(x))
+		tab[2].configure(text = ';'.join(r))
+
+		for x in png_path:
+			self.m_plist_files[index].append(x)
+
+		pos_arr = tab[0].m_pos_arr
+		for x in pos_arr:
+			x.grid()
+
+		print(self.m_plist_files[index])
+
+	def dragJsonDir(self,index,event):
+		pass
+		file_path = event.data.split()[0]
+		json_path = find_sk_json_file(file_path)
+		image_path = find_sk_image_file(file_path)
+		image_path_basename = []
+		for x in image_path:
+			image_path_basename.append(os.path.basename(x))
+
 		tab = self.m_json_tabs[index]
-		file_path = askopenfilename(initialdir =  "/", title = "Select A File" )
+		for i,x in enumerate(image_path_basename):
+			result = check_png_name_(x)
+			if result == 1:
+				tab[2].configure(text = u'{} not end with _'.format(x))
+				return
+
+			if result == 2:
+				tab[2].configure(text = u'invalid name {}'.format(x))
+				return
+
+
+		self.fileDialog(index,json_path)
+
+	def dragIconDir(self,index,event):
+		pass
+		file_path = event.data.split()[0]
+		file_path = find_icon_file(file_path)
+		self.iconFileDialog(index,file_path)
+
+	def dragPlistDir(self,index,event):
+		pass
+		file_path = event.data.split()[0]
+		file_path,pngs_path = find_plist_file(file_path)
+		if not table_is_empty(file_path):
+			dir_path = os.path.dirname(file_path[0])
+			for i,x in enumerate(pngs_path):
+				pngs_path[i] = os.path.join(dir_path,x)
+			self.plistFileDialog(index,file_path,pngs_path)
+
+	def fileDialog(self,index,file_path = None):
+		tab = self.m_json_tabs[index]
+		if not file_path:
+			file_path = askopenfilename(initialdir =  "/", title = "Select A File" )
 
 		
 		if file_path == '':
@@ -548,8 +735,11 @@ def gui_gen_zip():
 
 def test(a = 'abcd'):
 	pass
+	a = u'123中文'
+	for x in a:
+		s = ord(x)
 
-
+		b = s
 
 if __name__ == '__main__':
 	use_test = False
