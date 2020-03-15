@@ -3,7 +3,7 @@
 # https://stackoverflow.com/questions/25427347/how-to-install-and-use-tkdnd-with-python-tkinter-on-osx
 
 from __future__ import print_function
-import sys,os,re
+import sys,os,re,json
 import os
 import os.path
 import shutil,json,plistlib
@@ -14,6 +14,7 @@ from tkFileDialog import askopenfilename
 from functools import partial
 
 from TkinterDnD2 import *
+import zipfile
 
 def is_number(str):
     try:
@@ -78,6 +79,16 @@ def find_sk_image_file(src):
 	if exist_dir:
 		return find_ext_file(src,'.png',[exist_dir],True)
 
+def get_directory(file_path,level):
+	pass
+
+	p = file_path
+	i = 0
+	while i < level:
+		i+=1
+		p = os.path.dirname(p)
+	return p
+
 def find_sk_json_file(src):
 	return find_ext_file(src,'.json',['export','exports','Export','Exports'])
 
@@ -139,7 +150,7 @@ def table_contains_string(tb,s):
 			return True
 	return False
 
-def copy_file(sourceDir, targetDir, defList, ensureLastCh = '', specFiles = None):
+def copy_file(sourceDir, targetDir, defList = None, ensureLastCh = '', specFiles = None):
 	for f in os.listdir(sourceDir):
 		sourceF = os.path.join(sourceDir,f)
 		targetF = os.path.join(targetDir,f)
@@ -149,8 +160,8 @@ def copy_file(sourceDir, targetDir, defList, ensureLastCh = '', specFiles = None
 			if check_specfiles and (table_is_empty(defList) or table_contains(defList,ext)):
 				do_copy_file(sourceF,targetF)
 		if os.path.isdir(sourceF):
-			try_create_dir(sourceF)
-			copy_file(sourceF,targetDir,defList,ensureLastCh,specFiles)
+			try_create_dir(targetF)
+			copy_file(sourceF,targetF,defList,ensureLastCh,specFiles)
 
 def do_copy_file(src_file, dst):
 	shutil.copy(src_file, dst)
@@ -225,13 +236,19 @@ class GenZipGUI():
 		self.m_plist_tabs = []
 		self.m_plist_files = []
 
+		# zip files
+		self.m_zip_tabs = []
+		self.m_zip_files = []
+
 		# rows
 		self.m_json_start_raw = 4
 		self.m_icon_strat_row = 20
 		self.m_plist_strat_row = 30
+		self.m_zip_strat_row = 40
 
 		# 
 		self.m_selectTypeName = ''
+		self.m_selectType = -1
 
 	def getPackTypeByName(self,typeName):
 		return self.m_pack_types.index(typeName)
@@ -279,7 +296,7 @@ class GenZipGUI():
 		lbl = tk_lib.Label(window, text="资源文件数量:")
 		lbl.grid( row=3, column=0)
 		la = []
-		for i in range(1,10):
+		for i in range(0,10):
 			la.append(i)
 		json_num,json_num_v = self.make_option(self.select_json_num,la)
 		json_num.grid(row=3, column=1,sticky="W")
@@ -296,10 +313,20 @@ class GenZipGUI():
 		# 粒子
 		lbl = tk_lib.Label(window, text="粒子文件*:")
 		lbl.grid( row=self.m_plist_strat_row, column=0)
-		la = [u'有',u'无']
+		la = []
+		for i in range(10):
+			la.append(i)
 		plistOpt,plistOpt_v = self.make_option(self.select_hava_plist,la)
 		plistOpt.grid(row=self.m_plist_strat_row, column=1,sticky="W")
 		self.m_plistOpt_v = plistOpt_v
+
+		# prev zip
+		lbl = tk_lib.Label(window, text="追加zip*:")
+		lbl.grid( row=self.m_zip_strat_row, column=0)
+		la = [u'是',u'否']
+		zipOpt,zipOpt_v = self.make_option(self.select_hava_zip,la)
+		zipOpt.grid(row=self.m_zip_strat_row, column=1,sticky="W")
+		self.m_zipOpt_v = zipOpt_v
 
 		# 选择文件
 		# self.chooseFileLabel = tk_lib.LabelFrame(window, text = "Open File")
@@ -313,6 +340,7 @@ class GenZipGUI():
 
 			res['skin_name'] = skin_name_field.get()
 			res['skin_type'] = pack_type_v.get()
+			res['skin_type_number'] = self.m_selectType
 			res['spine_cfg'] = []
 			for i,x in enumerate(self.m_json_files):
 				t = {}
@@ -327,7 +355,7 @@ class GenZipGUI():
 
 			res['icon_src'] = '' if table_is_empty(self.m_icon_files) else self.m_icon_files[0]
 			res['plist_src'] = '' if table_is_empty(self.m_plist_files) else self.m_plist_files[0]
-
+			res['prev_zip'] = self.m_zip_files[0] if len(self.m_zip_files) > 0 else ''
 
 
 			window.withdraw()
@@ -386,8 +414,14 @@ class GenZipGUI():
 
 	def select_hava_plist(self,*args):
 		pass
-		self.m_havePlist = self.m_plistOpt_v.get() == u'有'
+		# self.m_havePlist = self.m_plistOpt_v.get() == u'有'
+		self.m_havePlist = int(self.m_plistOpt_v.get())
 		self.create_plist_tab(self.m_havePlist)
+
+	def select_hava_zip(self,*args):
+		pass
+		self.m_haveZip = self.m_zipOpt_v.get() == u'是'
+		self.create_zip_tab(self.m_haveZip)
 
 	def select_json_num(self,*args):
 		pass
@@ -402,8 +436,17 @@ class GenZipGUI():
 	def create_plist_tab(self,has_plist):
 		self.create_file_tab__(has_plist,self.dragPlistDir,'m_plist_tabs','m_plist_files','m_plist_strat_row',True)
 
+	def create_zip_tab(self,has_zip):
+		self.create_file_tab__(has_zip,self.dragZipDir,'m_zip_tabs','m_zip_files','m_zip_strat_row',True)
+
 	def create_file_tab__(self,has_icon,drag_func,tabmem_name='m_icon_tabs',filemem_name='m_icon_files',strat_row='m_icon_strat_row',posFlag=False):
-		prev_has_icon = len(getattr(self,tabmem_name)) > 0
+		
+		prev_has_icon = None
+		if isinstance(has_icon,bool):
+			prev_has_icon = len(getattr(self,tabmem_name)) > 0
+		else:
+			prev_has_icon = len(getattr(self,tabmem_name))
+
 		if has_icon == prev_has_icon:
 			return
 
@@ -567,6 +610,12 @@ class GenZipGUI():
 			r.append(os.path.basename(x))
 		tab[2].configure(text = ';'.join(r))
 
+	def zipFileDialog(self,index,file_path):
+		
+		tab = self.m_zip_tabs[index]
+		self.m_zip_files[index] = file_path
+		tab[2].configure(text = os.path.basename(file_path))
+
 	def plistFileDialog(self,index,file_path,png_path):
 		tab = self.m_plist_tabs[index]
 		self.m_plist_files[index] = file_path
@@ -587,6 +636,15 @@ class GenZipGUI():
 	def dragJsonDir(self,index,event):
 		pass
 		file_path = event.data.split()[0]
+
+		file_ext = file_extension(file_path)
+		is_png = file_ext == '.png'
+		is_nameplate = self.m_selectTypeName == u'铭牌'
+		if is_png and is_nameplate:
+			self.fileDialog(index,file_path)
+			return
+
+
 		json_path = find_sk_json_file(file_path)
 		image_path = find_sk_image_file(file_path)
 		image_path_basename = []
@@ -606,6 +664,17 @@ class GenZipGUI():
 
 
 		self.fileDialog(index,json_path)
+
+	def dragZipDir(self,index,event):
+		pass
+		file_path = event.data.split()[0]
+
+		file_ext = file_extension(file_path)
+		is_zip = file_ext == '.zip'
+		if not is_zip:
+			return
+		# file_path = find_icon_file(file_path)
+		self.zipFileDialog(index,file_path)
 
 	def dragIconDir(self,index,event):
 		pass
@@ -721,11 +790,17 @@ def gui_gen_zip():
 
 	res = []
 	while True:
+		continue_flag = False
 		wd = GenZipGUI()
 
 		r = wd.show()
-		res.append(r)
-		continue_flag = yes_no_dialog(u'是否继续?')[0] == 'y'
+		print('one skin config is',r)
+		
+		if isStringNil(r['skin_name']):
+			continue_flag = yes_no_dialog(u'请输入皮肤名')[0] == 'y'
+		else:
+			res.append(r)
+			continue_flag = yes_no_dialog(u'是否继续?')[0] == 'y'
 
 		if not continue_flag:
 			break
@@ -741,9 +816,72 @@ def test(a = 'abcd'):
 
 		b = s
 
+	get_directory('/Users/tangwen/Documents/my_projects/cplusplus_test/opengl_st1/Opengl_st1/commit_xml/spine/spineboy.png',2)
+
+def try_clean_dir(dst):
+	if os.path.exists(dst):
+		shutil.rmtree(dst)
+
 if __name__ == '__main__':
 	use_test = False
 	if use_test:
 		test()
 	else:
-		gui_gen_zip()
+		res = gui_gen_zip()
+		prev_zip = [x['prev_zip'] for x in res if x['prev_zip'] !='']
+		print('prev_zip,,',prev_zip)
+		prev_zip = prev_zip[0] if len(prev_zip) > 0 else False
+
+		default_zip = 'skin.zip'
+		skin_cfg_json = 'skin_config.json'
+		if not prev_zip:
+			dst_dir = 'skin'
+			try_clean_dir(dst_dir)
+			try_create_dir(dst_dir)
+
+			# z = zipfile.ZipFile(os.path.join(dst_dir,default_zip), "w",zipfile.ZIP_DEFLATED)
+			skin_cfg_json = os.path.join(dst_dir,skin_cfg_json)
+			with open(skin_cfg_json, 'w' ) as outfile:
+				json.dump(res, outfile)
+			
+			# skin config
+
+			# spine dir
+			spine_dir = []
+			plist_dir = []
+			for x in res:
+				spine_cfg = x['spine_cfg']
+				if len(spine_cfg) > 0:
+					pass
+					for y in spine_cfg:
+						ty = get_directory(y['src_dir'],2)
+						if not ty in spine_dir:
+							spine_dir.append(ty)
+
+				plist_cfg = x['plist_src']
+				if not table_is_empty(plist_cfg):
+					for y in plist_cfg:
+						if not y in plist_dir:
+							plist_dir.append(y)
+			
+			print('spine_dir',spine_dir)
+			# 骷髅动画
+			for x in spine_dir:
+				pt = os.path.join(dst_dir,os.path.basename(x))
+				try_create_dir(pt)
+				copy_file(x,pt)
+
+			# 粒子
+			pilist_path = os.path.join(dst_dir,'plist')
+			try_create_dir(pilist_path)
+			for x in plist_dir:
+				pt = os.path.join(pilist_path,os.path.basename(x))
+				do_copy_file(x,pt)
+
+				
+			shutil.make_archive(dst_dir, 'zip', dst_dir)
+
+			# os.remove(skin_cfg_json)
+			try_clean_dir(dst_dir)
+
+

@@ -1,16 +1,1 @@
-{
-	"destination":[
-		{
-			"nickname":"内网",
-			"path":"/Users/mac/Documents/my_projects/cok/innerDyRes",
-			"range":[],
-			"fen_biao":true
-		},
-		{
-			"nickname":"外网75",
-			"path":"/Users/mac/Documents/my_projects/cok/outerDyRes75",
-			"range":["5.05.0"],
-			"fen_biao":false
-		}
-	]
-}
+[{"icon_src": "", "prev_zip": "", "skin_name": "123", "spine_cfg": [{"src_dir": "/Users/tangwen/Downloads/\u706b\u9cf3\u51f0\u66f4\u65b0/spine/export/phoenix_00000_.json", "position": ["1", "2"]}], "plist_src": "", "skin_type": "\u5916\u57ce"}]

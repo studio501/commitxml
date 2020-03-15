@@ -253,7 +253,7 @@ def copy_file(sourceDir, targetDir, defList, ensureLastCh = '', specFiles = None
 				do_copy_file(sourceF,targetF)
 		if os.path.isdir(sourceF):
 			try_create_dir(sourceF)
-			copy_file(sourceF,TargetDir,defList,ensureLastCh,specFiles)
+			copy_file(sourceF,targetF,defList,ensureLastCh,specFiles)
 
 def rename_file_bat(sourceDir, targetDir, defList, adjust = ''):
 	for f in os.listdir(sourceDir):
