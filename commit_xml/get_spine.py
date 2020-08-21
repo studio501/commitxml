@@ -4,6 +4,7 @@ import imghdr,json,zipfile,plistlib,biplist
 from PIL import Image
 
 size_re = re.compile(r'size:\s* (\d+)\s*,\s*(\d+)')
+same_name_dir = 0
 
 fc = [
 ]
@@ -93,7 +94,13 @@ def find_spine(sourceDir,dstDir):
                         find_png = find_relative_png(json_data,atlas_data,sourceDir)
                         write_sp_file(json.dumps(json_data["_skeletonJson"],encoding="utf-8"),os.path.join(dstDir,file_base_name,spine_name + ".json"))
                         shutil.copy(find_png, os.path.join(dstDir,file_base_name,atlas_data[0]))
-                        os.rename(os.path.join(dstDir,file_base_name),os.path.join(dstDir,spine_name))
+
+                        dst_dir = os.path.join(dstDir,spine_name)
+                        if os.path.exists(dst_dir):
+                            global same_name_dir
+                            same_name_dir = same_name_dir + 1
+                            dst_dir = dst_dir + str(same_name_dir)
+                        os.rename(os.path.join(dstDir,file_base_name),dst_dir)
 
         elif os.path.isdir(sourceF):
             find_spine(sourceF,dstDir)
