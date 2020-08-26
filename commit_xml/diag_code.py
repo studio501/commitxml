@@ -11,6 +11,11 @@ JsRe_re = re.compile(r'/.*?[\'\"].*?/\.test\(.*?\)')
 
 CorArr = ['(','[','{','}',']',')']
 
+def get_json_data(f):
+	with open(f,'r') as load_f:
+  		load_dict = json.load(load_f)
+  		return load_dict
+
 class word_class:
     def __init__(self,w,p):
         self.w = w
@@ -231,17 +236,19 @@ def get_code(js_file_name,out_put_dir):
 
     pass
 
-def get_res(js_file_name,out_put_dir):
-    if os.path.exists(out_put_dir):
-        shutil.rmtree(out_put_dir)
-
-    subprocess.call(['mkdir','-p',out_put_dir])
-
+def gen_res_json(js_file_name,json_pt):
     contents = None
+    had_save = [False]
     def when_match(word1,word2):
+        if had_save[0]:
+            return
         module_contents = contents[word1.p:word2.p+1]
-        module_contents = module_contents.replace('\n','').decode("utf-8")
+        module_contents = module_contents.replace('\n','').replace('!0','true').replace('!1','false')
         result = demjson.decode(module_contents)
+        json_str = json.dumps(result,encoding="utf-8")
+        with open(json_pt,"w") as f:
+            f.write(json_str)
+            had_save[0] = result
         pass
 
     def can_del(word1,word2):
@@ -266,7 +273,24 @@ def get_res(js_file_name,out_put_dir):
                 break
             ws.push(word_class(c,i_cter))
             i_cter+=1
+            if had_save[0]:
+                return had_save[0]
 
+def get_res(js_file_name,out_put_dir):
+    if os.path.exists(out_put_dir):
+        shutil.rmtree(out_put_dir)
+
+    subprocess.call(['mkdir','-p',out_put_dir])
+
+    gen_json_name = "settings.json"
+    scripyts_pwd = os.path.dirname( os.path.realpath(__file__))
+    gen_json_path = os.path.join(scripyts_pwd,gen_json_name)
+    json_data = None
+    if os.path.exists(gen_json_path):
+        json_data = get_json_data(gen_json_path)
+    else:
+        json_data = gen_res_json(js_file_name,gen_json_path)
+    
     pass
 
 def main():
