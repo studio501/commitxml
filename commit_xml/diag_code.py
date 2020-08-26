@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*
 import os,sys,json,re,subprocess
 import shutil
+import demjson
 
 W_re = re.compile(r'\w')
 PushRF_re = re.compile(r'cc._RF.push\(.*?\),')
@@ -17,7 +18,7 @@ class word_class:
 
 
 class world_stack:
-    def __init__(self,data,check_arr,call_back,match_back=None,err_func=None):
+    def __init__(self,data,check_arr,call_back,match_back=None,err_func=None,Js_Reg=True):
         self.m_data = data
         self.m_arr = []
         self.m_quta_stack  = []
@@ -27,6 +28,7 @@ class world_stack:
         self.m_call_back = call_back
         self.m_match_back = match_back
         self.m_err_func = err_func
+        self.m_js_reg_check = Js_Reg
 
     def push(self, word):
         if self.is_cor(word):
@@ -40,6 +42,9 @@ class world_stack:
                     if self.m_call_back:
                         self.m_call_back(self.get_top(),word)
                 self.pop()
+                # self.dump()
+                # line = self.get_line_of(word)
+                # print(line)
             else:
                 if self.is_left_cor(word):
                     self.m_arr.append(word)
@@ -82,8 +87,10 @@ class world_stack:
         return self.m_data[i1:i2]
 
     def is_wrap_by_reg(self,word):
-        line = self.get_line_of(word)
-        return len(JsRe_re.findall(line)) > 0
+        if self.m_js_reg_check:
+            line = self.get_line_of(word)
+            return len(JsRe_re.findall(line)) > 0
+        return False
 
     def is_right_cor(self,word):
         w = word.w
@@ -171,61 +178,106 @@ def get_module_name(contents,start):
             print("can not find module name",''.join(t))
             break
 
+def get_code(js_file_name,out_put_dir):
+    if os.path.exists(out_put_dir):
+        shutil.rmtree(out_put_dir)
+
+    subprocess.call(['mkdir','-p',out_put_dir])
+
+    contents = None
+    def when_match(word1,word2):
+        
+        module_name = get_module_name(contents,word1.p)
+        module_contents = contents[word1.p:word2.p+1]
+        print("when_match",module_name)
+        def when_match2(w1_,w2_):
+            file_pts = os.path.join(out_put_dir,module_name+'.js')
+            if os.path.exists(file_pts):
+                return
+            contents_ = module_contents[w1_.p+1:w2_.p]
+            contents_ = contents_.replace('"use strict";','')
+            contents_ = PushRF_re.sub('',contents_)
+            contents_ = PopRF_re.sub('',contents_)
+            with open(file_pts,"w") as f1:
+                f1.write(contents_.encode("utf-8"))
+            pass
+        ms = world_stack(module_contents,['[','{'],when_match2)
+        for i1,x in enumerate( module_contents ):
+            ms.push(word_class(x,i1))
+        pass
+
+    def can_del(word1,word2):
+        pass
+        print("can_del",word1.w,word2.w,"   ")
+
+    def error_func(word1):
+        pass
+        st = word1.p - 10
+        et = word1.p + 10
+        print("error_func",contents[st:et])
+
+    i_cter = 0
+    with open(js_file_name) as f:
+        contents = f.read()
+        f.seek(0)
+
+        ws = world_stack(contents,['(','{','(','{','['],when_match,None,error_func)
+        while True:
+            c = f.read(1)
+            if not c:
+                break
+            ws.push(word_class(c,i_cter))
+            i_cter+=1
+
+    pass
+
+def get_res(js_file_name,out_put_dir):
+    if os.path.exists(out_put_dir):
+        shutil.rmtree(out_put_dir)
+
+    subprocess.call(['mkdir','-p',out_put_dir])
+
+    contents = None
+    def when_match(word1,word2):
+        module_contents = contents[word1.p:word2.p+1]
+        module_contents = module_contents.replace('\n','').decode("utf-8")
+        result = demjson.decode(module_contents)
+        pass
+
+    def can_del(word1,word2):
+        pass
+        print("can_del",word1.w,word2.w,"   ")
+
+    def error_func(word1):
+        pass
+        st = word1.p - 10
+        et = word1.p + 10
+        print("error_func",contents[st:et])
+
+    i_cter = 0
+    with open(js_file_name) as f:
+        contents = f.read()
+        f.seek(0)
+
+        ws = world_stack(contents,['(','{','{'],when_match,None,error_func,False)
+        while True:
+            c = f.read(1)
+            if not c:
+                break
+            ws.push(word_class(c,i_cter))
+            i_cter+=1
+
+    pass
+
 def main():
-    if len(sys.argv) == 3:
+    if len(sys.argv) == 4:
         js_file_name = sys.argv[1]
         out_put_dir = sys.argv[2]
-        if os.path.exists(out_put_dir):
-            shutil.rmtree(out_put_dir)
-
-        subprocess.call(['mkdir','-p',out_put_dir])
-
-        contents = None
-        def when_match(word1,word2):
-            
-            module_name = get_module_name(contents,word1.p)
-            module_contents = contents[word1.p:word2.p+1]
-            print("when_match",module_name)
-            def when_match2(w1_,w2_):
-                file_pts = os.path.join(out_put_dir,module_name+'.js')
-                if os.path.exists(file_pts):
-                    return
-                contents_ = module_contents[w1_.p+1:w2_.p]
-                contents_ = contents_.replace('"use strict";','')
-                contents_ = PushRF_re.sub('',contents_)
-                contents_ = PopRF_re.sub('',contents_)
-                with open(file_pts,"w") as f1:
-                    f1.write(contents_)
-                pass
-            ms = world_stack(module_contents,['[','{'],when_match2)
-            for i1,x in enumerate( module_contents ):
-                ms.push(word_class(x,i1))
-            pass
-
-        def can_del(word1,word2):
-            pass
-            print("can_del",word1.w,word2.w,"   ")
-
-        def error_func(word1):
-            pass
-            st = word1.p - 10
-            et = word1.p + 10
-            print("error_func",contents[st:et])
-
-        i_cter = 0
-        with open(js_file_name) as f:
-            contents = f.read()
-            f.seek(0)
-
-            ws = world_stack(contents,['(','{','(','{','['],when_match,None,error_func)
-            while True:
-                c = f.read(1)
-                if not c:
-                    break
-                ws.push(word_class(c,i_cter))
-                i_cter+=1
-
-        pass
+        res_type = sys.argv[3]
+        if res_type == "code":
+            get_code(js_file_name,out_put_dir)
+        elif res_type == "res":
+            get_res(js_file_name,out_put_dir)
 
 
 if __name__ == "__main__":
