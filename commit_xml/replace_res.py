@@ -49,8 +49,12 @@ def main():
 
     coin_path = os.path.join(dst2,'icon_nyd_2020_coin.png')
     ticket_path = os.path.join(dst2,'icon_nyd_2020_ticket.png')
-    do_copy_file(coin_icon,coin_path)
-    do_copy_file(ticket_icon,ticket_path)
+    if coin_icon != '':
+        do_copy_file(coin_icon,coin_path)
+    if ticket_icon != '':
+        do_copy_file(ticket_icon,ticket_path)
+
+    print(u"请打包: NewYearDay2020_face")
     
 
 if __name__ == "__main__":
