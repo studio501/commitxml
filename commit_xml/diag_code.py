@@ -11,10 +11,23 @@ JsRe_re = re.compile(r'/.*?[\'\"].*?/\.test\(.*?\)')
 
 CorArr = ['(','[','{','}',']',')']
 
+def is_number(str):
+    try:
+        # 因为使用float有一个例外是'NaN'
+        if str=='NaN':
+            return False
+        float(str)
+        return True
+    except ValueError:
+        return False
+
 def get_json_data(f):
 	with open(f,'r') as load_f:
   		load_dict = json.load(load_f)
   		return load_dict
+
+def decode_uuid(uuid):
+    return subprocess.check_output(['node','decode-uuid.js',uuid]).rstrip()
 
 class word_class:
     def __init__(self,w,p):
@@ -248,7 +261,7 @@ def gen_res_json(js_file_name,json_pt):
         json_str = json.dumps(result,encoding="utf-8")
         with open(json_pt,"w") as f:
             f.write(json_str)
-            had_save[0] = result
+            had_save[0] = json.loads(json_str,"utf-8")
         pass
 
     def can_del(word1,word2):
@@ -276,6 +289,15 @@ def gen_res_json(js_file_name,json_pt):
             if had_save[0]:
                 return had_save[0]
 
+def download_res_(url,save_file):
+    pass
+
+def get_md5_suffix(val,tab):
+    if not val in tab:
+        return False
+    x = tab.index(val)
+    return tab[x+1]
+
 def get_res(js_file_name,out_put_dir):
     if os.path.exists(out_put_dir):
         shutil.rmtree(out_put_dir)
@@ -290,10 +312,40 @@ def get_res(js_file_name,out_put_dir):
         json_data = get_json_data(gen_json_path)
     else:
         json_data = gen_res_json(js_file_name,gen_json_path)
-    
+    assetTypes = json_data['assetTypes']
+
+    direct_get_res = ["cc.Texture2D","cc.AudioClip","cc.JsonAsset","sp.SkeletonData"]
+    direct_get_res_idx = []
+    for i,v in enumerate(direct_get_res):
+        for i1,v1 in enumerate(assetTypes):
+            if v == v1:
+                direct_get_res_idx.append(i1)
+                break
+
+    uuids_arr = json_data['uuids']
+    md5AssetsMap = json_data['md5AssetsMap']
+    md5AssetsMap_import = md5AssetsMap["import"]
+    md5AssetsMap_raw = md5AssetsMap["raw-assets"]
+
+    tm = get_md5_suffix(978,md5AssetsMap_import)
+    for k in json_data['rawAssets']:
+        asset_tmp = json_data['rawAssets'][k]
+        for k1 in asset_tmp:
+            asset_one = asset_tmp[k1]
+            asset_url = asset_one[0]
+            asset_type = asset_one[1]
+
+            if asset_type in direct_get_res_idx:
+                uuid_idx = int(k1)
+                uuid = uuids_arr[uuid_idx]
+                md5_suf = get_md5_suffix(978,md5AssetsMap_import)
+                if md5_suf:
+                    dec_uuid = decode_uuid(uuid)
     pass
 
 def main():
+    # a = subprocess.check_output(['node','decode-uuid.js','fcmR3XADNLgJ1ByKhqcC5Z']).rstrip()
+
     if len(sys.argv) == 4:
         js_file_name = sys.argv[1]
         out_put_dir = sys.argv[2]
