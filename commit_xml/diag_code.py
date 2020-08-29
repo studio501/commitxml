@@ -2,6 +2,7 @@
 import os,sys,json,re,subprocess
 import shutil
 import demjson
+import urllib2
 
 W_re = re.compile(r'\w')
 PushRF_re = re.compile(r'cc._RF.push\(.*?\),')
@@ -249,6 +250,23 @@ def get_code(js_file_name,out_put_dir):
 
     pass
 
+def save_one_file(url,file_path,file_mode):
+    dst_dir = os.path.dirname(file_path)
+    if not os.path.exists(dst_dir):
+        try:
+            subprocess.call(['mkdir','-p',dst_dir])
+        except Exception as e:
+            pass
+
+    try:
+        contents = urllib2.urlopen(url).read()
+        with open(file_path, file_mode) as f:
+            f.write(contents)
+
+            print("save file",file_path,"success")
+    except Exception as e:
+        pass
+
 def gen_res_json(js_file_name,json_pt):
     contents = None
     had_save = [False]
@@ -298,7 +316,10 @@ def get_md5_suffix(val,tab):
     x = tab.index(val)
     return tab[x+1]
 
-def get_res(js_file_name,out_put_dir):
+def get_first2char(in_str):
+    return in_str[:2]
+
+def get_res(js_file_name,out_put_dir,base_url):
     if os.path.exists(out_put_dir):
         shutil.rmtree(out_put_dir)
 
@@ -315,6 +336,10 @@ def get_res(js_file_name,out_put_dir):
     assetTypes = json_data['assetTypes']
 
     direct_get_res = ["cc.Texture2D","cc.AudioClip","cc.JsonAsset","sp.SkeletonData"]
+    direct_get_res_suff = [".png",".mp3",".json",".json"]
+    file_mode_arr = ["wb","wb","w","w"]
+    file_mode_arr = ["wb","wb","w","w"]
+    searchModule = ["raw-assets","raw-assets","import","import"]
     direct_get_res_idx = []
     for i,v in enumerate(direct_get_res):
         for i1,v1 in enumerate(assetTypes):
@@ -328,6 +353,8 @@ def get_res(js_file_name,out_put_dir):
     md5AssetsMap_raw = md5AssetsMap["raw-assets"]
 
     tm = get_md5_suffix(978,md5AssetsMap_import)
+    raw_url = "raw-assets"
+    import_url = "import"
     for k in json_data['rawAssets']:
         asset_tmp = json_data['rawAssets'][k]
         for k1 in asset_tmp:
@@ -336,16 +363,35 @@ def get_res(js_file_name,out_put_dir):
             asset_type = asset_one[1]
 
             if asset_type in direct_get_res_idx:
+                asset_idx = direct_get_res_idx.index(asset_type)
+                asset_suffix = direct_get_res_suff[asset_idx]
+                file_mode = file_mode_arr[asset_idx]
+                searchMo = searchModule[asset_idx]
                 uuid_idx = int(k1)
                 uuid = uuids_arr[uuid_idx]
-                md5_suf = get_md5_suffix(978,md5AssetsMap_import)
+                md5_suf = get_md5_suffix(uuid_idx,md5AssetsMap[searchMo])
                 if md5_suf:
                     dec_uuid = decode_uuid(uuid)
+                    url_prefix = get_first2char(dec_uuid)
+                    url_arr = [base_url,searchMo,url_prefix,dec_uuid+"."+md5_suf+asset_suffix]
+                    final_url = '/'.join(url_arr)
+                    dst_path = os.path.join(out_put_dir,asset_url)
+                    save_one_file(final_url,dst_path,file_mode)
+                    a = 100
+    
+    for k in json_data['packedAssets']:
+        md5_suf = get_md5_suffix(k,md5AssetsMap_import)
+        if md5_suf:
+            url_prefix = get_first2char(k)
+            url_arr = [base_url,import_url,url_prefix,k+"."+md5_suf+".json"]
+            final_url = '/'.join(url_arr)
+            dst_path = os.path.join(out_put_dir,k+".json")
+            save_one_file(final_url,dst_path,"w")
     pass
+
 
 def main():
     # a = subprocess.check_output(['node','decode-uuid.js','fcmR3XADNLgJ1ByKhqcC5Z']).rstrip()
-
     if len(sys.argv) == 4:
         js_file_name = sys.argv[1]
         out_put_dir = sys.argv[2]
@@ -353,7 +399,8 @@ def main():
         if res_type == "code":
             get_code(js_file_name,out_put_dir)
         elif res_type == "res":
-            get_res(js_file_name,out_put_dir)
+            base_url = "https://cdn.ftaro.com/kingwar4_h5/43331/wx/res"
+            get_res(js_file_name,out_put_dir,base_url)
 
 
 if __name__ == "__main__":
