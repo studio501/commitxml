@@ -1,8 +1,8 @@
 const fs = require('fs');
-a = require('./settings')
-var content = JSON.stringify(a.a)
+var res = require('./settings')
+var content = JSON.stringify(res);
 
-fs.writeFile("a.json", content, function (err) {
+fs.writeFile("settings.json", content, function (err) {
     if (err) {
         return console.log(err);
     }
