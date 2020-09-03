@@ -5,6 +5,7 @@ from PIL import Image
 
 size_re = re.compile(r'size:\s* (\d+)\s*,\s*(\d+)')
 md5_re = re.compile(r'MD5\s+.*? = (\w+)\n')
+jsfile_re = re.compile(r'(\w+?):\[function\(\w+,\w+,\w+\)\{\s*"use strict";\s*cc\._RF\.push\(\w+,"(.*?)"')
 same_name_dir = 0
 
 def get_png_size(file_name):
@@ -197,6 +198,17 @@ def unzip_to(zf,dst_dir):
 def test():
     abcd = 100
 
+def parse_jsfile(js_filename,output):
+    with open(js_filename,"r") as f:
+        contents = f.read()
+        ss = jsfile_re.findall(contents)
+        result = {}
+        for x in ss:
+            result[x[1]] = x[0]
+        with open(output,"w") as f:
+            f.write(json.dumps(result,encoding="utf-8"))
+
+
     
 def main():
     # pl = {
@@ -230,7 +242,9 @@ def main():
             get_json_map(json_dir,json_map,"cc.BitmapFont")
             get_bmfont(png_dir,dst_dir,json_map)
             a =10
-
+        elif res_type == "jsmap":
+            jsfile_name = sys.argv[2]
+            parse_jsfile(jsfile_name,os.path.join(sys.argv[3],"map.json"))
 
 
 if __name__ == "__main__":
