@@ -6,6 +6,12 @@ import my_input
 type_re = re.compile(r'"__type__":\s*"(.*?)"')
 ref_re = re.compile(r"cc._RF.push\(module,\s*'(.*?)',\s*.*?\);")
 spriteframe_re = re.compile(r'"_spriteFrame":\s*\{"__uuid__":\s*"(.*?)"\}')
+normalframe_re = re.compile(r'normalSprite"\s*:\s*\{"__uuid__"\s*:\s*"(.*?)"\}')
+pressframe_re = re.compile(r'pressedSprite"\s*:\s*\{"__uuid__"\s*:\s*"(.*?)"\}')
+disabledframe_re = re.compile(r'disabledSprite"\s*:\s*\{"__uuid__"\s*:\s*"(.*?)"\}')
+hoverframe_re = re.compile(r'hoverSprite"\s*:\s*\{"__uuid__"\s*:\s*"(.*?)"\}')
+prefab_re = re.compile(r'"_prefab":.*?,\s*"__type__":\s*"cc.PrefabInfo",\s*"asset":\s*\{"__uuid__":\s*"(.*?)"\}')
+matrial_re = re.compile(r'"_materials":\s*(\[\{.*?\}\s*\])')
 
 
 def file_without_extension(path):
@@ -34,17 +40,34 @@ def find_all_jscomp(prefabfile):
                 res.append(x)
         return res
 
-
-def find_all_spriteframe(prefabfile):
+def find_uuid_byre(prefabfile,reg_re_arr=[spriteframe_re]):
     with open(prefabfile, "r") as f:
         contents = f.read()
-        all_res = spriteframe_re.findall(contents)
         res = []
-        for x in all_res:
-            if not x in res:
-                res.append(x)
+        for tre in reg_re_arr:
+            all_res = tre.findall(contents)
+            for x in all_res:
+                if not x in res:
+                    res.append(x)
         return res
 
+def find_all_spriteframe(prefabfile):
+    return find_uuid_byre(prefabfile,[spriteframe_re,normalframe_re,pressframe_re,disabledframe_re,hoverframe_re])
+
+def find_all_prefab(prefabfile):
+    return find_uuid_byre(prefabfile,[prefab_re])
+
+def find_all_matrial(prefabfile):
+    with open(prefabfile, "r") as f:
+        contents = f.read()
+        res = []
+        all_res = matrial_re.findall(contents)
+        for x in all_res:
+            x_json = json.loads(x)
+            for y in x_json:
+                if not y["__uuid__"] in res:
+                    res.append(y["__uuid__"])
+        return res
 
 def find_new_script(depend_js_readable, new_lib_dir):
     uuid_json = os.path.join(new_lib_dir, "uuid-to-mtime.json")
@@ -83,9 +106,9 @@ def convert_js_bind(origin_prefab, jsmapfile, new_lib_dir, dst_dir,
         return
     print(u'prefab depen of', depend_js_readable)
 
-    # is_continue = my_input.my_input(u"是否替换(y/n)?") == 'y'
-    # if not is_continue:
-    #     return
+    is_continue = my_input.my_input(u"是否替换(y/n)?") == 'y'
+    if not is_continue:
+        return
 
     new_js = find_new_script(depend_js_readable, new_lib_dir)
 
@@ -143,7 +166,6 @@ def sf_uuid2_pngpath(uuid, t_data, all_res):
     if find_png:
         return [0, find_png]
 
-    find_pack = None
     packedAssets = t_data["packedAssets"]
     old_import_dir = os.path.join(all_res, "import")
     for x in packedAssets:
@@ -153,24 +175,7 @@ def sf_uuid2_pngpath(uuid, t_data, all_res):
                 valid_atlas = is_valid_spriteAtlasFile(ts, uuid)
                 if valid_atlas:
                     return valid_atlas
-
-    return
-    # if not find_pack:
-    #     return
-
-    # old_import_json = os.path.join(old_import_dir, find_pack + ".json")
-    # o_data = read_json_file(old_import_json)
-    # atlas = None
-    # for x in o_data:
-    #     if x["__type__"] == "cc.SpriteAtlas":
-    #         atlas = [1, file_without_extension(x["_name"])]
-
-    #         for y in x["_spriteFrames"]:
-    #             if x["_spriteFrames"][y]["__uuid__"] == uuid:
-    #                 atlas.append(y)
-    #                 break
-
-    #         return atlas
+    return [1,"image/default_sprite_splash","default_sprite_splash"]
 
 
 def getUUidByRelativePath(new_uuid_json, filepath):
@@ -220,6 +225,9 @@ def convert_srpitFrame_bind(origin_prefab, settingsfile, new_lib_dir, dst_dir,
     sf_uuid = {}
     for x in map1:
         tm = map1[x]
+        if not tm:
+            print("cannot find res: {} ".format(x))
+            continue
         pngName = None
         frameName = None
         if tm[0] == 0:
@@ -239,9 +247,49 @@ def convert_srpitFrame_bind(origin_prefab, settingsfile, new_lib_dir, dst_dir,
             if z[0] == frameName:
                 replace_map[x] = z[1]
                 break
-        print("{} replace {} to {}".format(tm[1] if tm[0] == 0 else tm[2], x,
-                                           replace_map[x]))
+        print("replace {} to {}  ( {} )".format( x,
+                                           replace_map[x],tm[1] if tm[0] == 0 else tm[2] ))
 
+def convert_prefab_bind(origin_prefab, settingsfile, new_lib_dir, dst_dir,
+                            all_res, replace_map):
+    pass
+    t_data = read_json_file(settingsfile)
+    all_sfs = find_all_prefab(origin_prefab)
+    map1 = {}
+    for x in all_sfs:
+        map1[x] = sf_uuid2_pngpath(x, t_data, all_res)
+
+    new_uuid_json = read_json_file(
+        os.path.join(new_lib_dir, "uuid-to-mtime.json"))
+    for x in map1:
+        tm = map1[x]
+        pngName = tm[1]
+        pngUUid = getUUidByRelativePath(new_uuid_json, pngName)
+        replace_map[x] = pngUUid
+        print("replace {} to {}  ( {} )".format( x,
+                                           replace_map[x],tm[1] if tm[0] == 0 else tm[2] ))
+
+
+def convert_matrial_bind(origin_prefab, settingsfile, new_lib_dir, dst_dir,
+                            all_res, replace_map):
+    pass
+    t_data = read_json_file(settingsfile)
+    all_sfs = find_all_matrial(origin_prefab)
+    map1 = {}
+    for x in all_sfs:
+        map1[x] = sf_uuid2_pngpath(x, t_data, all_res)
+
+    new_uuid_json = read_json_file(
+        os.path.join(new_lib_dir, "uuid-to-mtime.json"))
+    for x in map1:
+        tm = map1[x]
+        pngName = tm[1]
+        pngUUid = getUUidByRelativePath(new_uuid_json, pngName)
+        replace_map[x] = pngUUid
+        print("replace {} to {}  ( {} )".format( x,
+                                           replace_map[x],tm[1] if tm[0] == 0 else tm[2] ))
+
+    a = 100
 
 # python convert_prefab.py /Users/mac/Downloads/_-1495149767_49.wxapkg_dir/prefab_res/LayoutLoading.prefab /Users/mac/Documents/my_projects/creator_proj/third_code/jsfilemap/map.json /Users/mac/Documents/my_projects/creator_proj/some_component/library /Users/mac/Downloads/_-1495149767_49.wxapkg_dir/prefab_convert
 def main():
@@ -261,17 +309,20 @@ def main():
                         replace_map)
         convert_srpitFrame_bind(origin_prefab, settingsfile, new_lib_dir,
                                 dst_dir, all_res, replace_map)
+        convert_prefab_bind(origin_prefab, settingsfile, new_lib_dir,
+                                dst_dir, all_res, replace_map)
+        convert_matrial_bind(origin_prefab, settingsfile, new_lib_dir,
+                                dst_dir, all_res, replace_map)
 
         new_prefab = os.path.join(dst_dir, os.path.basename(origin_prefab))
         with open(origin_prefab, "r") as f:
             contents = f.read()
             for x in replace_map:
-                contents = contents.replace(x, replace_map[x])
+                if replace_map[x]:
+                    contents = contents.replace(x, replace_map[x])
 
             with open(new_prefab, "w") as f2:
                 f2.write(contents.encode("utf-8"))
-
-        a = 100
 
 
 if __name__ == "__main__":
