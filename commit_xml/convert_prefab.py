@@ -12,6 +12,7 @@ disabledframe_re = re.compile(r'disabledSprite"\s*:\s*\{"__uuid__"\s*:\s*"(.*?)"
 hoverframe_re = re.compile(r'hoverSprite"\s*:\s*\{"__uuid__"\s*:\s*"(.*?)"\}')
 prefab_re = re.compile(r'"_prefab":.*?,\s*"__type__":\s*"cc.PrefabInfo",\s*"asset":\s*\{"__uuid__":\s*"(.*?)"\}')
 matrial_re = re.compile(r'"_materials":\s*(\[\{.*?\}\s*\])')
+spine_re = re.compile(r'skeletonData"\s*:\s*\{"__uuid__"\s*:\s*"(.*?)"\}')
 
 
 def file_without_extension(path):
@@ -289,9 +290,27 @@ def convert_matrial_bind(origin_prefab, settingsfile, new_lib_dir, dst_dir,
         print("replace {} to {}  ( {} )".format( x,
                                            replace_map[x],tm[1] if tm[0] == 0 else tm[2] ))
 
-    a = 100
+def convert_spine_bind(origin_prefab, settingsfile, new_lib_dir, dst_dir,
+                            all_res, replace_map):
+    pass
+    t_data = read_json_file(settingsfile)
+    all_sfs = find_uuid_byre(origin_prefab,[spine_re])
+    map1 = {}
+    for x in all_sfs:
+        map1[x] = sf_uuid2_pngpath(x, t_data, all_res)
 
-# python convert_prefab.py /Users/mac/Downloads/_-1495149767_49.wxapkg_dir/prefab_res/LayoutLoading.prefab /Users/mac/Documents/my_projects/creator_proj/third_code/jsfilemap/map.json /Users/mac/Documents/my_projects/creator_proj/some_component/library /Users/mac/Downloads/_-1495149767_49.wxapkg_dir/prefab_convert
+    new_uuid_json = read_json_file(
+        os.path.join(new_lib_dir, "uuid-to-mtime.json"))
+    for x in map1:
+        tm = map1[x]
+        pngName = tm[1]
+        pngUUid = getUUidByRelativePath(new_uuid_json, pngName)
+        replace_map[x] = pngUUid
+        print("replace {} to {}  ( {} )".format( x,
+                                           replace_map[x],tm[1] if tm[0] == 0 else tm[2] ))
+
+
+# python convert_prefab.py /Users/mac/Downloads/_-1495149767_49.wxapkg_dir/prefab_res/LayoutLoading.prefab /Users/mac/Documents/my_projects/creator_proj/third_code/jsfilemap/map.json /Users/mac/Documents/my_projects/local_project/opengl_st/commit_xml/settings.json /Users/mac/Documents/my_projects/creator_proj/some_component/library /Users/mac/Downloads/_-1495149767_49.wxapkg_dir/prefab_convert /Users/mac/Downloads/_-1495149767_49.wxapkg_dir/allres
 def main():
     if len(sys.argv) == 7:
         origin_prefab = sys.argv[1]
@@ -312,6 +331,9 @@ def main():
         convert_prefab_bind(origin_prefab, settingsfile, new_lib_dir,
                                 dst_dir, all_res, replace_map)
         convert_matrial_bind(origin_prefab, settingsfile, new_lib_dir,
+                                dst_dir, all_res, replace_map)
+
+        convert_spine_bind(origin_prefab, settingsfile, new_lib_dir,
                                 dst_dir, all_res, replace_map)
 
         new_prefab = os.path.join(dst_dir, os.path.basename(origin_prefab))
