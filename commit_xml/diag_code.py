@@ -16,6 +16,9 @@ CorArr = ['(', '[', '{', '}', ']', ')']
 def file_extension(path):
     return os.path.splitext(path)[1]
 
+def file_without_extension(path):
+    return os.path.splitext(os.path.basename(path))[0]
+
 
 def is_number(str):
     try:
@@ -364,12 +367,12 @@ def get_res(js_file_name, out_put_dir, base_url):
     assetTypes = json_data['assetTypes']
 
     direct_get_res = [
-        "cc.Texture2D", "cc.AudioClip", "cc.JsonAsset", "sp.SkeletonData"
+        "cc.Texture2D", "cc.AudioClip", "cc.JsonAsset", "sp.SkeletonData", "cc.TiledMapAsset"
     ]
-    direct_get_res_suff = [".png", ".mp3", ".json", ".json"]
-    file_mode_arr = ["wb", "wb", "w", "w"]
-    file_mode_arr = ["wb", "wb", "w", "w"]
-    searchModule = ["raw-assets", "raw-assets", "import", "import"]
+    direct_get_res_suff = [".png", ".mp3", ".json", ".json", ".json"]
+    file_mode_arr = ["wb", "wb", "w", "w", "w"]
+    file_mode_arr = ["wb", "wb", "w", "w", "w"]
+    searchModule = ["raw-assets", "raw-assets", "import", "import", "import"]
     direct_get_res_idx = []
     for i, v in enumerate(direct_get_res):
         for i1, v1 in enumerate(assetTypes):
@@ -382,7 +385,6 @@ def get_res(js_file_name, out_put_dir, base_url):
     md5AssetsMap_import = md5AssetsMap["import"]
     md5AssetsMap_raw = md5AssetsMap["raw-assets"]
 
-    tm = get_md5_suffix(978, md5AssetsMap_import)
     raw_url = "raw-assets"
     import_url = "import"
     for k in json_data['rawAssets']:
@@ -391,8 +393,10 @@ def get_res(js_file_name, out_put_dir, base_url):
             asset_one = asset_tmp[k1]
             asset_url = asset_one[0]
             asset_type = asset_one[1]
-            if not ".jpg" in asset_url:
+            if not ".tmx" in asset_url:
                 continue
+            if assetTypes[asset_type] == "cc.TiledMapAsset":
+                asset_url = file_without_extension(asset_url) + ".json"
 
             if asset_type in direct_get_res_idx:
                 asset_idx = direct_get_res_idx.index(asset_type)
@@ -415,6 +419,8 @@ def get_res(js_file_name, out_put_dir, base_url):
                     save_one_file(final_url, dst_path, file_mode)
                     a = 100
 
+    if True:
+        return
     for k in json_data['packedAssets']:
         md5_suf = get_md5_suffix(k, md5AssetsMap_import)
         if md5_suf:
@@ -441,7 +447,7 @@ def main():
         if res_type == "code":
             get_code(js_file_name, out_put_dir)
         elif res_type == "res":
-            # python diag_code.py /Users/tangwen/Documents/my_projects/cplusplus_test/opengl_st1/Opengl_st1/commit_xml/settings.json /Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/allres/jpgs res
+            # python diag_code.py /Users/tangwen/Documents/my_projects/cplusplus_test/opengl_st1/Opengl_st1/commit_xml/settings.json /Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/allres/map_tmx res
             base_url = "https://cdn.ftaro.com/kingwar4_h5/43331/wx/res"
             get_res(js_file_name, out_put_dir, base_url)
 

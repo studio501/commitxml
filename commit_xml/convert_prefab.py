@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*
 import os, sys, shutil, re
 import subprocess, json
-import my_input
+import my_input, demjson
 
 type_re = re.compile(r'"__type__":\s*"(.*?)"')
 ref_re = re.compile(r"cc._RF.push\(module,\s*'(.*?)',\s*.*?\);")
@@ -13,6 +13,9 @@ hoverframe_re = re.compile(r'hoverSprite"\s*:\s*\{"__uuid__"\s*:\s*"(.*?)"\}')
 prefab_re = re.compile(r'"_prefab":.*?,\s*"__type__":\s*"cc.PrefabInfo",\s*"asset":\s*\{"__uuid__":\s*"(.*?)"\}')
 matrial_re = re.compile(r'"_materials":\s*(\[\{.*?\}\s*\])')
 spine_re = re.compile(r'skeletonData"\s*:\s*\{"__uuid__"\s*:\s*"(.*?)"\}')
+
+# only for sg
+get1_re = re.compile(r'ftc.ManagerData.get1\("(.*?)"\)')
 
 
 def file_without_extension(path):
@@ -309,6 +312,32 @@ def convert_spine_bind(origin_prefab, settingsfile, new_lib_dir, dst_dir,
         print("replace {} to {}  ( {} )".format( x,
                                            replace_map[x],tm[1] if tm[0] == 0 else tm[2] ))
 
+def is_wanted_object(symbol_name,sb_object):
+    if type(sb_object) is dict:
+        if sb_object.get("type") == "MemberExpression":
+            if sb_object.get("object") and sb_object.get("property"):
+                if sb_object["object"]["type"] == "Identifier" and sb_object["object"]["name"] == symbol_name:
+                    return sb_object["property"]["name"]
+    return None
+
+def find_mem_object(symbol_name,mem_map,script_json):
+    if type(script_json) is dict:
+        res = is_wanted_object(symbol_name,script_json)
+        if res:
+            if not res in mem_map:
+                mem_map.append(res)
+        else:
+            for x in script_json:
+                if type(script_json[x]) is dict:
+                    res = is_wanted_object(symbol_name,script_json[x])
+                    if res:
+                        if not res in mem_map:
+                            mem_map.append(res)
+                    else:
+                        find_mem_object(symbol_name,mem_map,script_json[x])
+                elif type(script_json[x]) is list:
+                    for y in script_json[x]:
+                        find_mem_object(symbol_name,mem_map,y)
 
 # python convert_prefab.py /Users/mac/Downloads/_-1495149767_49.wxapkg_dir/prefab_res/LayoutLoading.prefab /Users/mac/Documents/my_projects/creator_proj/third_code/jsfilemap/map.json /Users/mac/Documents/my_projects/local_project/opengl_st/commit_xml/settings.json /Users/mac/Documents/my_projects/creator_proj/some_component/library /Users/mac/Downloads/_-1495149767_49.wxapkg_dir/prefab_convert /Users/mac/Downloads/_-1495149767_49.wxapkg_dir/allres
 def main():
@@ -345,6 +374,109 @@ def main():
 
             with open(new_prefab, "w") as f2:
                 f2.write(contents.encode("utf-8"))
+    elif len(sys.argv) == 3: # convert tmx file
+        sourceDir = sys.argv[1]
+        dst_dir = sys.argv[2]
+        if not os.path.exists(dst_dir):
+            os.makedirs(dst_dir)
+        for f in os.listdir(sourceDir):
+            sourceF = os.path.join(sourceDir, f)
+            if file_extension(f) == ".json" and os.path.isfile(sourceF):
+                js_data = read_json_file(sourceF)
+                if type(js_data) is dict and js_data.get("__type__") == "cc.TiledMapAsset" and js_data.get("tmxXmlStr"):
+                    xml_str = js_data.get("tmxXmlStr")
+                    tmx_file_name = file_without_extension(f) + ".tmx"
+                    with open(os.path.join(dst_dir,tmx_file_name), "w") as f2:
+                        f2.write(xml_str)
+                        print("save {} successful",tmx_file_name)
+    elif len(sys.argv) == 2: #gen ftc.ManagerData only use for 三国吞噬无界
+        with open(sys.argv[1],"r") as f:
+            data1 = {}
+            data2 = {}
+            _data2Id = {}
+            _dataKeys = {}
+            contents = f.read()
+            for match in re.finditer(get1_re, contents):
+                # Start index of match (integer)
+                sStart = match.start()
+
+                # Final index of match (integer)
+                sEnd = match.end()
+
+                # Complete match (string)
+                sGroup = match.group()
+                t_key = match.group(1)
+                data1[t_key] = data1.get(t_key) if data1.get(t_key) else {}
+                key_name_arr = []
+                if contents[sEnd] == ".":
+                    for i in range(52):
+                        tv = contents[sEnd+1+i]
+                        if len(re.findall('\w',tv)) == 0:
+                            break
+                        else:
+                            key_name_arr.append(tv)
+                    data1[t_key][''.join(key_name_arr)] = ""
+                elif contents[sEnd] == "[":
+                    for i in range(52):
+                        tv = contents[sEnd+2+i]
+                        if len(re.findall('\w',tv)) == 0:
+                            break
+                        else:
+                            key_name_arr.append(tv)
+                    data1[t_key][''.join(key_name_arr)] = ""
+                else:
+                    symbol_name = ""
+                    equal_idx = None
+                    s_flag = None
+                    for i in range(52):
+                        tidx = sStart-1-i
+                        tv = contents[tidx]
+                        if tv == '=':
+                            equal_idx = tidx
+                        elif equal_idx and len(re.findall('\w',tv)) == 1:
+                            s_flag = tidx
+                        elif equal_idx and s_flag and len(re.findall('\w',tv)) == 0:
+                            break
+                    print("temp variable name {}".format(contents[s_flag:equal_idx]))
+                    symbol_name = contents[s_flag:equal_idx]
+                    if equal_idx and s_flag:
+                        brace_arr = []
+                        brace_i = 0
+                        t_i = sEnd
+                        while True:
+                            brace_i += 1
+                            t_i = sEnd + brace_i
+                            if contents[t_i] == '{':
+                                brace_arr.append(contents[t_i])
+                            elif contents[t_i] == '}':
+                                if len(brace_arr) == 0:
+                                    break
+                                else:
+                                    brace_arr.pop()
+                        script_str = contents[sStart:t_i]
+                        try:
+                            script_json_str = subprocess.check_output(['node','jsgrama.js',script_str])
+                        except Exception as e:
+                            a = 100
+                        script_json = json.loads(script_json_str)
+                        mem_map = []
+                        find_mem_object(symbol_name,mem_map,script_json)
+                        for mm in mem_map:
+                            data1[t_key][mm] = ""
+                    pass
+
+                # Print match
+                # print('Match "{}" found at: [{},{}]'.format(sGroup, sStart,sEnd))
+
+            ss = get1_re.findall(contents)
+            c1 = get1_re.search(contents)
+            c2 = c1.groups()
+            c3 = c1.group()
+            c4 = c1.groupdict()
+            for x in c1.group():
+                a = x
+                b = a
+            sa = ss
 
 
 if __name__ == "__main__":
