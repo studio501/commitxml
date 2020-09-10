@@ -111,22 +111,46 @@ def get_json_map(json_dir,json_map,type_name="cc.SpriteAtlas"):
         elif os.path.isdir(sourceF):
             get_json_map(sourceF,json_map)
 
+def get_prefab_byfile(sourceF,dstDir):
+    bf = os.path.basename(sourceF)
+    if file_extension(sourceF) == ".json":
+        json_data = is_json_file(sourceF)
+        if json_data and type(json_data) is list:
+            y = json_data
+            if type(y) is list and type(y[0]) is dict and y[0].get("__type__") and y[0]["__type__"] == "cc.Prefab":
+                prefab_contents = y
+                prefab_name = y[0]["_name"]
+                prefab_filename = os.path.join(dstDir,prefab_name+".prefab")
+                with open(prefab_filename,"w") as f:
+                    f.write(json.dumps(prefab_contents,encoding="utf-8"))
+                return
+
+            for x in json_data:
+                if type(x) is list and type(x[0]) is dict and x[0].get("__type__") and x[0]["__type__"] == "cc.Prefab":
+                    prefab_contents = x
+                    prefab_name = x[0]["_name"]
+                    prefab_filename = os.path.join(dstDir,prefab_name+".prefab")
+                    with open(prefab_filename,"w") as f:
+                        f.write(json.dumps(prefab_contents,encoding="utf-8"))
+                    break
+
 def get_prefab(json_dir,dstDir):
     for f in os.listdir(json_dir):
         sourceF = os.path.join(json_dir,f)
         if os.path.isfile(sourceF):
-            bf = os.path.basename(sourceF)
-            if file_extension(sourceF) == ".json":
-                json_data = is_json_file(sourceF)
-                if json_data and type(json_data) is list:
-                    for x in json_data:
-                        if type(x) is list and type(x[0]) is dict and x[0].get("__type__") and x[0]["__type__"] == "cc.Prefab":
-                            prefab_contents = x
-                            prefab_name = x[0]["_name"]
-                            prefab_filename = os.path.join(dstDir,prefab_name+".prefab")
-                            with open(prefab_filename,"w") as f:
-                                f.write(json.dumps(prefab_contents,encoding="utf-8"))
-                            break
+            get_prefab_byfile(sourceF,dstDir)
+            # bf = os.path.basename(sourceF)
+            # if file_extension(sourceF) == ".json":
+            #     json_data = is_json_file(sourceF)
+            #     if json_data and type(json_data) is list:
+            #         for x in json_data:
+            #             if type(x) is list and type(x[0]) is dict and x[0].get("__type__") and x[0]["__type__"] == "cc.Prefab":
+            #                 prefab_contents = x
+            #                 prefab_name = x[0]["_name"]
+            #                 prefab_filename = os.path.join(dstDir,prefab_name+".prefab")
+            #                 with open(prefab_filename,"w") as f:
+            #                     f.write(json.dumps(prefab_contents,encoding="utf-8"))
+            #                 break
 
         elif os.path.isdir(sourceF):
             get_prefab(sourceF,dstDir)
@@ -197,6 +221,7 @@ def unzip_to(zf,dst_dir):
 
 def test():
     abcd = 100
+    get_prefab_byfile("/Users/mac/Downloads/_-1495149767_49.wxapkg_dir/allres/after_prefabs/95611f5a-9017-4022-8155-dc8704315c72.a4b6f.json","/Users/mac/Downloads/_-1495149767_49.wxapkg_dir/prefab_res")
 
 def parse_jsfile(js_filename,output):
     with open(js_filename,"r") as f:

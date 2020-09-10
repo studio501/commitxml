@@ -2,6 +2,7 @@ import os, sys, shutil, re
 import subprocess, json
 
 get1_re = re.compile(r'ftc.ManagerData.get1\("(.*?)"\)')
+get2_re = re.compile(r'ftc.ManagerData.get2(Object)?\("(\w+)".*?\)')
 
 def is_wanted_object(symbol_name,sb_object):
     if type(sb_object) is dict:
@@ -92,7 +93,7 @@ def find_get1_data(contents,data1):
                     s_flag = tidx
                 elif equal_idx and s_flag and len(re.findall('\w',tv)) == 0:
                     break
-            print("temp variable name {}".format(contents[s_flag:equal_idx]))
+            # print("temp variable name {}".format(contents[s_flag:equal_idx]))
             symbol_name = contents[s_flag:equal_idx]
             if equal_idx and s_flag:
                 brace_arr = []
@@ -122,6 +123,18 @@ def find_get1_data(contents,data1):
                     data1[t_key][mm] = ""
             pass
 
+
+def find_get2_data(contents,data1):
+    for match in re.finditer(get2_re, contents):
+        sStart = match.start()
+        sEnd = match.end()
+        sGroup = match.group()
+        t_key = match.group(2)
+        data1[t_key] = data1.get(t_key) if data1.get(t_key) else {
+            '0': {"id":0}
+        }
+        key_name_arr = []
+
 def main():
     if len(sys.argv) == 2: #gen ftc.ManagerData only use for 三国吞噬无界
         with open(sys.argv[1],"r") as f:
@@ -132,17 +145,13 @@ def main():
             contents = f.read()
             
             find_get1_data(contents,data1)
+            find_get2_data(contents,data2)
 
+            print("data1,,,")
+            print(json.dumps(data1))
+            print("data2,,,")
+            print(json.dumps(data2))
 
-            ss = get1_re.findall(contents)
-            c1 = get1_re.search(contents)
-            c2 = c1.groups()
-            c3 = c1.group()
-            c4 = c1.groupdict()
-            for x in c1.group():
-                a = x
-                b = a
-            sa = ss
 
 if __name__ == "__main__":
     main()
