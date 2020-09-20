@@ -113,6 +113,8 @@ def find_spine_withfilename(sourceDir,dstDir,originSrcDirLen):
         if os.path.isfile(sourceF):
             bf = os.path.basename(sourceF)
             if file_extension(sourceF) == ".json":
+                if not bf in ["scene_14.json","scene_16.json","scene_17.json"]:
+                    continue
                 relative_dir = sourceDir[originSrcDirLen+1:]
                 json_data = is_json_file(sourceF)
                 if json_data and type(json_data) is dict:
@@ -120,7 +122,9 @@ def find_spine_withfilename(sourceDir,dstDir,originSrcDirLen):
                         pass
                         file_base_name = file_without_extension(f)
                         print("start save {0}".format(file_base_name))
-                        find_png = os.path.join(sourceDir,file_base_name+".png")
+                        # find_png = os.path.join(sourceDir,file_base_name+".png")
+                        textureName = json_data["textureNames"][0]
+                        find_png = os.path.join(sourceDir,textureName)
                         if os.path.exists(find_png):
                             tmpDir = dstDir
                             if relative_dir != "":
@@ -132,13 +136,14 @@ def find_spine_withfilename(sourceDir,dstDir,originSrcDirLen):
                                     pass
                             os.makedirs(os.path.join(tmpDir,file_base_name))
                             # json.dumps(json_data["_skeletonJson"],encoding="utf-8") _atlasText
-                            atlas_data = write_atlas_file(json.dumps(json_data["_atlasText"],encoding="utf-8"),os.path.join(tmpDir,file_base_name,file_base_name + ".atlas"))
+                            atlas_name = file_base_name + ".atlas"
+                            atlas_data = write_atlas_file(json.dumps(json_data["_atlasText"],encoding="utf-8"),os.path.join(tmpDir,file_base_name, atlas_name))
                             spine_name = file_base_name
                             # file_without_extension(atlas_data[0])
-                            shutil.move(os.path.join(tmpDir,file_base_name,file_base_name + ".atlas"),os.path.join(tmpDir,file_base_name,spine_name + ".atlas"))
+                            # shutil.move(os.path.join(tmpDir,file_base_name,atlas_name),os.path.join(tmpDir,file_base_name,spine_name + ".atlas"))
                         
                             write_sp_file(json.dumps(json_data["_skeletonJson"],encoding="utf-8"),os.path.join(tmpDir,file_base_name,spine_name + ".json"))
-                            shutil.copy(find_png, os.path.join(tmpDir,file_base_name,spine_name + ".png"))
+                            shutil.copy(find_png, os.path.join(tmpDir,file_base_name,textureName))
                             print("save {0} successful".format(file_base_name))
                             # dst_dir = os.path.join(tmpDir,spine_name)
                             # if os.path.exists(dst_dir):

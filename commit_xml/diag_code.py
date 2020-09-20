@@ -393,7 +393,7 @@ def get_res(js_file_name, out_put_dir, base_url):
             asset_one = asset_tmp[k1]
             asset_url = asset_one[0]
             asset_type = asset_one[1]
-            if not ".tmx" in asset_url:
+            if not asset_url in ["spine/npc/scene_14.json","spine/npc/scene_16.json","spine/npc/scene_17.json"]:
                 continue
             if assetTypes[asset_type] == "cc.TiledMapAsset":
                 asset_url = file_without_extension(asset_url) + ".json"

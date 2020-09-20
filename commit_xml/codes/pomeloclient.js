@@ -43,39 +43,38 @@
             return !!this.listeners(t).length
         }, "undefined" != typeof window && (window.EventEmitter = t)
     } (),
-        function (t, e, i) {
+        function (t, ByteArray, i) {
             var a = t,
-                n = a.Package = {},
+                Package = a.Package = {},
                 s = a.Message = {};
-            n.TYPE_HANDSHAKE = 1, n.TYPE_HANDSHAKE_ACK = 2, n.TYPE_HEARTBEAT = 3, n.TYPE_DATA = 4, n.TYPE_KICK = 5, s.TYPE_REQUEST = 0, s.TYPE_NOTIFY = 1, s.TYPE_RESPONSE = 2, s.TYPE_PUSH = 3, a.strencode = function (t) {
-                for (var i = new e(3 * t.length), a = 0, n = 0; n < t.length; n++) {
+            Package.TYPE_HANDSHAKE = 1, Package.TYPE_HANDSHAKE_ACK = 2, Package.TYPE_HEARTBEAT = 3, Package.TYPE_DATA = 4, Package.TYPE_KICK = 5, s.TYPE_REQUEST = 0, s.TYPE_NOTIFY = 1, s.TYPE_RESPONSE = 2, s.TYPE_PUSH = 3, a.strencode = function (t) {
+                for (var i = new ByteArray(3 * t.length), a = 0, n = 0; n < t.length; n++) {
                     var s = t.charCodeAt(n),
                         o = null;
                     o = s <= 127 ? [s] : s <= 2047 ? [192 | s >> 6, 128 | 63 & s] : [224 | s >> 12, 128 | (4032 & s) >> 6, 128 | 63 & s];
                     for (var r = 0; r < o.length; r++) i[a] = o[r], ++a
                 }
-                var h = new e(a);
-                return c(h, 0, i, 0, a), h
+                var h = new ByteArray(a);
+                return copyArray(h, 0, i, 0, a), h
             }, a.strdecode = function (t) {
-                for (var i = new e(t), a = [], n = 0, s = 0, o = i.length; n < o;) i[n] < 128 ? (s = i[n], n += 1) : i[n] < 224 ? (s = ((63 & i[n]) << 6) + (63 & i[n + 1]), n += 2) : (s = ((15 & i[n]) << 12) + ((63 & i[n + 1]) << 6) + (63 & i[n + 2]), n += 3), a.push(s);
+                for (var i = new ByteArray(t), a = [], n = 0, s = 0, o = i.length; n < o;) i[n] < 128 ? (s = i[n], n += 1) : i[n] < 224 ? (s = ((63 & i[n]) << 6) + (63 & i[n + 1]), n += 2) : (s = ((15 & i[n]) << 12) + ((63 & i[n + 1]) << 6) + (63 & i[n + 2]), n += 3), a.push(s);
                 var r, c = "";
                 for (r = 0; r < a.length / 8192; r++) c += String.fromCharCode.apply(null, a.slice(8192 * r, 8192 * (r + 1)));
                 return c += String.fromCharCode.apply(null, a.slice(8192 * r))
-            }, n.encode = function (t, i) {
+            }, Package.encode = function (t, i) {
                 var a = i ? i.length : 0,
-                    n = new e(4 + a),
+                    n = new ByteArray(4 + a),
                     s = 0;
-                return n[s++] = 255 & t, n[s++] = a >> 16 & 255, n[s++] = a >> 8 & 255, n[s++] = 255 & a, i && c(n, s, i, 0, a), n
-            }, n.decode = function (t) {
-                for (var i = 0, a = new e(t), n = 0, s = []; i < a.length;) {
-                    var o = a[i++],
-                        r = (n = (a[i++] << 16 | a[i++] << 8 | a[i++]) >>> 0) ? new e(n) : null;
-                    c(r, 0, a, i, n), i += n, s.push({
-                        type: o,
-                        body: r
-                    })
+                return n[s++] = 255 & t, n[s++] = a >> 16 & 255, n[s++] = a >> 8 & 255, n[s++] = 255 & a, i && copyArray(n, s, i, 0, a), n
+            }, Package.decode = function (t) {
+                for (var offset = 0, bytes = new ByteArray(t), length = 0, rs = []; offset < bytes.length;) {
+                    var type = bytes[offset++];
+                    var body = (length = (bytes[offset++] << 16 | bytes[offset++] << 8 | bytes[offset++]) >>> 0) ? new ByteArray(length) : null;
+                    copyArray(body, 0, bytes, offset, length);
+                    offset += length;
+                    rs.push({ type: type, body: body });
                 }
-                return 1 === s.length ? s[0] : s
+                return 1 === rs.length ? rs[0] : rs
             };
             var o = function (t) {
                 for (var i = Math.ceil(1e4 * Math.random() + 1e4), a = [i >> 8 & 255, 255 & i], n = 0, s = 0, o = t.length; s < o; s++) n += t[s] * (s + 1);
@@ -86,14 +85,14 @@
                         t[h] = t[d], t[d] = l
                     }
                 }
-                var u = new e(6 + t.length);
-                return c(u, 0, a, 0, a.length), c(u, a.length, r, 0, r.length), c(u, a.length + r.length, t, 0, t.length), u
+                var u = new ByteArray(6 + t.length);
+                return copyArray(u, 0, a, 0, a.length), copyArray(u, a.length, r, 0, r.length), copyArray(u, a.length + r.length, t, 0, t.length), u
             },
                 r = function (t) {
                     var i = (t[0] << 8) + t[1],
                         a = (t[2] << 24) + (t[3] << 16) + (t[4] << 8) + t[5],
-                        n = new e(t.length - 6);
-                    c(n, 0, t, 6, t.length);
+                        n = new ByteArray(t.length - 6);
+                    copyArray(n, 0, t, 6, t.length);
                     for (var s = n.length, o = s - 1; o >= 0; o--) {
                         var r = 2 * (o + 1) + i * Math.pow(o, 2);
                         if (r > s && 0 == (r %= s) && (r = s), (r -= 1) != s) {
@@ -115,12 +114,12 @@
                         c += s.length
                     }
                 r && (c += r.length);
-                var m = new e(c),
+                var m = new ByteArray(c),
                     b = 0;
                 return b = l(i, n, m, b), h(i) && (b = u(t, m, b)), f(i) && (b = p(n, s, m, b)), r && (b = g(r, m, b)), o(m)
             }, s.decode = function (t) {
                 t = r(t);
-                var i = new e(t),
+                var i = new ByteArray(t),
                     n = i.length || i.byteLength,
                     s = 0,
                     o = 0,
@@ -139,10 +138,10 @@
                     if (u) d = i[s++] << 8 | i[s++];
                     else {
                         var b = i[s++];
-                        b ? (d = new e(b), c(d, 0, i, s, b), d = a.strdecode(d)) : d = "", s += b
+                        b ? (d = new ByteArray(b), copyArray(d, 0, i, s, b), d = a.strdecode(d)) : d = "", s += b
                     } var v = n - s,
-                        y = new e(v);
-                return c(y, 0, i, s, v), {
+                        y = new ByteArray(v);
+                return copyArray(y, 0, i, s, v), {
                     id: o,
                     type: p,
                     compressRoute: u,
@@ -150,7 +149,7 @@
                     body: y
                 }
             };
-            var c = function (t, e, i, a, n) {
+            var copyArray = function (t, e, i, a, n) {
                 if ("function" == typeof i.copy) i.copy(t, e, a, a + n);
                 else
                     for (var s = 0; s < n; s++) t[e++] = i[a++]
@@ -184,11 +183,11 @@
                     if (t) {
                         if (e > 65535) throw new Error("route number is overflow");
                         i[a++] = e >> 8 & 255, i[a++] = 255 & e
-                    } else e ? (i[a++] = 255 & e.length, c(i, a, e, 0, e.length), a += e.length) : i[a++] = 0;
+                    } else e ? (i[a++] = 255 & e.length, copyArray(i, a, e, 0, e.length), a += e.length) : i[a++] = 0;
                     return a
                 },
                 g = function (t, e, i) {
-                    return c(e, i, t, 0, t.length), i + t.length
+                    return copyArray(e, i, t, 0, t.length), i + t.length
                 };
             "undefined" != typeof window && (window.Protocol = a)
         }("undefined" == typeof window ? e.exports : {}, "undefined" == typeof window ? t : Uint8Array),
@@ -467,14 +466,14 @@
         }("undefined" != typeof protobuf ? protobuf : e.exports),
         function () {
             var t = window.Protocol,
-                e = window.protobuf,
-                i = window.decodeIO_protobuf,
+                protobuf = window.protobuf,
+                decodeIO_protobuf = window.decodeIO_protobuf,
                 a = null,
                 n = null,
-                s = t.Package,
+                Package = t.Package,
                 o = t.Message,
                 r = window.EventEmitter,
-                c = window.rsa,
+                rsa = window.rsa,
                 h = null;
             "undefined" != typeof window && "undefined" != typeof sys && sys.localStorage && (window.localStorage = sys.localStorage);
             "function" != typeof Object.create && (Object.create = function (t) {
@@ -482,25 +481,25 @@
                 return e.prototype = t, new e
             });
             var f = window,
-                d = Object.create(r.prototype);
-            f.pomelo = d;
-            var l, u = null,
+                pomelo = Object.create(r.prototype);
+            f.pomelo = pomelo;
+            var useCrypto, socket = null,
                 p = 0,
-                g = {},
-                m = {},
+                callbacks = {},
+                handlers = {},
                 b = {},
-                v = {},
-                y = {},
-                _ = {},
-                x = {},
-                w = 0,
-                S = 0,
-                k = 0,
-                I = 0,
-                T = null,
-                C = null,
-                E = null,
-                M = null,
+                dict = {},
+                abbrs = {},
+                serverProtos = {},
+                clientProtos = {},
+                protoVersion = 0,
+                heartbeatInterval = 0,
+                heartbeatTimeout = 0,
+                nextHeartbeatTimeout = 0,
+                heartbeatId = null,
+                heartbeatTimeoutId = null,
+                handshakeCallback = null,
+                decode = null,
                 P = null,
                 D = !1,
                 L = null,
@@ -515,147 +514,216 @@
                     },
                     user: {}
                 },
-                H = null;
-            d.init = function (t, e) {
-                H = e;
-                var i = t.host,
-                    a = t.port;
-                P = t.encode || V, M = t.decode || F;
+                initCallback = null;
+            pomelo.init = function (t, e) {
+                initCallback = e;
+                var i = t.host;
+                var a = t.port;
+                P = t.encode || V;
+                decode = t.decode || F;
                 var n = "ws://" + i;
-                if (-1 == i.indexOf("192.168.0.") && -1 == i.indexOf("test.") && (n = "wss://" + i), a && (n += ":" + a), R.user = t.user, t.encrypt) {
-                    l = !0, c.generate(1024, "10001");
-                    var s = {
-                        rsa_n: c.n.toString(16),
-                        rsa_e: c.e
-                    };
-                    R.sys.rsa = s
+                if (i.indexOf("192.168.0.") == -1 && i.indexOf("test.") == -1) {
+                    n = "wss://" + i;
                 }
-                E = t.handshakeCallback, O(t, n, e)
+                if (a) {
+                    n += ":" + a;
+                }
+                R.user = t.user;
+                if (t.encrypt) {
+                    useCrypto = true;
+                    rsa.generate(1024, "10001");
+                    var s = { rsa_n: rsa.n.toString(16), rsa_e: rsa.e };
+                    R.sys.rsa = s;
+                }
+                handshakeCallback = t.handshakeCallback;
+                O(t, n, e);
+
             };
-            var F = d.decode = function (t) {
+            var F = pomelo.decode = function (t) {
                 var e = o.decode(t);
                 if (!(e.id > 0) || (e.route = b[e.id], delete b[e.id], e.route)) return e.body = J(e), e
             },
-                V = d.encode = function (i, n, s) {
+                V = pomelo.encode = function (i, n, s) {
                     var r = i ? o.TYPE_REQUEST : o.TYPE_NOTIFY;
-                    if (e && x[n]) s = e.encode(n, s);
+                    if (protobuf && clientProtos[n]) s = protobuf.encode(n, s);
                     else if (a && a.lookup(n)) {
                         s = new (a.build(n))(s).encodeNB()
                     } else s = t.strencode(JSON.stringify(s));
                     var c = 0;
-                    return v && v[n] && (n = v[n], c = 1), o.encode(i, r, c, n, s)
+                    return dict && dict[n] && (n = dict[n], c = 1), o.encode(i, r, c, n, s)
                 },
                 O = function o(r, c, f) {
                     console.log("connect to " + c);
                     var l = (r = r || {}).maxReconnectAttempts || 10;
-                    if (N = c, window.localStorage && window.localStorage.getItem("protos") && 0 === w) {
+                    if (N = c, window.localStorage && window.localStorage.getItem("protos") && 0 === protoVersion) {
                         var p = JSON.parse(window.localStorage.getItem("protos"));
-                        w = p.version || 0, _ = p.server || {}, x = p.client || {}, e && e.init({
-                            encoderProtos: x,
-                            decoderProtos: _
-                        }), i && (a = i.loadJson(x), n = i.loadJson(_))
+                        protoVersion = p.version || 0, serverProtos = p.server || {}, clientProtos = p.client || {}, protobuf && protobuf.init({
+                            encoderProtos: clientProtos,
+                            decoderProtos: serverProtos
+                        }), decodeIO_protobuf && (a = decodeIO_protobuf.loadJson(clientProtos), n = decodeIO_protobuf.loadJson(serverProtos))
                     }
-                    R.sys.protoVersion = w;
-                    (u = new WebSocket(c)).binaryType = "arraybuffer", u.onopen = function (e) {
-                        D && d.emit("reconnect"), G();
-                        var i = s.encode(s.TYPE_HANDSHAKE, t.strencode(JSON.stringify(R)));
-                        U(i)
-                    }, u.onmessage = function (t) {
-                        W(s.decode(t.data), f), k && (I = Date.now() + k), ftc._serverClose = !1
-                    }, u.onerror = function (t) {
-                        d.emit("io-error", t), console.error("socket error: ", t), ftc._serverClose = !0, ftc._serverReconnectCount = 0
-                    }, u.onclose = function (t) {
-                        d.emit("close", t), d.emit("disconnect", t), console.error("socket close: ", t), r.reconnect && B < l ? (D = !0, B++, L = setTimeout(function () {
+                    R.sys.protoVersion = protoVersion;
+                    (socket = new WebSocket(c)).binaryType = "arraybuffer", socket.onopen = function (e) {
+                        D && pomelo.emit("reconnect"), G();
+                        var i = Package.encode(Package.TYPE_HANDSHAKE, t.strencode(JSON.stringify(R)));
+                        send(i)
+                    }, socket.onmessage = function (event) {
+                        processPackage(Package.decode(event.data), f);
+                        if (heartbeatTimeout) {
+                            nextHeartbeatTimeout = Date.now() + heartbeatTimeout;
+                        }
+                        ftc._serverClose = false;
+
+                    }, socket.onerror = function (t) {
+                        pomelo.emit("io-error", t), console.error("socket error: ", t), ftc._serverClose = !0, ftc._serverReconnectCount = 0
+                    }, socket.onclose = function (t) {
+                        pomelo.emit("close", t), pomelo.emit("disconnect", t), console.error("socket close: ", t), r.reconnect && B < l ? (D = !0, B++, L = setTimeout(function () {
                             o(r, N, f)
-                        }, A), A *= 2) : ftc._serverClose = !0, u = null, h && h(), h = null
+                        }, A), A *= 2) : ftc._serverClose = !0, socket = null, h && h(), h = null
                     }
                 };
-            d.disconnect = function (t) {
-                h = t, u && (u.disconnect && u.disconnect(), u.close && u.close(), console.log("disconnect"), u = null), T && (clearTimeout(T), T = null), C && (clearTimeout(C), C = null)
+            pomelo.disconnect = function (t) {
+                h = t, socket && (socket.disconnect && socket.disconnect(), socket.close && socket.close(), console.log("disconnect"), socket = null), heartbeatId && (clearTimeout(heartbeatId), heartbeatId = null), heartbeatTimeoutId && (clearTimeout(heartbeatTimeoutId), heartbeatTimeoutId = null)
             };
             var G = function () {
                 D = !1, A = 5e3, B = 0, clearTimeout(L)
             };
-            d.request = function (t, e, i) {
-                2 === arguments.length && "function" == typeof e ? (i = e, e = {}) : e = e || {}, (t = t || e.route) && (q(++p, t, e), g[p] = i, b[p] = t)
-            }, d.notify = function (t, e) {
+            pomelo.request = function (t, e, i) {
+                2 === arguments.length && "function" == typeof e ? (i = e, e = {}) : e = e || {}, (t = t || e.route) && (q(++p, t, e), callbacks[p] = i, b[p] = t)
+            }, pomelo.notify = function (t, e) {
                 q(0, t, e = e || {})
             };
             var q = function (t, e, i) {
-                if (l) {
+                if (useCrypto) {
                     i = JSON.stringify(i);
-                    var a = c.signString(i, "sha256");
+                    var a = rsa.signString(i, "sha256");
                     (i = JSON.parse(i)).__crypto__ = a
                 }
                 P && (i = P(t, e, i));
-                var n = s.encode(s.TYPE_DATA, i);
-                U(n)
+                var n = Package.encode(Package.TYPE_DATA, i);
+                send(n)
             },
-                U = function (t) {
-                    null !== u && u.send(t.buffer)
+                send = function (t) {
+                    null !== socket && socket.send(t.buffer)
                 },
                 z = function t() {
-                    var e = I - Date.now();
-                    e > 100 ? C = setTimeout(t, e) : (console.error("server heartbeat timeout"), d.emit("heartbeat timeout"), d.disconnect())
+                    var e = nextHeartbeatTimeout - Date.now();
+                    e > 100 ? heartbeatTimeoutId = setTimeout(t, e) : (console.error("server heartbeat timeout"), pomelo.emit("heartbeat timeout"), pomelo.disconnect())
                 };
-            m[s.TYPE_HANDSHAKE] = function (e) {
-                if (501 !== (e = JSON.parse(t.strdecode(e))).code)
-                    if (200 === e.code) {
-                        Y(e);
-                        var i = s.encode(s.TYPE_HANDSHAKE_ACK);
-                        U(i), H && H(u)
-                    } else d.emit("error", "handshake fail");
-                else d.emit("error", "client version not fullfill")
-            }, m[s.TYPE_HEARTBEAT] = function (t) {
-                if (S) {
-                    var e = s.encode(s.TYPE_HEARTBEAT);
-                    C && (clearTimeout(C), C = null), T || (T = setTimeout(function () {
-                        T = null, U(e), I = Date.now() + k, C = setTimeout(z, k)
-                    }, S))
+            handlers[Package.TYPE_HANDSHAKE] = function (data) {
+                if ((data = JSON.parse(t.strdecode(data))).code === 501) {
+                    pomelo.emit("error", "client version not fullfill");
+                } else if (data.code === 200) {
+                    handshakeInit(data);
+                    var obj = Package.encode(Package.TYPE_HANDSHAKE_ACK);
+                    send(obj);
+                    if (initCallback) {
+                        initCallback(socket);
+                    }
+                } else {
+                    pomelo.emit("error", "handshake fail");
                 }
-            }, m[s.TYPE_DATA] = function (t) {
-                var e = t;
-                M && (e = M(e)), j(d, e)
-            }, m[s.TYPE_KICK] = function (e) {
-                e = JSON.parse(t.strdecode(e)), d.emit("onKick", e)
+
+            }, handlers[Package.TYPE_HEARTBEAT] = function (t) {
+                if (heartbeatInterval) {
+                    var obj = Package.encode(Package.TYPE_HEARTBEAT);
+                    if (heartbeatTimeoutId) {
+                        clearTimeout(heartbeatTimeoutId);
+                        heartbeatTimeoutId = null;
+                    }
+                    if (!heartbeatId) {
+                        heartbeatId = setTimeout(function () {
+                            heartbeatId = null;
+                            send(obj);
+                            nextHeartbeatTimeout = Date.now() + heartbeatTimeout;
+                            heartbeatTimeoutId = setTimeout(z, heartbeatTimeout);
+                        }, heartbeatInterval);
+                    }
+                }
+
+            }, handlers[Package.TYPE_DATA] = function (data) {
+                var msg = data;
+                if (decode) {
+                    msg = decode(msg);
+                }
+                processMessage(pomelo, msg);
+
+            }, handlers[Package.TYPE_KICK] = function (e) {
+                e = JSON.parse(t.strdecode(e)), pomelo.emit("onKick", e)
             };
-            var W = function (t) {
-                if (Array.isArray(t))
-                    for (var e = 0; e < t.length; e++) {
-                        var i = t[e];
-                        m[i.type](i.body)
-                    } else m[t.type](t.body)
+            var processPackage = function (msgs) {
+                if (Array.isArray(msgs)) {
+                    for (var e = 0; e < msgs.length; e++) {
+                        var msg = msgs[e];
+                        handlers[msg.type](msg.body);
+                    }
+                } else {
+                    handlers[msgs.type](msgs.body);
+                }
+
             },
-                j = function (t, e) {
-                    if (e)
-                        if (e.id) {
-                            var i = g[e.id];
-                            delete g[e.id], "function" == typeof i && i(e.body)
-                        } else t.emit(e.route, e.body);
-                    else console.log("err:msg == undefined")
+                processMessage = function (pomelo, msg) {
+                    if (msg) {
+                        if (msg.id) {
+                            var cb = callbacks[msg.id];
+                            delete callbacks[msg.id];
+                            if (typeof cb == "function") {
+                                cb(msg.body);
+                            }
+                        } else {
+                            pomelo.emit(msg.route, msg.body);
+                        }
+                    } else {
+                        console.log("err:msg == undefined");
+                    }
+
                 },
                 J = function (i) {
                     var a = i.route;
                     if (i.compressRoute) {
-                        if (!y[a]) return {};
-                        a = i.route = y[a]
+                        if (!abbrs[a]) return {};
+                        a = i.route = abbrs[a]
                     }
-                    return e && _[a] ? e.decode(a, i.body) : n && n.lookup(a) ? n.build(a).decode(i.body) : JSON.parse(t.strdecode(i.body))
+                    return protobuf && serverProtos[a] ? protobuf.decode(a, i.body) : n && n.lookup(a) ? n.build(a).decode(i.body) : JSON.parse(t.strdecode(i.body))
                 },
-                Y = function (t) {
-                    t.sys && t.sys.heartbeat ? (S = 1e3 * t.sys.heartbeat, k = 2 * S) : (S = 0, k = 0), Z(t), "function" == typeof E && E(t.user)
-                },
-                Z = function (t) {
-                    if (t && t.sys) {
-                        v = t.sys.dict;
-                        var s = t.sys.protos;
-                        if (v)
-                            for (var o in y = {}, v = v) y[v[o]] = o;
-                        s && (w = s.version || 0, _ = s.server || {}, x = s.client || {}, window.localStorage.setItem("protos", JSON.stringify(s)), e && e.init({
-                            encoderProtos: s.client,
-                            decoderProtos: s.server
-                        }), i && (a = i.loadJson(x), n = i.loadJson(_)))
+                handshakeInit = function (data) {
+                    if (data.sys && data.sys.heartbeat) {
+                        heartbeatInterval = 1e3 * data.sys.heartbeat;
+                        heartbeatTimeout = 2 * heartbeatInterval;
+                    } else {
+                        heartbeatInterval = 0;
+                        heartbeatTimeout = 0;
                     }
+                    initData(data);
+                    if (typeof handshakeCallback == "function") {
+                        handshakeCallback(data.user);
+                    }
+
+                },
+                initData = function (data) {
+                    if (data && data.sys) {
+                        dict = data.sys.dict;
+                        var protos = data.sys.protos;
+                        if (dict) {
+                            for (var route in abbrs = {}, dict = dict) {
+                                abbrs[dict[route]] = route;
+                            }
+                        }
+                        if (protos) {
+                            protoVersion = protos.version || 0;
+                            serverProtos = protos.server || {};
+                            clientProtos = protos.client || {};
+                            window.localStorage.setItem("protos", JSON.stringify(protos));
+                            if (protobuf) {
+                                protobuf.init({ encoderProtos: protos.client, decoderProtos: protos.server });
+                            }
+                            if (decodeIO_protobuf) {
+                                a = decodeIO_protobuf.loadJson(clientProtos);
+                                n = decodeIO_protobuf.loadJson(serverProtos);
+                            }
+                        }
+                    }
+
                 }
         }()
 }).call(this, t("buffer").Buffer)

@@ -221,7 +221,7 @@ def unzip_to(zf,dst_dir):
 
 def test():
     abcd = 100
-    get_prefab_byfile("/Users/mac/Downloads/_-1495149767_49.wxapkg_dir/allres/after_prefabs/95611f5a-9017-4022-8155-dc8704315c72.a4b6f.json","/Users/mac/Downloads/_-1495149767_49.wxapkg_dir/prefab_res")
+    get_prefab_byfile("/Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/prefab_parse/904eabe2-acc0-439a-b024-0fb2b87f146e.6bc50.json","/Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/prefab_res")
 
 def parse_jsfile(js_filename,output):
     with open(js_filename,"r") as f:
@@ -273,5 +273,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()   
-    # test()
+    # main()   
+    test()
