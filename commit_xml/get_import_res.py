@@ -5,7 +5,8 @@ from PIL import Image
 
 size_re = re.compile(r'size:\s* (\d+)\s*,\s*(\d+)')
 md5_re = re.compile(r'MD5\s+.*? = (\w+)\n')
-jsfile_re = re.compile(r'(\w+?):\[function\(\w+,\w+,\w+\)\{\s*"use strict";\s*cc\._RF\.push\(\w+,"(.*?)"')
+# jsfile_re = re.compile(r'(\w+?):\[function\(\w+,\w+,\w+\)\{\s*"use strict";\s*cc\._RF\.push\(\w+,"(.*?)"')
+jsfile_re = re.compile(r'cc._RF.push\(e,\"(.*?)",\"(.*?)\"\)')
 same_name_dir = 0
 
 def get_png_size(file_name):
@@ -229,7 +230,8 @@ def parse_jsfile(js_filename,output):
         ss = jsfile_re.findall(contents)
         result = {}
         for x in ss:
-            result[x[1]] = x[0]
+            # result[x[1]] = x[0]
+            result[x[0]] = x[1]
         with open(output,"w") as f:
             f.write(json.dumps(result,encoding="utf-8"))
 
@@ -273,5 +275,5 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()   
-    test()
+    main()   
+    # test()

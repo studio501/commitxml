@@ -3,6 +3,8 @@ import os, sys, shutil, re
 import subprocess, json
 import my_input, demjson
 
+from collections import Mapping, Set, Sequence 
+
 type_re = re.compile(r'"__type__":\s*"(.*?)"')
 ref_re = re.compile(r"cc._RF.push\(module,\s*'(.*?)',\s*.*?\);")
 spriteframe_re = re.compile(r'"_spriteFrame":\s*\{"__uuid__":\s*"(.*?)"\}')
@@ -17,6 +19,19 @@ spine_re = re.compile(r'skeletonData"\s*:\s*\{"__uuid__"\s*:\s*"(.*?)"\}')
 # only for sg
 get1_re = re.compile(r'ftc.ManagerData.get1\("(.*?)"\)')
 
+string_types = (str, unicode) if str is bytes else (str, bytes)
+iteritems = lambda mapping: getattr(mapping, 'iteritems', mapping.items)()
+
+def objwalk(obj, cb):
+    iterator = None
+    if isinstance(obj, Mapping):
+        iterator = iteritems
+        cb(obj)
+    elif isinstance(obj, (Sequence, Set)) and not isinstance(obj, string_types):
+        iterator = enumerate
+    if iterator:
+        for path_component, value in iterator(obj):
+            objwalk(value,cb)
 
 def file_without_extension(path):
     return os.path.splitext(os.path.basename(path))[0]
@@ -363,5 +378,70 @@ def main():
                         f2.write(xml_str)
                         print("save {} successful",tmx_file_name)
 
+def find_spriteFrameInfo_newlib(sourceDir,uuid_to_mtime,res):
+    for f in os.listdir(sourceDir):
+        sourceF = os.path.join(sourceDir, f)
+        if os.path.isfile(sourceF) and file_extension(sourceF) == ".json":
+            data = read_json_file(sourceF)
+            if isinstance(data, Mapping) and data.get("__type__") and data.get("__type__") == "cc.SpriteFrame" and data.get("content"):
+                texture = data["content"]["texture"]
+                res.append({"texture":uuid_to_mtime[texture]["relativePath"],"name":data["content"]["name"],"path":sourceF})
+        elif os.path.isdir(sourceF):
+            find_spriteFrameInfo_newlib(sourceF,uuid_to_mtime,res)
+
+def find_spriteFrameInfo(json_path):
+    json_data = read_json_file(json_path)
+    res = []
+    def check_back(data):
+        if data.get("__type__") and data.get("__type__") == "cc.SpriteFrame" and data.get("content") and sum(data["content"]["capInsets"]) > 0:
+            res.append({"name":data["content"]["name"],"texture":data["content"]["texture"],"capInsets":data["content"]["capInsets"]})
+    objwalk(json_data,check_back)
+
+    return res
+
+def convert_sprite9( settingsfile, new_lib_dir, all_res):
+    t_data = read_json_file(settingsfile)
+    check_dir = ["import","jpgs"]
+    old_sf_info = []
+    for x in check_dir:
+        sourceDir = os.path.join(all_res,x)
+        for f in os.listdir(sourceDir):
+            if file_extension(f) == ".json":
+                sourceF = os.path.join(sourceDir, f)
+                old_sf_info.extend(find_spriteFrameInfo(sourceF))
+
+    for x in old_sf_info:
+        x["texture0"] = sf_uuid2_pngpath(x["texture"], t_data, all_res)[1]
+
+    all_sf_in_newlib = []
+    find_spriteFrameInfo_newlib(os.path.join(new_lib_dir,"imports"),read_json_file(os.path.join(new_lib_dir,"uuid-to-mtime.json")),all_sf_in_newlib)
+
+    for x in all_sf_in_newlib:
+        fixed = False
+        if x["name"] == "_progress4_1":
+            a = 100
+        for y in old_sf_info:
+            if os.path.basename(y["texture0"]) in os.path.basename(x["texture"]) and y["name"] == x["name"]:
+                json_dt = read_json_file(x["path"])
+                cap1 = json_dt["content"]["capInsets"]
+                cap2 = y["capInsets"]
+                for i,v in enumerate(cap2):
+                    cap1[i] = v
+                
+                with open(x["path"], "w") as f:
+                    f.write(json.dumps(json_dt,encoding="utf-8"))
+                    print("fix {} successful".format(x["name"]))
+                break
+
+    a = 100
 if __name__ == "__main__":
-    main()
+    # find_spriteFrameInfo("/Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/allres/import/0a184f1f0.json")
+
+    # all_sf_in_newlib = []
+    # find_spriteFrameInfo_newlib("/Users/tangwen/Documents/my_projects/cocos_creator/some_comp/client/library/imports",read_json_file("/Users/tangwen/Documents/my_projects/cocos_creator/some_comp/client/library/uuid-to-mtime.json"),all_sf_in_newlib)
+
+    convert_sprite9("/Users/tangwen/Documents/my_projects/cplusplus_test/opengl_st1/Opengl_st1/commit_xml/settings.json","/Users/tangwen/Documents/my_projects/cocos_creator/some_comp/client/library","/Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/allres")
+
+    a = 100
+
+    # main()
