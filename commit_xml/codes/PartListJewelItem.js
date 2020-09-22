@@ -16,7 +16,7 @@
                     this.item = this.newPart("PartItem"), this.item.setInteractable(!1), this.nodeItem.addChild(this.item.node)
                 },
                 updateData: function (t) {
-                    this.item.setJewelData(this.data), this.labelName.string = ft.ExtJewel.getName(this.data.id), this.labelInfo.string = ft.ExtJewel.getValueInfo(this.data.id), this.labelNum.string = ftc.language("\u6570\u91cf:") + this.data.num
+                    this.item.setJewelData(this.data), this.labelName.string = ft.ExtJewel.getName(this.data.id), this.labelInfo.string = ft.ExtJewel.getValueInfo(this.data.id), this.labelNum.string = ftc.language("数量:") + this.data.num
                 },
                 cleanup: function () { },
                 tick: function (t) { },

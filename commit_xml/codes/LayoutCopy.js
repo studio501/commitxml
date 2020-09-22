@@ -14,13 +14,13 @@
                     ftc.isIphoneX() ? (t.left = 80, e.left = 315) : (t.left = 0, e.left = 235), t.updateAlignment(), e.updateAlignment()
                 },
                 load: function () {
-                    for (var t in this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("\u526f\u672c"), this.node.addChild(this.partTopStatus.node), this.mapTypeCopys = {}, ftd.Copy.data) {
+                    for (var t in this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("副本"), this.node.addChild(this.partTopStatus.node), this.mapTypeCopys = {}, ftd.Copy.data) {
                         var e = Number(t),
                             i = ft.ExtCopy.getType(e);
                         this.mapTypeCopys[i] ? this.mapTypeCopys[i].push(e) : this.mapTypeCopys[i] = [e]
                     }
                     var a = [ft.type.copy.daily, ft.type.copy.weekly, ft.type.copy.challenge];
-                    this.listViewL.setListView(a, 0), this.selectCopyType(a[0]), this._tickTime = 0, this._tabIndex = 0, ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u526f\u672c\u7c7b\u578b"), ftc.ManagerTV.nextFrameSelect(this.listViewR.getItem(0).buttonSelf, this.node)
+                    this.listViewL.setListView(a, 0), this.selectCopyType(a[0]), this._tickTime = 0, this._tabIndex = 0, ftc.setTvTip(this.node, "【返回键】关闭界面，【菜单键】切换副本类型"), ftc.ManagerTV.nextFrameSelect(this.listViewR.getItem(0).buttonSelf, this.node)
                 },
                 setData: function (t) { },
                 selectCopyType: function (t) {
@@ -40,7 +40,7 @@
                             this.listViewL.updateListViewItems(t.index), this.selectCopyType(t.data)
                         },
                         c_onSelectCopyRightItem: function (t, e) {
-                            if (t.conditionDesc) ftc.showTip(t.conditionDesc + "\u540e\u5f00\u653e");
+                            if (t.conditionDesc) ftc.showTip(t.conditionDesc + "后开放");
                             else {
                                 var i, a, n = t.data;
                                 switch (n) {

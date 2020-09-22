@@ -7,15 +7,15 @@
                 },
                 init: function () { },
                 load: function () {
-                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("\u90ae\u4ef6"), this.node.addChild(this.partTopStatus.node), this.initPart(this.partMail), this.partMail.setData(), this.updateTvTip()
+                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("邮件"), this.node.addChild(this.partTopStatus.node), this.initPart(this.partMail), this.partMail.setData(), this.updateTvTip()
                 },
                 setData: function (t) { },
                 enter: function () {
                     this.updateData()
                 },
                 updateTvTip: function () {
-                    var t = "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u4e00\u952e\u9886\u53d6";
-                    this.partMail.tvSte && (t += "\uff0c\u3010\u786e\u5b9a\u952e\u3011" + (1 == this.partMail.tvSte ? "\u9886\u53d6\u9644\u4ef6" : "\u5220\u9664\u90ae\u4ef6")), ftc.setTvTip(this.node, t)
+                    var t = "【返回键】关闭界面，【菜单键】一键领取";
+                    this.partMail.tvSte && (t += "，【确定键】" + (1 == this.partMail.tvSte ? "领取附件" : "删除邮件")), ftc.setTvTip(this.node, t)
                 },
                 updateData: function () {
                     this.partTopStatus.updateData()
@@ -31,10 +31,10 @@
                             -1 != t && this.partMail.readMail(t), this.updateTvTip()
                         },
                         msgReceive: function (t, e) {
-                            t.length > 0 ? this.partMail.updateMailItems(t) : ftc.showTip("\u5e76\u6ca1\u4ec0\u4e48\u597d\u9886\u53d6\u7684"), this.updateTvTip()
+                            t.length > 0 ? this.partMail.updateMailItems(t) : ftc.showTip("并没什么好领取的"), this.updateTvTip()
                         },
                         msgDelete: function (t, e) {
-                            -1 != t ? (this.partMail.deleteMail(t), ftc.ManagerTV.nextSelect()) : ftc.showTip("\u5220\u9664\u5931\u8d25"), this.updateTvTip()
+                            -1 != t ? (this.partMail.deleteMail(t), ftc.ManagerTV.nextSelect()) : ftc.showTip("删除失败"), this.updateTvTip()
                         }
                     }
                 },

@@ -7,9 +7,9 @@ window.ftc = window.ftc || {}, window.fts || (window.fts = !1), window.ftsdk || 
 }, ftc.cancelWait = function (t) {
     ftr && ftr.cancelWait(t)
 }, ftc.showExitTip = function () {
-    ftr.showTip("\u518d\u6309\u4e00\u6b21\u9000\u51fa\u6e38\u620f")
+    ftr.showTip("再按一次退出游戏")
 }, ftc.showErrorDialog = function (t, e) {
-    t || (t = "\u5f88\u62b1\u6b49\uff0c\u7a0b\u5e8f\u4e0d\u5c0f\u5fc3\u51fa\u9519\u4e86!"), e || (e = 0), ftr.showDialog({
+    t || (t = "很抱歉，程序不小心出错了!"), e || (e = 0), ftr.showDialog({
         text: t + "-" + e,
         clickOk: function () {
             ftc.sysEnd()
@@ -50,7 +50,7 @@ window.ftc = window.ftc || {}, window.fts || (window.fts = !1), window.ftsdk || 
                     var n = i[a].split(":");
                     ftc.windowsConfig[n[0]] = n[1].split("#")[0]
                 }
-                for (var a in window.ftaroHotUpdate = ftc.windowsConfig.ftaroHotUpdate, ftc.windowsConfig) ft.console("\u8bfb\u53d6windows\u914d\u7f6e" + a + ":" + ftc.windowsConfig[a])
+                for (var a in window.ftaroHotUpdate = ftc.windowsConfig.ftaroHotUpdate, ftc.windowsConfig) ft.console("读取windows配置" + a + ":" + ftc.windowsConfig[a])
             }
         }
     } catch (t) { }
@@ -60,22 +60,22 @@ window.ftc = window.ftc || {}, window.fts || (window.fts = !1), window.ftsdk || 
     ftc.__dtSum += t - ftc.__dts[ftc.__dtPos], ftc.__dts[ftc.__dtPos] = t, ftc.__dtPos = (1 + ftc.__dtPos) % 10, ftc.__dtSum > 60 && ftc.sysEnd()
 }, ftc._tickPay = function () {
     var t = ftc.tickPayEnd();
-    0 != t && (t = ("" + t).split(","), ftr.cancelWait(), 1 == t[0] ? ftr.showPayCountdown() : -1 == t[0] ? ftr.showTip("\u652f\u4ed8\u5931\u8d25") : -2 == t[0] ? ftr.showTip("\u652f\u4ed8\u53d6\u6d88") : -3 == t[0] ? ftr.showDialog({
-        text: "\u5145\u503c\u5230\u8d26\u53ef\u80fd\u5b58\u5728\u5ef6\u8fdf\uff0c\u8bf7\u5c1d\u8bd5\u91cd\u65b0\u8fdb\u5165\u6e38\u620f",
+    0 != t && (t = ("" + t).split(","), ftr.cancelWait(), 1 == t[0] ? ftr.showPayCountdown() : -1 == t[0] ? ftr.showTip("支付失败") : -2 == t[0] ? ftr.showTip("支付取消") : -3 == t[0] ? ftr.showDialog({
+        text: "充值到账可能存在延迟，请尝试重新进入游戏",
         clickOk: function () { }
-    }) : 2 == t[0] && ftr.showWait("\u83b7\u53d6\u8ba2\u5355\u6210\u529f..."))
+    }) : 2 == t[0] && ftr.showWait("获取订单成功..."))
 }, ftc._tickShare = function (t) {
-    var e = ftc.tickShareEnd(); - 1 != e && (0 == e || ftc.delaySuccessShare ? (ftc.delaySuccessShare > 0 && (ftc.delaySuccessShare -= t), (0 == e || ftc.delaySuccessShare <= 0) && (ftc.sendClient("c_shareSuccess", 1), ftr.showTip("\u5206\u4eab\u6210\u529f"), ftc.delaySuccessShare = 0)) : 1 == e ? (ftr.showTip("\u5206\u4eab\u5931\u8d25"), ftc.delaySuccessShare = 0) : 2 == e && (ftr.showTip("\u5206\u4eab\u53d6\u6d88"), ftc.delaySuccessShare = 0))
+    var e = ftc.tickShareEnd(); - 1 != e && (0 == e || ftc.delaySuccessShare ? (ftc.delaySuccessShare > 0 && (ftc.delaySuccessShare -= t), (0 == e || ftc.delaySuccessShare <= 0) && (ftc.sendClient("c_shareSuccess", 1), ftr.showTip("分享成功"), ftc.delaySuccessShare = 0)) : 1 == e ? (ftr.showTip("分享失败"), ftc.delaySuccessShare = 0) : 2 == e && (ftr.showTip("分享取消"), ftc.delaySuccessShare = 0))
 }, ftc._tickAd = function () {
     if (ftc.watchingAd) {
         var t = ftc.tickAdEnd();
-        0 != t && (ftc.watchingAd = !1, 1 == t ? ftc.sendClient("c_successFullAd") : ftr.showTip("\u89c2\u770b\u53d6\u6d88"))
+        0 != t && (ftc.watchingAd = !1, 1 == t ? ftc.sendClient("c_successFullAd") : ftr.showTip("观看取消"))
     }
 }, ftc._tickLocalStorage = function (t) {
     if (ftc.__dtSave += t, ftc.__dtSave >= ftc.__dtSum) {
         ftc.__dtSave = 0;
         var e = ftc.player;
-        e._readyWriteString && (cc.sys.localStorage.setItem(e.dbFile._playerId, e._readyWriteString), e._readyWriteString = void 0, ftc.openTest && ftc.log(("\u5b58\u50a8\u6210\u529f\uff0c\u6700\u77ed\u95f4\u9694" + ftc.__dtSum).substr(0, 13) + "\u79d2"))
+        e._readyWriteString && (cc.sys.localStorage.setItem(e.dbFile._playerId, e._readyWriteString), e._readyWriteString = void 0, ftc.openTest && ftc.log(("存储成功，最短间隔" + ftc.__dtSum).substr(0, 13) + "秒"))
     }
 }, ftc._tickSendRecvMsg = function (t) {
     if (ftc._serverClose) ftc._pomeloReconnect();
@@ -217,7 +217,7 @@ window.ftc = window.ftc || {}, window.fts || (window.fts = !1), window.ftsdk || 
 }, ftc.sysEnd = function () {
     fts && ftc._tickLocalStorage(1e3), ftc.ManagerH5.end() || (cc.sys.isBrowser ? document.location.reload() : cc.game.end())
 }, ftc.sysRestart = function () {
-    cc.audioEngine.stopAll(), ftr.showWait("\u6b63\u5728\u91cd\u65b0\u542f\u52a8\u6e38\u620f..."), fts && ftc._tickLocalStorage(1e3), ftc.ManagerH5.isH5() ? (ftc.send("exit"), ftc.scene.update(0), ftc.scene.isLoaded = !1, ftc._forbidReconnect = !0, window.setTimeout(function () {
+    cc.audioEngine.stopAll(), ftr.showWait("正在重新启动游戏..."), fts && ftc._tickLocalStorage(1e3), ftc.ManagerH5.isH5() ? (ftc.send("exit"), ftc.scene.update(0), ftc.scene.isLoaded = !1, ftc._forbidReconnect = !0, window.setTimeout(function () {
         for (ftr.cancelWait(), ftc._pomeloDisConnect(); ftc.ManagerRes.topLayout();) ftc.ManagerRes.topLayout().cancel(!0, !0);
         ftc.scene.loading()
     }, 2e3)) : cc.sys.isBrowser ? window.setTimeout(function () {
@@ -256,7 +256,7 @@ window.ftc = window.ftc || {}, window.fts || (window.fts = !1), window.ftsdk || 
         ftc.__pomeloEnter(t, e, i, 1, a, n)
     })
 }, ftc._pomeloReconnect = function () {
-    ftc._forbidReconnect || (ftc.log("_pomeloReconnect start...", 2), ftc.__serverToken > 0 && 0 == ftc._serverReconnectCount && (ftr.showWait("\u6b63\u5728\u91cd\u8fde..."), ftc._serverReconnectCount = 1, ftc.__pomeloEnter()))
+    ftc._forbidReconnect || (ftc.log("_pomeloReconnect start...", 2), ftc.__serverToken > 0 && 0 == ftc._serverReconnectCount && (ftr.showWait("正在重连..."), ftc._serverReconnectCount = 1, ftc.__pomeloEnter()))
 }, ftc.__pomeloConnect = function (t) {
     ftc._serverClose = !1, pomelo.init({
         host: window.mainH5ServerIp,
@@ -285,61 +285,61 @@ window.ftc = window.ftc || {}, window.fts || (window.fts = !1), window.ftsdk || 
             zone: ftc.getZone(),
             anonymous_openid: s
         }, function (t) {
-            ftc.log("__pomeloEnter end..." + t.code, 2), ftc._forbidReconnect = !1, 1 == t.code ? (ftc._serverReconnectCount = 0, ftc.__serverUid = t.uid, ftc.__serverToken = t.token, t.openid && (ftc.serverOpenid = t.openid), ftc._latestSendMsg && (ftc._sendPackMsgs = ftc._latestSendMsg, ftc.warn("\u91cd\u53d1\u6d88\u606f" + JSON.stringify(ftc._sendPackMsgs))), ftc.send("c_enter"), ftr.cancelWait(!0)) : pomelo.disconnect(function () {
-                ftc.__serverToken > 0 ? 12 == t.code || ftc._serverReconnectCount >= 3 ? (ftc._endShowSendWait(!1), ftc.ManagerH5.countEvent("2_" + ftc._serverReconnectCount, "\u91cd\u8fde\u5931\u8d25"), ftr.showDialog({
-                    text: "\u5df2\u7ecf\u4e0e\u670d\u52a1\u5668\u5931\u53bb\u8054\u7cfb\uff0c\u8bf7\u91cd\u65b0\u5f00\u59cb\u6e38\u620f",
+            ftc.log("__pomeloEnter end..." + t.code, 2), ftc._forbidReconnect = !1, 1 == t.code ? (ftc._serverReconnectCount = 0, ftc.__serverUid = t.uid, ftc.__serverToken = t.token, t.openid && (ftc.serverOpenid = t.openid), ftc._latestSendMsg && (ftc._sendPackMsgs = ftc._latestSendMsg, ftc.warn("重发消息" + JSON.stringify(ftc._sendPackMsgs))), ftc.send("c_enter"), ftr.cancelWait(!0)) : pomelo.disconnect(function () {
+                ftc.__serverToken > 0 ? 12 == t.code || ftc._serverReconnectCount >= 3 ? (ftc._endShowSendWait(!1), ftc.ManagerH5.countEvent("2_" + ftc._serverReconnectCount, "重连失败"), ftr.showDialog({
+                    text: "已经与服务器失去联系，请重新开始游戏",
                     clickOk: function () {
                         ftc.sysRestart()
                     }
-                }), ftr.cancelWait()) : (ftc.ManagerH5.countEvent("2_" + ftc._serverReconnectCount, "\u91cd\u8fde\u5931\u8d25"), ft.console("ftc.__pomeloEnter" + t.code + "," + t.txt), ftc._serverReconnectCount++, ftc.__pomeloEnter()) : t.txt ? ftc.send("c_enter", void 0, t.txt) : ftc.send("c_enter", void 0, ftc.__getPomeloError(t.code))
+                }), ftr.cancelWait()) : (ftc.ManagerH5.countEvent("2_" + ftc._serverReconnectCount, "重连失败"), ft.console("ftc.__pomeloEnter" + t.code + "," + t.txt), ftc._serverReconnectCount++, ftc.__pomeloEnter()) : t.txt ? ftc.send("c_enter", void 0, t.txt) : ftc.send("c_enter", void 0, ftc.__getPomeloError(t.code))
             }), n && n()
         })
     })
 }, ftc._pomeloDisConnect = function () {
     pomelo.disconnect(function () {
-        ft.console("\u65ad\u7ebf\u6210\u529f")
+        ft.console("断线成功")
     })
 }, ftc.__getPomeloError = function (t) {
     var e = "";
     switch (t) {
         case 0:
-            e = "\u670d\u52a1\u5668\u9519\u8bef";
+            e = "服务器错误";
             break;
         case 1:
-            e = "\u767b\u9646\u6216\u6ce8\u518c\u5931\u8d25";
+            e = "登陆或注册失败";
             break;
         case 2:
-            e = "\u53c2\u6570\u9519\u8bef";
+            e = "参数错误";
             break;
         case 3:
-            e = "\u6ce8\u518c\u5931\u8d25";
+            e = "注册失败";
             break;
         case 4:
-            e = "\u7528\u6237\u5df2\u5b58\u5728";
+            e = "用户已存在";
             break;
         case 5:
-            e = "\u767b\u5f55\u5931\u8d25";
+            e = "登录失败";
             break;
         case 6:
-            e = "\u7528\u6237\u4e0d\u5b58\u5728";
+            e = "用户不存在";
             break;
         case 7:
-            e = "\u5bc6\u7801\u9519\u8bef";
+            e = "密码错误";
             break;
         case 8:
-            e = "\u9a8c\u8bc1\u5931\u8d25";
+            e = "验证失败";
             break;
         case 9:
-            e = "\u767b\u5f55\u8d85\u65f6";
+            e = "登录超时";
             break;
         case 12:
-            e = "\u91cd\u8fde\u5931\u8d25";
+            e = "重连失败";
             break;
         case 14:
-            e = "\u670d\u52a1\u5668\u7e41\u5fd9";
+            e = "服务器繁忙";
             break;
         default:
-            e = "\u670d\u52a1\u5668\u7ef4\u62a4\u4e2d..." + t
+            e = "服务器维护中..." + t
     }
     return e
 }, ftc.__startShowSendWait = function () {
@@ -362,10 +362,10 @@ window.ftc = window.ftc || {}, window.fts || (window.fts = !1), window.ftsdk || 
         var n = i[a];
         if (!t.name || n.getName() == t.name) {
             if (ftc.__layoutHandleMsg(n, t.k, t.v, t.e)) return;
-            if (t.name) return void ftc.warn(t.layoutName + "\u65e0\u6cd5\u5904\u7406msg:" + t.k)
+            if (t.name) return void ftc.warn(t.layoutName + "无法处理msg:" + t.k)
         }
     }
-    e ? ftc.warn("\u4e22\u5f03\u6d88\u606f" + t.k) : ftc.__unHandlerMsg.push(t)
+    e ? ftc.warn("丢弃消息" + t.k) : ftc.__unHandlerMsg.push(t)
 }, ftc.sendApi = function (t) {
     ftc.send("code", {
         code: t,
@@ -385,20 +385,20 @@ window.ftc = window.ftc || {}, window.fts || (window.fts = !1), window.ftsdk || 
             name: i
         };
         void 0 === a ? ftc._recv([s], !0) : ftc._clientPackMsgs.push([s, a])
-    } else this.err("\u53d1\u9001\u6d88\u606f\u5931\u8d25key==undefined")
+    } else this.err("发送消息失败key==undefined")
 }, ftc.send = function (t, e, i) {
     var a;
-    void 0 != t ? ft._getMsgType(t) === ft._SERVER_MSG ? ftc._forbidSendMsg ? ftc.__delaySendMsgs.push([t, e, i]) : (ftc.__startShowSendWait(), ftc.openLog && ftc.log(ftc._sendMsgIndex + "\u53d1\u9001: " + t + (e ? ", " + JSON.stringify(e) : ""), 6), a = i ? {
+    void 0 != t ? ft._getMsgType(t) === ft._SERVER_MSG ? ftc._forbidSendMsg ? ftc.__delaySendMsgs.push([t, e, i]) : (ftc.__startShowSendWait(), ftc.openLog && ftc.log(ftc._sendMsgIndex + "发送: " + t + (e ? ", " + JSON.stringify(e) : ""), 6), a = i ? {
         k: t,
         e: i
     } : {
             k: t,
             v: e
-        }, 0 == ftc._sendPackMsgs.l && (ftc._sendPackMsgs.i = ftc._sendMsgIndex), ftc._sendPackMsgs[ftc._sendPackMsgs.l++] = a) : ftc.sendClient(t, e, void 0, void 0, i) : this.err("\u53d1\u9001\u6d88\u606f\u5931\u8d25key==undefined")
+        }, 0 == ftc._sendPackMsgs.l && (ftc._sendPackMsgs.i = ftc._sendMsgIndex), ftc._sendPackMsgs[ftc._sendPackMsgs.l++] = a) : ftc.sendClient(t, e, void 0, void 0, i) : this.err("发送消息失败key==undefined")
 }, ftc._recv = function (t, e) {
     ftc.closeReceiveMsg = !1;
     for (var i = 0; i < t.length; i++) {
-        if (ftc.openLog && "log" != t[i].k && (ft._getMsgType(t[i].k) == ft._SERVER_MSG ? ftc.log(ftc._sendMsgIndex + "\u63a5\u6536: " + JSON.stringify(t[i]), t[i].e ? 8 : 4) : ft.console(ftc._sendMsgIndex + "\u63a5\u6536: " + t[i].k)), ftc.ManagerData.msg[t[i].k]) {
+        if (ftc.openLog && "log" != t[i].k && (ft._getMsgType(t[i].k) == ft._SERVER_MSG ? ftc.log(ftc._sendMsgIndex + "接收: " + JSON.stringify(t[i]), t[i].e ? 8 : 4) : ft.console(ftc._sendMsgIndex + "接收: " + t[i].k)), ftc.ManagerData.msg[t[i].k]) {
             if (t[i].e && ft.isNumber(t[i].e)) {
                 var a = ft.getError(t[i].e);
                 a && (t[i].e = a)
@@ -413,7 +413,7 @@ window.ftc = window.ftc || {}, window.fts || (window.fts = !1), window.ftsdk || 
         }
         if (ftc.closeReceiveMsg) {
             var n = t.length - i - 1;
-            n > 0 && ftc.warn("\u4e22\u5f03" + n + "\u6761\u6d88\u606f");
+            n > 0 && ftc.warn("丢弃" + n + "条消息");
             break
         }
     }
@@ -438,7 +438,7 @@ window.ftc = window.ftc || {}, window.fts || (window.fts = !1), window.ftsdk || 
                 e.open("GET", "http://test.ftaro.com:8081/getCoreData?gid=0"), e.timeout = 5e3, e.setRequestHeader("Access-Control-Allow-Origin", "*"), ["abort", "error", "timeout"].forEach(function (t) {
                     e["on" + t] = function () { }
                 }), e.onreadystatechange = function () {
-                    200 == e.status ? 4 == e.readyState && (t && jsb.fileUtils.writeStringToFile(e.responseText, "ftaro_core.dt"), func(e.responseText)) : cc.log("\u83b7\u53d6\u914d\u7f6e\u6587\u4ef6\uff1aftaro_core.dt\u5931\u8d25")
+                    200 == e.status ? 4 == e.readyState && (t && jsb.fileUtils.writeStringToFile(e.responseText, "ftaro_core.dt"), func(e.responseText)) : cc.log("获取配置文件：ftaro_core.dt失败")
                 }, e.send(null)
             };
         try {
@@ -453,7 +453,7 @@ window.ftc = window.ftc || {}, window.fts || (window.fts = !1), window.ftsdk || 
 }, ftc.getOrder = function (t, e) {
     var i = 0;
     if (ftc.openTest && fts) {
-        if (99 != ftc.getSourceId()) return void ftr.showTip("\u6d4b\u8bd5\u7248\u672c\u65e0\u6cd5\u8fdb\u884c\u5145\u503c");
+        if (99 != ftc.getSourceId()) return void ftr.showTip("测试版本无法进行充值");
         i = 1
     }
     ftc.send("addOrder", {
@@ -463,7 +463,7 @@ window.ftc = window.ftc || {}, window.fts || (window.fts = !1), window.ftsdk || 
         age: ftsdk && _ftsdkcertify.getUserCertifyAge(),
         fcm: ftsdk && _ftsdkcertify.getUserCertifyPayOpen(),
         gift: e
-    }), ftc.__orderIndex = t, ftr.showWait("\u83b7\u53d6\u8ba2\u5355\u4e2d...")
+    }), ftc.__orderIndex = t, ftr.showWait("获取订单中...")
 }, ftc._startPay = function (t) {
     var e = 0;
     if (t.txt) t.certify ? ftsdk && _ftsdkcertify.openUserCertifyTip(!1, t.txt) : ftr.showTip(t.txt);
@@ -477,11 +477,11 @@ window.ftc = window.ftc || {}, window.fts || (window.fts = !1), window.ftsdk || 
             sid: t.sid,
             source: ftc.getSourceId(),
             version: ft.getVersion(),
-            productName: i.gem + i.gemAdd + "\u5143\u5b9d",
+            productName: i.gem + i.gemAdd + "元宝",
             productPrice: i.price
         })
     } else ftc.openTest ? ftc.send("testPayNotify", t.order) : e = ftc.startPay(ftc.__orderIndex, t.order, t.sid, t.url, ftc.ManagerData.passport.account);
-    ftr.cancelWait(), 1 == e && ftr.showWait("\u7b49\u5f85\u5145\u503c\u5b8c\u6210...")
+    ftr.cancelWait(), 1 == e && ftr.showWait("等待充值完成...")
 }, ftc.addActivityLog = function (t, e, i, a) {
     ftc.send("addLog", {
         type: "addActivityLog",

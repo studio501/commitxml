@@ -12,12 +12,12 @@
                     for (var t = 0; t < this.buttonTabs.length; t++) this.addClick(this.buttonTabs[t], !0)
                 },
                 load: function () {
-                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("\u6d3b\u8dc3"), this.node.addChild(this.partTopStatus.node), this.partActives = [], this.selectTab(0), this.updateData()
+                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("活跃"), this.node.addChild(this.partTopStatus.node), this.partActives = [], this.selectTab(0), this.updateData()
                 },
                 setData: function (t) { },
                 updateTvTip: function () {
-                    var t = "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u6807\u7b7e";
-                    1 == this.tabIndex && this.partActives[1].getTvIsCanGet() && (t += "\uff0c\u3010\u786e\u5b9a\u952e\u3011\u9886\u53d6\u5956\u52b1"), ftc.setTvTip(this.node, t)
+                    var t = "【返回键】关闭界面，【菜单键】切换标签";
+                    1 == this.tabIndex && this.partActives[1].getTvIsCanGet() && (t += "，【确定键】领取奖励"), ftc.setTvTip(this.node, t)
                 },
                 selectTab: function (t) {
                     var e;
@@ -42,7 +42,7 @@
                             this.partActives[this.tabIndex].selectTab(t.index), this.updateTvTip()
                         },
                         achievementGet: function (t, e) {
-                            0 === t.ret ? this.partActives[this.tabIndex].updateData(t) : ftc.showTip("\u9886\u53d6\u5931\u8d25"), this.updateTvTip()
+                            0 === t.ret ? this.partActives[this.tabIndex].updateData(t) : ftc.showTip("领取失败"), this.updateTvTip()
                         }
                     }
                 },

@@ -61,7 +61,7 @@
                     var t = ftc.ManagerData.get1("Player"),
                         e = ftc.ManagerData.passport,
                         i = e.account || e.uid;
-                    i ? (this.labelDocTitle.string = ftc.language("\u8d26\u53f7"), this.labelDoc.string = i) : (this.labelDocTitle.string = ftc.language("\u5b58\u6863"), this.labelDoc.string = ftc.ManagerData.sid.substr(0, 16)), this.labelNick.string = t.nick, ftc.getUserCenter() ? (this.buttonEdit.node.active = !0, this.labelEdit.string = ftc.language("\u7528\u6237\u4e2d\u5fc3")) : ftc.ManagerData.passport.account.length > 18 ? (this.buttonEdit.node.active = !0, this.labelEdit.string = ftc.language("\u8bbe\u7f6e\u8d26\u53f7")) : this.buttonEdit.node.active = !1, this.buttonEditNick.node.active = "" === t.nick, this.labelTitle.string = ft.ExtTitle.getCurTitle(), this.buttonExit.node.active = !!e.account
+                    i ? (this.labelDocTitle.string = ftc.language("账号"), this.labelDoc.string = i) : (this.labelDocTitle.string = ftc.language("存档"), this.labelDoc.string = ftc.ManagerData.sid.substr(0, 16)), this.labelNick.string = t.nick, ftc.getUserCenter() ? (this.buttonEdit.node.active = !0, this.labelEdit.string = ftc.language("用户中心")) : ftc.ManagerData.passport.account.length > 18 ? (this.buttonEdit.node.active = !0, this.labelEdit.string = ftc.language("设置账号")) : this.buttonEdit.node.active = !1, this.buttonEditNick.node.active = "" === t.nick, this.labelTitle.string = ft.ExtTitle.getCurTitle(), this.buttonExit.node.active = !!e.account
                 },
                 tick: function (t) { },
                 selectTeam: function (t) {
@@ -81,7 +81,7 @@
                     else if (t.target === this.buttonEdit.node) ftc.getUserCenter() ? ftr.showUserCenter() : ftc.ManagerData.passport.account.length > 18 && ftr.showAccount(ftr.Account.Type.SETACCOUNT, ftr.Account.MODE.SELF);
                     else if (t.target === this.buttonExit.node) ftc.sysRestart();
                     else if (t.target === this.buttonChangeTitle.node) {
-                        ftc.ManagerData.get2("Title") ? ftc.loadLayout("LayoutTitle") : ftc.showTip("\u6682\u65e0\u79f0\u53f7")
+                        ftc.ManagerData.get2("Title") ? ftc.loadLayout("LayoutTitle") : ftc.showTip("暂无称号")
                     } else if (t.target === this.buttonAdd.node || t.target === this.buttonChange.node) ftc.loadLayout("LayoutSelectSkin", function (t) {
                         t.setData(this.team)
                     }.bind(this));

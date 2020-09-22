@@ -17,7 +17,7 @@
                     ftc.setTvTip(this.node)
                 },
                 setData: function (t) {
-                    t.title ? this.labelTitle.string = t.title : this.labelTitle.string = ftc.language("\u89c4\u5219\u8bf4\u660e"), this.labelInfo.string = t.info
+                    t.title ? this.labelTitle.string = t.title : this.labelTitle.string = ftc.language("规则说明"), this.labelInfo.string = t.info
                 },
                 enter: function () {
                     this.updateData()

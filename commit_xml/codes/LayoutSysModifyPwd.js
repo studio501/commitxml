@@ -19,7 +19,7 @@
                     this.nodeInput2.active = !1, this.editBox1.string = "", this.editBox2.string = ""
                 },
                 setData: function (t, e, i) {
-                    this.type = t, this.param = i, this.labelTip1.string = e || "", this.buttonClose.node.active = !0, t == ftr.Account.Type.SETACCOUNT ? (this.labelTitle.string = ftc.language("\u4fee\u6539\u8d26\u53f7"), this.editBox1.placeholder = ftc.language("\u8bf7\u8f93\u51653-18\u4f4d\u65b0\u8d26\u53f7"), this.editBox1.inputFlag = cc.EditBox.InputFlag.DEFAULT) : t == ftr.Account.Type.SETACCOUNTPWD ? (this.labelTitle.string = ftc.language("\u8bbe\u7f6e\u8d26\u53f7\u5bc6\u7801"), this.nodeInput2.active = !0, this.editBox1.placeholder = ftc.language("\u8bf7\u8f93\u51653-18\u4f4d\u65b0\u8d26\u53f7"), this.editBox2.placeholder = ftc.language("\u8bf7\u8f93\u51656-18\u4f4d\u65b0\u5bc6\u7801"), this.editBox1.inputFlag = cc.EditBox.InputFlag.DEFAULT, this.editBox2.inputFlag = cc.EditBox.InputFlag.PASSWORD) : t == ftr.Account.Type.SETPWD ? (this.labelTitle.string = ftc.language("\u91cd\u7f6e\u5bc6\u7801"), this.nodeInput2.active = !0, this.editBox1.placeholder = ftc.language("\u8bf7\u8f93\u51656-18\u4f4d\u65b0\u5bc6\u7801"), this.editBox2.placeholder = ftc.language("\u8bf7\u518d\u6b21\u8f93\u5165\u5bc6\u7801"), this.editBox1.inputFlag = cc.EditBox.InputFlag.PASSWORD, this.editBox2.inputFlag = cc.EditBox.InputFlag.PASSWORD) : t == ftr.Account.Type.SETACCOUNT2 && (this.buttonClose.node.active = !1, this.labelTitle.string = ftc.language("\u5347\u7ea7\u8d26\u53f7"), this.editBox1.placeholder = ftc.language("\u8bf7\u8f93\u51653-18\u4f4d\u65b0\u8d26\u53f7"), this.editBox1.inputFlag = cc.EditBox.InputFlag.DEFAULT)
+                    this.type = t, this.param = i, this.labelTip1.string = e || "", this.buttonClose.node.active = !0, t == ftr.Account.Type.SETACCOUNT ? (this.labelTitle.string = ftc.language("修改账号"), this.editBox1.placeholder = ftc.language("请输入3-18位新账号"), this.editBox1.inputFlag = cc.EditBox.InputFlag.DEFAULT) : t == ftr.Account.Type.SETACCOUNTPWD ? (this.labelTitle.string = ftc.language("设置账号密码"), this.nodeInput2.active = !0, this.editBox1.placeholder = ftc.language("请输入3-18位新账号"), this.editBox2.placeholder = ftc.language("请输入6-18位新密码"), this.editBox1.inputFlag = cc.EditBox.InputFlag.DEFAULT, this.editBox2.inputFlag = cc.EditBox.InputFlag.PASSWORD) : t == ftr.Account.Type.SETPWD ? (this.labelTitle.string = ftc.language("重置密码"), this.nodeInput2.active = !0, this.editBox1.placeholder = ftc.language("请输入6-18位新密码"), this.editBox2.placeholder = ftc.language("请再次输入密码"), this.editBox1.inputFlag = cc.EditBox.InputFlag.PASSWORD, this.editBox2.inputFlag = cc.EditBox.InputFlag.PASSWORD) : t == ftr.Account.Type.SETACCOUNT2 && (this.buttonClose.node.active = !1, this.labelTitle.string = ftc.language("升级账号"), this.editBox1.placeholder = ftc.language("请输入3-18位新账号"), this.editBox1.inputFlag = cc.EditBox.InputFlag.DEFAULT)
                 },
                 enter: function () {
                     this.updateData()
@@ -30,7 +30,7 @@
                 msg: function () {
                     this.msg = {
                         sysAcountResult: function (t, e) {
-                            ftr.cancelWait(), 0 == t.result ? (t.isLogin ? ftr.showLoginWait(t.isLogin) : ftr.showTip("\u64cd\u4f5c\u6210\u529f"), this.cancel()) : t.txt ? ftr.showTip(t.txt) : this.cancel()
+                            ftr.cancelWait(), 0 == t.result ? (t.isLogin ? ftr.showLoginWait(t.isLogin) : ftr.showTip("操作成功"), this.cancel()) : t.txt ? ftr.showTip(t.txt) : this.cancel()
                         }
                     }
                 },
@@ -40,32 +40,32 @@
                         var e = this.editBox1.string.trim(),
                             i = this.editBox2.string;
                         if (this.type == ftr.Account.Type.SETACCOUNT) {
-                            if (!ftc.ManagerData.passport.pwd) return void ftr.showTip("\u8bf7\u5148\u767b\u5f55");
+                            if (!ftc.ManagerData.passport.pwd) return void ftr.showTip("请先登录");
                             ftr.checkAccount(e) && (ftc.send("modifyAccount", {
                                 account2: e,
                                 pwd2: ftc.ManagerData.passport.pwd
-                            }), ftr.showWait("\u8bbe\u7f6e\u4e2d..."))
+                            }), ftr.showWait("设置中..."))
                         } else if (this.type == ftr.Account.Type.SETACCOUNTPWD) ftr.checkAccount(e) && ftr.checkPwd(i) && (ftc.send("modifyAccount", {
                             account2: e,
                             pwd2: i
-                        }), ftr.showWait("\u8bbe\u7f6e\u4e2d..."));
+                        }), ftr.showWait("设置中..."));
                         else if (this.type == ftr.Account.Type.SETPWD) {
-                            if (e != i) return void ftr.showTip("\u4e24\u6b21\u8f93\u5165\u5bc6\u7801\u4e0d\u4e00\u81f4");
+                            if (e != i) return void ftr.showTip("两次输入密码不一致");
                             ftr.checkPwd(i) && ftr.showDialog({
-                                text: "\u5bc6\u7801\u91cd\u7f6e\u540e\uff0c\u5df2\u767b\u5f55\u6b64\u8d26\u53f7\u7684\u8bbe\u5907\u5c06\u4f1a\u5931\u6548\uff0c\u662f\u5426\u7ee7\u7eed\uff1f",
+                                text: "密码重置后，已登录此账号的设备将会失效，是否继续？",
                                 clickOk: function () {
                                     ftc.send("changePwd", {
                                         pwd: i,
                                         phone: this.param.phone,
                                         email: this.param.email,
                                         vercode: this.param.vercode
-                                    }), ftr.showWait("\u91cd\u7f6e\u4e2d...")
+                                    }), ftr.showWait("重置中...")
                                 }.bind(this),
                                 clickCancel: function () { }.bind(this)
                             })
                         } else this.type == ftr.Account.Type.SETACCOUNT2 && ftr.checkAccount(e) && (ftc.send("login", {
                             account2: e
-                        }), ftr.showWait("\u5347\u7ea7\u4e2d..."))
+                        }), ftr.showWait("升级中..."))
                     } else t.target == this.editBox1.node ? this.editBox1.setFocus() : t.target == this.editBox2.node && this.editBox2.setFocus()
                 }
             })

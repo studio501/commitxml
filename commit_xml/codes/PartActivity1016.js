@@ -42,10 +42,10 @@
                 setData: function (t) {
                     this.data = t;
                     var e = ft.ExtMsg.getActivityData(this.data);
-                    this.activity = e, this.labelDate.string = ftc.language("\u5269\u4f59\u65f6\u95f4: ") + ftc.calcTimeDelta(void 0, this.data.date1);
+                    this.activity = e, this.labelDate.string = ftc.language("剩余时间: ") + ftc.calcTimeDelta(void 0, this.data.date1);
                     for (var i = e.getCountMax, a = 0, n = this.data.ste.split(","), s = 0; s < n.length; s++) n[s] && n[s] > 0 && (a += Number(n[s]));
                     var o = i - a;
-                    if (this.labelCount.string = ftc.language("\u5269\u4f59\u6b21\u6570:") + o, 0 == this.data.ui) {
+                    if (this.labelCount.string = ftc.language("剩余次数:") + o, 0 == this.data.ui) {
                         ftc.ManagerRes.restoreNodeChildren(this.nodeLayout);
                         for (s = 0; s < e.showIds.length; s++) {
                             var r = this.newPart("PartItem");
@@ -61,10 +61,10 @@
                     this.updateDate();
                     for (var e = this.activity.getCountMax, i = 0, a = this.data.ste.split(","), n = 0; n < a.length; n++) a[n] && a[n] > 0 && (i += Number(a[n]));
                     var s = e - i;
-                    this.labelCount.string = ftc.language("\u5269\u4f59\u6b21\u6570:") + s, 0 == this.data.ui ? this.buttonGo.interactable = s > 0 : 1 == this.data.ui && (this.spriteRedPoint.node.active = ft.ExtMsg.checkCanGet(this.msgConsume), this.nodeActivity.active = s > 0, this.spriteGet.node.active = 0 == s, s > 0 && (this.progressBar.progress = this.data.ext / this.activity.chargeMax, this.labelProgress.string = this.data.ext + "/" + this.activity.chargeMax, this.labelNum.string = ft.ExtItem.getNum(this.activity.chargeNeedId), this.buttonCharge.node.active = this.progressBar.progress < 1, this.buttonGet.node.active = !this.buttonCharge.node.active, this.buttonCharge.node.active || ftc.ManagerTV.getSelectButton() == this.buttonCharge && ftc.ManagerTV.updateSelect(this.node), this.buttonGet.node.active || ftc.ManagerTV.getSelectButton() == this.buttonGet && ftc.ManagerTV.updateSelect(this.node), t && t.mutil ? (t.mutil > 1 && ftc.showTip("\u6d47\u6c34 x" + t.mutil), this.data.ext >= this.activity.chargeMax ? (this.spineTree.setAnimation(0, "wait3"), this.spineTree.addAnimation(0, "wait4", !0)) : this.spineTree.setAnimation(0, "wait1", !0)) : this.data.ext >= this.activity.chargeMax ? (this.spineTree.animation = "wait4", this.spineTree.loop = !0) : this.spineTree.setAnimation(0, "wait1", !0)))
+                    this.labelCount.string = ftc.language("剩余次数:") + s, 0 == this.data.ui ? this.buttonGo.interactable = s > 0 : 1 == this.data.ui && (this.spriteRedPoint.node.active = ft.ExtMsg.checkCanGet(this.msgConsume), this.nodeActivity.active = s > 0, this.spriteGet.node.active = 0 == s, s > 0 && (this.progressBar.progress = this.data.ext / this.activity.chargeMax, this.labelProgress.string = this.data.ext + "/" + this.activity.chargeMax, this.labelNum.string = ft.ExtItem.getNum(this.activity.chargeNeedId), this.buttonCharge.node.active = this.progressBar.progress < 1, this.buttonGet.node.active = !this.buttonCharge.node.active, this.buttonCharge.node.active || ftc.ManagerTV.getSelectButton() == this.buttonCharge && ftc.ManagerTV.updateSelect(this.node), this.buttonGet.node.active || ftc.ManagerTV.getSelectButton() == this.buttonGet && ftc.ManagerTV.updateSelect(this.node), t && t.mutil ? (t.mutil > 1 && ftc.showTip("浇水 x" + t.mutil), this.data.ext >= this.activity.chargeMax ? (this.spineTree.setAnimation(0, "wait3"), this.spineTree.addAnimation(0, "wait4", !0)) : this.spineTree.setAnimation(0, "wait1", !0)) : this.data.ext >= this.activity.chargeMax ? (this.spineTree.animation = "wait4", this.spineTree.loop = !0) : this.spineTree.setAnimation(0, "wait1", !0)))
                 },
                 updateDate: function () {
-                    this.isOpening = !1, this.labelDate.string = ftc.language("\u5269\u4f59\u65f6\u95f4: ") + ftc.calcTimeDelta(void 0, this.data.date1)
+                    this.isOpening = !1, this.labelDate.string = ftc.language("剩余时间: ") + ftc.calcTimeDelta(void 0, this.data.date1)
                 },
                 tick: function (t) { },
                 onClick: function (t, e) {
@@ -73,7 +73,7 @@
                             ids: this.activity.getIds,
                             nums: this.activity.getNums
                         })
-                    }.bind(this)) : t.target === this.buttonCharge.node ? ft.ExtItem.getNum(this.activity.chargeNeedId) < this.activity.chargeNeedNum ? ftc.showTip(ft.ExtItem.getName(this.activity.chargeNeedId) + "\u4e0d\u8db3") : this.isOpening ? ftc.showTip("\u6d47\u6c34\u4e2d...") : (this.isOpening = !0, this.spineTree.setAnimation(0, "wait2")) : t.target === this.buttonGet.node ? ftc.loadLayout("LayoutDialogTip8", function (t) {
+                    }.bind(this)) : t.target === this.buttonCharge.node ? ft.ExtItem.getNum(this.activity.chargeNeedId) < this.activity.chargeNeedNum ? ftc.showTip(ft.ExtItem.getName(this.activity.chargeNeedId) + "不足") : this.isOpening ? ftc.showTip("浇水中...") : (this.isOpening = !0, this.spineTree.setAnimation(0, "wait2")) : t.target === this.buttonGet.node ? ftc.loadLayout("LayoutDialogTip8", function (t) {
                         for (var e = this.data.ste.split(","), i = [], a = 0; a < this.activity.getCounts.length; a++) e[a] || (e[a] = 0), i.push(this.activity.getCounts[a] - Number(e[a]));
                         t.setData({
                             ids: this.activity.getIds,

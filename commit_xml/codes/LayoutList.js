@@ -20,7 +20,7 @@
                 },
                 load: function () {
                     for (var t = 0; t < this.listViews.length; t++) this.listViews[t].node.active = !1;
-                    this._partMenuPart = void 0, this._partMenuCountry = void 0, this._partMenuJewel = void 0, this.labelSelect.string = ftc.language("\u5168\u90e8"), this.lastSelectItem = null, this._notUpdate = !0, this.datas = void 0, this.labelTip.node.active = !1, ftc.setTvTip(this.node)
+                    this._partMenuPart = void 0, this._partMenuCountry = void 0, this._partMenuJewel = void 0, this.labelSelect.string = ftc.language("全部"), this.lastSelectItem = null, this._notUpdate = !0, this.datas = void 0, this.labelTip.node.active = !1, ftc.setTvTip(this.node)
                 },
                 setData: function (t) {
                     this.data = t, this.type = t.type, this.datas = t.datas, this.pos = t.pos;
@@ -28,7 +28,7 @@
                     switch (this.type) {
                         case ft.type.list.ChangeHero:
                         case ft.type.list.ChooseHero:
-                            if (this.labelTitle.string = ftc.language("\u9009\u62e9\u6b66\u5c06"), this.listViewHero.node.active = !0, e = !0, !this.datas) {
+                            if (this.labelTitle.string = ftc.language("选择武将"), this.listViewHero.node.active = !0, e = !0, !this.datas) {
                                 ft.ExtHero.load(!0), (o = ftc.ManagerData.get2Array("Hero")).sort(function (t, e) {
                                     return t.favour && !e.favour ? -1 : !t.favour && e.favour ? 1 : ft.ExtHero.getIndex(t.id) - ft.ExtHero.getIndex(e.id)
                                 });
@@ -37,9 +37,9 @@
                                 }
                                 if (i.sort(function (t, e) {
                                     return ft.ExtHero.getPos(t.id) - ft.ExtHero.getPos(e.id)
-                                }), ft.ExtMap.getType(ftc.ManagerData.get1("ManagerMap").cur) === ft.type.map.flhj) this.labelTip.node.active = !0, this.labelTip.string = ftc.language("\u5df2\u9690\u85cf\u4e0d\u53ef\u4e0a\u9635\u6b66\u5c06"), this.datas = i, e = !1;
+                                }), ft.ExtMap.getType(ftc.ManagerData.get1("ManagerMap").cur) === ft.type.map.flhj) this.labelTip.node.active = !0, this.labelTip.string = ftc.language("已隐藏不可上阵武将"), this.datas = i, e = !1;
                                 else if (ft.ExtMap.getType(ftc.ManagerData.get1("ManagerMap").cur) === ft.type.map.zy && ftc.ManagerData.get1("ManagerTask").cur >= 3301) {
-                                    this.labelTip.node.active = !0, this.labelTip.string = ftc.language("\u5df2\u9690\u85cf\u975e\u9b4f\u56fd\u6b66\u5c06");
+                                    this.labelTip.node.active = !0, this.labelTip.string = ftc.language("已隐藏非魏国武将");
                                     var s = i.concat(a);
                                     this.datas = [];
                                     for (n = 0; n < s.length; n++) ft.ExtHero.getCountry(s[n].id) === ft.type.country.Wei && this.datas.push(s[n]);
@@ -48,15 +48,15 @@
                             }
                             break;
                         case ft.type.list.ChooseJewel:
-                            this.datas = ft.ExtJewel.getJewels(void 0, !1), this.labelTitle.string = ftc.language("\u9009\u62e9\u5b9d\u77f3"), this.listViewJewel.node.active = !0, e = !0;
+                            this.datas = ft.ExtJewel.getJewels(void 0, !1), this.labelTitle.string = ftc.language("选择宝石"), this.listViewJewel.node.active = !0, e = !0;
                             break;
                         case ft.type.list.ChooseJewelUpgrade:
-                            this.labelTitle.string = ftc.language("\u9009\u62e9\u5b9d\u77f3"), this.listViewJewel.node.active = !0;
+                            this.labelTitle.string = ftc.language("选择宝石"), this.listViewJewel.node.active = !0;
                             break;
                         case ft.type.list.Inherit:
                             break;
                         case ft.type.list.UseGoods:
-                            this.labelTitle.string = ftc.language("\u70b9\u51fb\u4f7f\u7528"), this.listViewHero.node.active = !0, e = !0, (o = ftc.ManagerData.get2Array("Hero")).sort(function (t, e) {
+                            this.labelTitle.string = ftc.language("点击使用"), this.listViewHero.node.active = !0, e = !0, (o = ftc.ManagerData.get2Array("Hero")).sort(function (t, e) {
                                 return t.favour && !e.favour ? -1 : !t.favour && e.favour ? 1 : ft.ExtHero.getIndex(t.id) - ft.ExtHero.getIndex(e.id)
                             });
                             for (i = [], a = [], n = 0; n < o.length; n++) {
@@ -69,17 +69,17 @@
                         case ft.type.list.UseStrategy:
                             break;
                         case ft.type.list.EquipUpgrade:
-                            t.part && (this.labelTitle.string = ftc.language("\u70b9\u51fb\u4f7f\u7528"), this.listViewEquip.node.active = !0, this.datas = ft.ExtEquip.getEquipsByPart(t.part), e = !0);
+                            t.part && (this.labelTitle.string = ftc.language("点击使用"), this.listViewEquip.node.active = !0, this.datas = ft.ExtEquip.getEquipsByPart(t.part), e = !0);
                             break;
                         case ft.type.list.ChangeEquip:
                         case ft.type.list.EquipSwitch:
-                            this.labelTitle.string = ftc.language("\u9009\u62e9\u88c5\u5907"), this.listViewEquip.node.active = !0;
+                            this.labelTitle.string = ftc.language("选择装备"), this.listViewEquip.node.active = !0;
                             break;
                         case ft.type.list.ChangeCommander:
                             break;
                         case ft.type.list.UseGoods2:
                             var o;
-                            this.labelTitle.string = ftc.language("\u70b9\u51fb\u4f7f\u7528"), this.listViewHero.node.active = !0, e = !0, (o = ftc.ManagerData.get2Array("Hero")).sort(function (t, e) {
+                            this.labelTitle.string = ftc.language("点击使用"), this.listViewHero.node.active = !0, e = !0, (o = ftc.ManagerData.get2Array("Hero")).sort(function (t, e) {
                                 return t.favour && !e.favour ? -1 : !t.favour && e.favour ? 1 : ft.ExtHero.getIndex(t.id) - ft.ExtHero.getIndex(e.id)
                             });
                             for (i = [], a = [], n = 0; n < o.length; n++) {
@@ -97,15 +97,15 @@
                 },
                 onClickPart: function (t) {
                     var e = this.getListDatas(t);
-                    e.length > 0 ? (this.labelSelect.string = ft.type.part.partNames[index], this.listView.setListView(e)) : ftc.showTip("\u65e0\u6b64\u90e8\u4f4d\u7684\u88c5\u5907"), this.updateTv(e.length)
+                    e.length > 0 ? (this.labelSelect.string = ft.type.part.partNames[index], this.listView.setListView(e)) : ftc.showTip("无此部位的装备"), this.updateTv(e.length)
                 },
                 onClickCountry: function (t) {
                     var e = this.getListDatas(void 0, t);
-                    e.length > 0 ? (this.labelSelect.string = ft.type.country.countryNames[t], this.listView.setListView(e)) : ftc.showTip("\u65e0\u6b64\u56fd\u5bb6\u7684\u6b66\u5c06"), this.updateTv(e.length)
+                    e.length > 0 ? (this.labelSelect.string = ft.type.country.countryNames[t], this.listView.setListView(e)) : ftc.showTip("无此国家的武将"), this.updateTv(e.length)
                 },
                 onClickJewelType: function (t) {
                     var e = this.getListDatas(void 0, void 0, t);
-                    e.length > 0 ? (this.labelSelect.string = ft.type.jewel.jewelNames[t], this.listView.setListView(e)) : ftc.showTip("\u65e0\u6b64\u7c7b\u578b\u7684\u5b9d\u77f3"), this.updateTv(e.length)
+                    e.length > 0 ? (this.labelSelect.string = ft.type.jewel.jewelNames[t], this.listView.setListView(e)) : ftc.showTip("无此类型的宝石"), this.updateTv(e.length)
                 },
                 updateTv: function (t) {
                     t ? (this.tvZone = 1, ftc.ManagerTV.nextSelect(this.listView.getItem(0).buttonSelf)) : (this.tvZone = 0, ftc.ManagerTV.nextSelect())
@@ -134,7 +134,7 @@
                                 ft.ExtItem.getNum(ft.value.item["equipUpgrade" + i]) > 0 ? ftc.send("equipLevelUp", {
                                     eids: [t.data.entityId],
                                     ups: [1]
-                                }) : ftc.showTip("\u5f3a\u5316\u5238\u6570\u91cf\u4e0d\u8db3")
+                                }) : ftc.showTip("强化券数量不足")
                             } else if (this.type === ft.type.list.ChangeEquip) {
                                 if (t.data.pos === this.pos) {
                                     var a = ftc.ManagerRes.findLayout("LayoutEquipDetail");
@@ -149,7 +149,7 @@
                             } else this.type === ft.type.list.EquipSwitch && (ftc.send("c_onSelectListEquipItem", t, "LayoutEquipSwitch"), this.cancel())
                         },
                         c_onSelectHeroItem1: function (t, e) {
-                            if (this.type === ft.type.list.UseGoods) ft.ExtItem.getNum(this.data.id) <= 0 ? ftc.showTip("\u9053\u5177\u6570\u91cf\u4e0d\u8db3") : (ftc.send("itemUse", {
+                            if (this.type === ft.type.list.UseGoods) ft.ExtItem.getNum(this.data.id) <= 0 ? ftc.showTip("道具数量不足") : (ftc.send("itemUse", {
                                 id: this.data.id,
                                 param: t.data.id
                             }), this._notUpdate = !1), this.lastSelectItem = t;
@@ -166,7 +166,7 @@
                                     eid2: i.entityId,
                                     slot: a
                                 }), this.cancel()) : ftc.showDialog({
-                                    text: "\u9576\u5d4c\u5b9d\u77f3\u9700\u8981\u6d88\u8017100\u3010\u9576\u5d4c\u7c89\u3011\uff0c\u786e\u5b9a\u9576\u5d4c\u4e48?",
+                                    text: "镶嵌宝石需要消耗100【镶嵌粉】，确定镶嵌么?",
                                     click1: function () {
                                         ftc.send("jewelOnload", {
                                             eid: t.data.entityId,
@@ -185,7 +185,7 @@
                         equipLevelUp: function (t, e) {
                             var i = t[0][1];
                             if (i && i > 0) {
-                                ftc.showTip("\u5347\u7ea7\u6210\u529f"), this._notUpdate = !1;
+                                ftc.showTip("升级成功"), this._notUpdate = !1;
                                 var a = t[0][0],
                                     n = this.listView.getDatas(),
                                     s = ft.ExtEquip.getEquipsByPart(this.data.part);
@@ -201,7 +201,7 @@
                                             this.listView.getItem(o).playAni(), this.listView.updateListViewItems(o, s);
                                             break
                                         }
-                            } else ftc.showTip("\u5347\u7ea7\u5931\u8d25")
+                            } else ftc.showTip("升级失败")
                         },
                         itemUse: function (t, e) {
                             this.lastSelectItem && t > 0 && this.listView.updateListViewItem(this.lastSelectItem.index)

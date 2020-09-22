@@ -42,7 +42,7 @@
                     }.bind(this)), ftc.ManagerTV.setBackButton(this.buttonClose), this.buttonFavour.node.active = !1, this.partExpTip.active = !1
                 },
                 load: function () {
-                    this.partHeros = [], this.heroes = void 0, this.index = void 0, this.oldExp = void 0, this.oldLv = void 0, this.hero = void 0, this.canCompose = void 0, this.initPart(this.partFight), this.spineLvUp0.node.active = !1, this.spineLvUp1.node.active = !1, this.oldFight = void 0, this.isNewHero = !0, this.oldSpineName = void 0, this._spineResName = void 0, this.expValue = 0, this.name = "\u6b66\u529b", this.partExpTipPos = this.partExpTip.getPosition(), ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u6807\u7b7e")
+                    this.partHeros = [], this.heroes = void 0, this.index = void 0, this.oldExp = void 0, this.oldLv = void 0, this.hero = void 0, this.canCompose = void 0, this.initPart(this.partFight), this.spineLvUp0.node.active = !1, this.spineLvUp1.node.active = !1, this.oldFight = void 0, this.isNewHero = !0, this.oldSpineName = void 0, this._spineResName = void 0, this.expValue = 0, this.name = "武力", this.partExpTipPos = this.partExpTip.getPosition(), ftc.setTvTip(this.node, "【返回键】关闭界面，【菜单键】切换标签")
                 },
                 selectTab: function (t) {
                     if (this.tvTabIndex = t, this.hero.entityId && ft.ExtHero.getType(this.hero.id) === ft.type.hero.our) {
@@ -50,7 +50,7 @@
                             this.partHeros[t] = e, this.partHeros[t].node.active = !0, this.partHeros[t].setData(this.hero), this.nodeRoot.addChild(this.partHeros[t].node), this[this.parts[t]] = e
                         }.bind(this));
                         ftc.ManagerTV.nextFrameSelect()
-                    } else 0 !== t && (this.hero.entityId && ft.ExtHero.getType(this.hero.id) === ft.type.hero.story ? ftc.showTip("\u5267\u60c5\u6b66\u5c06\u65e0\u6cd5\u64cd\u4f5c") : ftc.showTip("\u672a\u62e5\u6709\u6b66\u5c06"))
+                    } else 0 !== t && (this.hero.entityId && ft.ExtHero.getType(this.hero.id) === ft.type.hero.story ? ftc.showTip("剧情武将无法操作") : ftc.showTip("未拥有武将"))
                 },
                 setHeroInfo: function (t) {
                     this.hero = t;
@@ -60,7 +60,7 @@
                         n = t.up || 0;
                     this.spriteCountry.spriteFrame = ft.ExtHero.getCountrySprite(e), this.spriteWeapon.spriteFrame = ft.ExtHero.getWeaponSprite(e), this.spriteName.spriteFrame = ft.ExtHero.getNameSprite(e), this.spriteName.node.color = ft.ExtHero.getNameColor(e), this.spritePlus.node.active = n > 0, n > 0 && (this.spritePlus.spriteFrame = ft.ExtHero.getUpSprite(n), this.spritePlus.node.active = !!this.spritePlus.spriteFrame, this.spritePlus.node.color = ft.ExtHero.getNameColor(e));
                     var s = Math.round(t.exp) ? Math.round(t.exp) : 0;
-                    this.progressExp.progress = s / ft.ExtHero.getNextExp(i), this.labelExp.string = ft.getNumShow(s) + "/" + ft.getNumShow(ft.ExtHero.getNextExp(i)), this.labelLv.string = i + ftc.language("\u7ea7"), this.oldExp = ft.getNumShow(s), this.oldlv = i;
+                    this.progressExp.progress = s / ft.ExtHero.getNextExp(i), this.labelExp.string = ft.getNumShow(s) + "/" + ft.getNumShow(ft.ExtHero.getNextExp(i)), this.labelLv.string = i + ftc.language("级"), this.oldExp = ft.getNumShow(s), this.oldlv = i;
                     for (var o = 0; o < this.spriteStars.length; o++) this.spriteStars[o].node.active = !0, this.spriteStars[o].spriteFrame = ftc.ManagerRes.getSpriteFrame("program", a > o ? "com_star" : "com_stargray");
                     if (this._spineResName !== ft.ExtHero.getSpineRes(e) && (this._spineResName = ft.ExtHero.getSpineRes(e), this.loadResource(this._spineResName, sp.SkeletonData, function (t) {
                         t && (this.oldSpineName && this.releaseResource(this.oldSpineName), this.oldSpineName = this._spineResName, this.spineHero.skeletonData = null, this.spineHero.skeletonData = t, this.spineHero.setAnimation(0, "w1", !0))
@@ -157,13 +157,13 @@
                             }.bind(this)), this.updateData())
                         },
                         heroBiographyUnlock: function (t, e) {
-                            0 === t ? (ftc.showTip("\u89e3\u9501\u6210\u529f"), this.updateData()) : 1 === t ? ftc.showTip("\u788e\u7247\u4e0d\u8db3") : 2 === t && ftc.showTip("\u4e3b\u516c\u4e0d\u5b58\u5728")
+                            0 === t ? (ftc.showTip("解锁成功"), this.updateData()) : 1 === t ? ftc.showTip("碎片不足") : 2 === t && ftc.showTip("主公不存在")
                         },
                         heroFeatUnlock: function (t, e) {
-                            0 === t ? (ftc.showTip("\u89e3\u9501\u6210\u529f"), this.updateData()) : 1 === t ? ftc.showTip("\u6761\u4ef6\u4e0d\u6ee1\u8db3") : 2 === t && ftc.showTip("\u6b66\u5c06\u4e0d\u5b58\u5728")
+                            0 === t ? (ftc.showTip("解锁成功"), this.updateData()) : 1 === t ? ftc.showTip("条件不满足") : 2 === t && ftc.showTip("武将不存在")
                         },
                         heroFavour: function (t, e) {
-                            this.hero && (ftc.showTip(this.hero.favour ? "\u5df2\u8bbe\u4e3a\u5e38\u7528\u6b66\u5c06" : "\u5df2\u53d6\u6d88\u5e38\u7528\u6b66\u5c06"), this.spriteFavour1.node.active = 0 === this.hero.favour, this.spriteFavour2.node.active = 1 === this.hero.favour)
+                            this.hero && (ftc.showTip(this.hero.favour ? "已设为常用武将" : "已取消常用武将"), this.spriteFavour1.node.active = 0 === this.hero.favour, this.spriteFavour2.node.active = 1 === this.hero.favour)
                         },
                         c_onClickHeroAttrUp: function (t, e) {
                             ftc.send("heroAddValue", {
@@ -214,7 +214,7 @@
                     }
                 },
                 showExpTip: function () {
-                    this.expTipIndex++, this.partExpTip.active = !0, 1 == this.expType ? this.partExpTip.getChildByName("labelName").getComponent(cc.Label).string = ftc.language("\u7ecf\u9a8c+") : this.partExpTip.getChildByName("labelName").getComponent(cc.Label).string = this.name + "+", this.partExpTip.getChildByName("labelValue").getComponent(cc.Label).string = ft.getNumShow((this.expValue * this.expTipIndex / 3).toFixed(2))
+                    this.expTipIndex++, this.partExpTip.active = !0, 1 == this.expType ? this.partExpTip.getChildByName("labelName").getComponent(cc.Label).string = ftc.language("经验+") : this.partExpTip.getChildByName("labelName").getComponent(cc.Label).string = this.name + "+", this.partExpTip.getChildByName("labelValue").getComponent(cc.Label).string = ft.getNumShow((this.expValue * this.expTipIndex / 3).toFixed(2))
                 },
                 hideExpTip: function () {
                     this.partExpTip.active = !1, this.partExpTip.setPosition(this.partExpTipPos)
@@ -222,7 +222,7 @@
                 onClick: function (t, e) {
                     if (t.target === this.buttonCompose.node) this.pieceIsEnough ? ftc.send("itemCompose", {
                         id: this.hero.id || this.hero
-                    }) : ftc.showTip("\u788e\u7247\u4e0d\u8db3");
+                    }) : ftc.showTip("碎片不足");
                     else if (t.target === this.buttonFavour.node) ftc.send("heroFavour", this.hero.id);
                     else if (t.target === this.buttonLeft.node) this.index > 0 && (this.index--, this.oldFight = void 0, this.isNewHero = !0, this.setHeroInfo(this.heroes[this.index])), this.buttonLeft.node.active = this.index > 0, this.buttonRight.node.active = this.index < this.heroes.length - 1, ftc.ManagerTV.nextSelect();
                     else if (t.target === this.buttonRight.node) this.index < this.heroes.length - 1 && (this.index++, this.oldFight = void 0, this.isNewHero = !0, this.setHeroInfo(this.heroes[this.index])), this.buttonLeft.node.active = this.index > 0, this.buttonRight.node.active = this.index < this.heroes.length - 1, ftc.ManagerTV.nextSelect();

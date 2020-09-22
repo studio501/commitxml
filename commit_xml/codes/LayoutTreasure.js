@@ -72,12 +72,12 @@
                                     this._queuePos.push([.05 * (i / 7 + 1), n])
                                 }
                                 this.updateData()
-                            } else ftc.showTip(ft.ExtItem.getName(ft.value.item.treasureKey) + ftc.language("\u6570\u91cf\u4e0d\u8db3"))
+                            } else ftc.showTip(ft.ExtItem.getName(ft.value.item.treasureKey) + ftc.language("数量不足"))
                         }
                     }
                 },
                 onClick: function (t, e) {
-                    t.target === this.buttonUse.node ? ft.ExtItem.getNum(ft.value.item.treasureKey) < 1 ? ftc.showTip(ft.ExtItem.getName(ft.value.item.treasureKey) + ftc.language("\u6570\u91cf\u4e0d\u8db3")) : (ftc.send("visitTreasure"), ftc.showTop()) : t.target === this.buttonClose.node && this.cancel()
+                    t.target === this.buttonUse.node ? ft.ExtItem.getNum(ft.value.item.treasureKey) < 1 ? ftc.showTip(ft.ExtItem.getName(ft.value.item.treasureKey) + ftc.language("数量不足")) : (ftc.send("visitTreasure"), ftc.showTop()) : t.target === this.buttonClose.node && this.cancel()
                 }
             })
         

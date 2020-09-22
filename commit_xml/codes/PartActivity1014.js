@@ -15,7 +15,7 @@
                     for (var t = this.node.getChildByName("nodeShadow"), e = 0; e < this.nodeDays.children.length; e++) {
                         var i = this.nodeDays.children[e],
                             a = t.children[e];
-                        this.buttonDays.push(i.getComponent(cc.Button)), this.spriteGets.push(i.getChildByName("spriteGet").getComponent(cc.Sprite)), this.spriteLantern1s.push(i.getChildByName("spriteLantern1").getComponent(cc.Sprite)), this.spriteLantern2s.push(i.getChildByName("spriteLantern2").getComponent(cc.Sprite)), this.labelDays.push(i.getChildByName("labelDay").getComponent(cc.Label)), this.nodeShadows.push(a), this.addClick(this.buttonDays[e]), this.labelDays[e].string = ftc.language("\u7b2c") + "\n" + (e + 1) + "\n" + ftc.language("\u5929"), this.spriteGets[e].node.active = !1, i.getChildByName("spriteLight") && (this.spriteLights.push(i.getChildByName("spriteLight").getComponent(cc.Sprite)), this.spriteLights[e].node.active = !1)
+                        this.buttonDays.push(i.getComponent(cc.Button)), this.spriteGets.push(i.getChildByName("spriteGet").getComponent(cc.Sprite)), this.spriteLantern1s.push(i.getChildByName("spriteLantern1").getComponent(cc.Sprite)), this.spriteLantern2s.push(i.getChildByName("spriteLantern2").getComponent(cc.Sprite)), this.labelDays.push(i.getChildByName("labelDay").getComponent(cc.Label)), this.nodeShadows.push(a), this.addClick(this.buttonDays[e]), this.labelDays[e].string = ftc.language("第") + "\n" + (e + 1) + "\n" + ftc.language("天"), this.spriteGets[e].node.active = !1, i.getChildByName("spriteLight") && (this.spriteLights.push(i.getChildByName("spriteLight").getComponent(cc.Sprite)), this.spriteLights[e].node.active = !1)
                     }
                     this.spriteRedPoints = [];
                     for (e = 0; e < this.nodeRedPoints.children.length; e++) this.spriteRedPoints.push(this.nodeRedPoints.children[e].getChildByName("spriteRedPoint").getComponent(cc.Sprite))
@@ -36,7 +36,7 @@
                             var s = this.newPart("PartItem");
                             1 == this.data.ui ? s.node.scale = .7 : 2 == this.data.ui && (s.node.scale = .52), this.nodeLayoutAward.addChild(s.node, n), this.partItems[n] = s
                         }
-                        s.setData(a.extIds[n], a.extNums[n]), s.setName(ftc.language("\u7d2f\u8ba1\u767b\u5f55{0}\u5929").replace("{0}", n + 1)), s.setNameColor(cc.Color.WHITE), s.addClick(s.buttonSelf)
+                        s.setData(a.extIds[n], a.extNums[n]), s.setName(ftc.language("累计登录{0}天").replace("{0}", n + 1)), s.setNameColor(cc.Color.WHITE), s.addClick(s.buttonSelf)
                     }
                     this.updateData(), this.buttonDetail.node.active = this.data.txt && this.data.txt.length > 0, ftc.isTv() && (this.buttonDetail.node.active = !1)
                 },
@@ -52,7 +52,7 @@
                     this.progressBar.progress = (n - 1) / (this.partItems.length - 1), this.updateDate()
                 },
                 updateDate: function () {
-                    this.labelDate.string = ftc.language("\u5269\u4f59\u65f6\u95f4: ") + ftc.calcTimeDelta(void 0, this.data.date1)
+                    this.labelDate.string = ftc.language("剩余时间: ") + ftc.calcTimeDelta(void 0, this.data.date1)
                 },
                 tick: function (t) { },
                 onClick: function (t, e) {

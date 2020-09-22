@@ -7,7 +7,7 @@
                 },
                 init: function () { },
                 load: function () {
-                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("\u5546\u5e97"), this.node.addChild(this.partTopStatus.node), this.id = void 0
+                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("商店"), this.node.addChild(this.partTopStatus.node), this.id = void 0
                 },
                 setData: function (t) {
                     if (this.id = t, this.id) {
@@ -41,10 +41,10 @@
                         },
                         shopBuyItem: function (t, e) {
                             if (-1 !== t) {
-                                ftc.showTip("\u8d2d\u4e70\u6210\u529f"), ftc.playEffect(ftc.type.effect.shop_get);
+                                ftc.showTip("购买成功"), ftc.playEffect(ftc.type.effect.shop_get);
                                 var i = ft.ExtShop.getShopDatas(this.id)[t];
                                 this.listView.updateListViewItem(t, i)
-                            } else ftc.showTip("\u8d2d\u4e70\u5931\u8d25\uff0c\u8d27\u5e01\u4e0d\u8db3")
+                            } else ftc.showTip("购买失败，货币不足")
                         }
                     }
                 },

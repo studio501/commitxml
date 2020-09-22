@@ -234,66 +234,66 @@ ft.ExtMsg = {}, ftc && (ft.ExtMsg.getHeroDesc = function (t) {
     var e;
     switch (t = Number(t)) {
         case ft.type.msg.pos.gift:
-            e = "\u7cbe\u5f69\u6d3b\u52a8";
+            e = "精彩活动";
             break;
         case ft.type.msg.pos.daily:
-            e = "\u6bcf\u65e5\u6d3b\u52a8";
+            e = "每日活动";
             break;
         case ft.type.msg.pos.limited:
-            e = "\u9650\u65f6\u6d3b\u52a8";
+            e = "限时活动";
             break;
         case ft.type.msg.pos.limited_month:
-            e = "\u6708\u5ea6\u6d3b\u52a8";
+            e = "月度活动";
             break;
         case ft.type.msg.pos.limited_gift:
-            e = "\u793c\u5305\u6d3b\u52a8";
+            e = "礼包活动";
             break;
         case ft.type.msg.pos.sevenDay:
-            e = "\u4e03\u65e5\u6d3b\u52a8";
+            e = "七日活动";
             break;
         case ft.type.msg.pos.vip:
-            e = "\u5c0a\u4eab\u4f1a\u5458";
+            e = "尊享会员";
             break;
         case ft.type.msg.pos.total:
-            e = "\u7d2f\u8ba1\u793c\u5305";
+            e = "累计礼包";
             break;
         case ft.type.msg.pos.focus:
-            e = "\u5173\u6ce8\u5956\u52b1";
+            e = "关注奖励";
             break;
         case ft.type.msg.pos.invite:
-            e = "\u9080\u8bf7\u5956\u52b1";
+            e = "邀请奖励";
             break;
         case ft.type.msg.pos.nationalDay:
-            e = "\u56fd\u5e86\u6d3b\u52a8";
+            e = "国庆活动";
             break;
         case ft.type.msg.pos.anniversary:
-            e = "\u5468\u5e74\u5e86\u5178";
+            e = "周年庆典";
             break;
         case ft.type.msg.pos.ad:
-            e = "\u5e7f\u544a\u798f\u5229";
+            e = "广告福利";
             break;
         case ft.type.msg.pos.mayDay:
-            e = "\u52b3\u52a8\u8282\u6d3b\u52a8";
+            e = "劳动节活动";
             break;
         case ft.type.msg.pos.firstCharge:
-            e = "\u9996\u5145\u793c\u5305";
+            e = "首充礼包";
             break;
         case ft.type.msg.pos.newYear:
-            e = "\u65b0\u6625\u6d3b\u52a8";
+            e = "新春活动";
             break;
         case ft.type.msg.pos.summer:
-            e = "\u6691\u671f\u6d3b\u52a8";
+            e = "暑期活动";
             break;
         case ft.type.msg.pos.guanYu:
-            e = "\u5173\u7fbd\u793c\u5305";
+            e = "关羽礼包";
             break;
         case ft.type.msg.pos.gameAd:
-            e = "\u5927\u5bb6\u7231\u73a9";
+            e = "大家爱玩";
             break;
         case ft.type.msg.pos.rank:
-            e = "\u6392\u884c\u699c"
+            e = "排行榜"
     }
-    return e || "\u6d3b\u52a8"
+    return e || "活动"
 }, ft.ExtMsg.getUnionMsgs = function (t) {
     var e = Number(this.getType(t));
     if (e === ft.type.activity.monthShop || e === ft.type.activity.snatchTreasureAll) {
@@ -434,58 +434,58 @@ ft.ExtMsg = {}, ftc && (ft.ExtMsg.getHeroDesc = function (t) {
     var e;
     switch (t) {
         case ft.type.event.TLXH:
-            e = "\u6d88\u8017\u4f53\u529b:";
+            e = "消耗体力:";
             break;
         case ft.type.event.WJZM:
-            e = "\u793c\u8d24\u4e0b\u58eb:";
+            e = "礼贤下士:";
             break;
         case ft.type.event.YBXH:
-            e = "\u6d88\u8017\u5143\u5b9d:";
+            e = "消耗元宝:";
             break;
         case ft.type.event.ZDWC:
-            e = "\u5b8c\u6210\u6218\u6597:";
+            e = "完成战斗:";
             break;
         case ft.type.event.XMRS:
-            e = "\u6d88\u706d\u654c\u519b:";
+            e = "消灭敌军:";
             break;
         case ft.type.event.BSTJ:
-            e = "\u884c\u8d70\u6b65\u6570:";
+            e = "行走步数:";
             break;
         case ft.type.event.ZBQH:
-            e = "\u88c5\u5907\u5f3a\u5316:";
+            e = "装备强化:";
             break;
         case ft.type.event.WJSJ:
-            e = "\u6b66\u5c06\u5347\u7ea7:";
+            e = "武将升级:";
             break;
         case ft.type.event.JBXH:
-            e = "\u94f6\u5e01\u6d88\u8017:";
+            e = "银币消耗:";
             break;
         case ft.type.event.WCZM:
-            e = "\u5b8c\u6210\u5468\u76ee:";
+            e = "完成周目:";
             break;
         case ft.type.event.WCZX:
-            e = "\u5b8c\u6210\u4e3b\u7ebf:";
+            e = "完成主线:";
             break;
         case ft.type.event.TZFB:
-            e = "\u6311\u6218\u526f\u672c:";
+            e = "挑战副本:";
             break;
         case ft.type.event.SYZP:
-            e = "\u4f7f\u7528\u8f6c\u76d8:";
+            e = "使用转盘:";
             break;
         case ft.type.event.SYCL:
-            e = "\u4f7f\u7528\u7b56\u7565:";
+            e = "使用策略:";
             break;
         case ft.type.event.SYJN:
-            e = "\u4f7f\u7528\u6280\u80fd:";
+            e = "使用技能:";
             break;
         case ft.type.event.FJTJ:
-            e = "\u4f7f\u7528\u5206\u89e3:";
+            e = "使用分解:";
             break;
         case ft.type.event.MRDL:
-            e = "\u6bcf\u65e5\u767b\u5f55:";
+            e = "每日登录:";
             break;
         case ft.type.event.CSWJ:
-            e = "\u62e5\u6709\u6a59\u8272\u6b66\u5c06:"
+            e = "拥有橙色武将:"
     }
     return e
 }, ft.ExtMsg.isCompleted = function (t) {

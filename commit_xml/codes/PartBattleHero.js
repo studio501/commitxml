@@ -46,7 +46,7 @@
                         try {
                             this.handleEvent[i[0]].apply(this, [a[0], a[1], a[2], a[3]])
                         } catch (t) {
-                            ftc.err(this.battleHero.id + "\u9519\u8bef\u4e8b\u4ef6" + i[0] + "," + e.data.name + "," + t + "\n" + ft.isObject(t) ? t.stack : "")
+                            ftc.err(this.battleHero.id + "错误事件" + i[0] + "," + e.data.name + "," + t + "\n" + ft.isObject(t) ? t.stack : "")
                         }
                     }
                 },
@@ -196,7 +196,7 @@
                     if (ftc.ManagerData.get1("ManagerMap").isOpenEffect) {
                         var e = "audio/effect/" + t;
                         ftc.battleView.effectResource[e] ? cc.audioEngine.play(ftc.battleView.effectResource[e], !1, 1) : cc.loader.loadRes(e, function (i, a) {
-                            a && !i ? (ftc.ManagerRes.setAutoReleaseWithLayout(ftc.battleView, e), ftc.battleView.effectResource[e] = a, this._playMusic(t)) : ftc.err("\u64ad\u653e\u58f0\u97f3\u51fa\u9519 " + t + i)
+                            a && !i ? (ftc.ManagerRes.setAutoReleaseWithLayout(ftc.battleView, e), ftc.battleView.effectResource[e] = a, this._playMusic(t)) : ftc.err("播放声音出错 " + t + i)
                         }.bind(this))
                     }
                 },
@@ -249,7 +249,7 @@
                         if (i && i.length > 0) this.handleEvent.boom.apply(this, []);
                         else {
                             var a = this._attackActs[0][2];
-                            for (e = 0; e < a.length; e++) a[e] ? (a[e].part.setHitAct(0, this._attackActs[0][3], this.attackIndex), a[e].part.attackIndex++) : ft.console("\u9519\u8befsetAttackAct\uff1a" + e)
+                            for (e = 0; e < a.length; e++) a[e] ? (a[e].part.setHitAct(0, this._attackActs[0][3], this.attackIndex), a[e].part.attackIndex++) : ft.console("错误setAttackAct：" + e)
                         }
                         this._attackActs.splice(0, 1)
                     }
@@ -259,7 +259,7 @@
                         if (this.spine.timeScale = ftc.ManagerData.get1("ManagerBattle").speed, this.spine.paused = !1, t == ftc.TypeHeroAct.die) ftc.ManagerData.get1("ManagerBattle").model != ft.type.battleModel.turns ? this.battleHero.completelyDead ? this.spriteDie.node.active = !0 : this._hasDieAni ? (this.spineDie.node.active = !0, this.spineDie.setAnimation(0, "wait1", e)) : (this._hasDieAni = !0, this.loadResource("spine/view/com_dead", sp.SkeletonData, function (t) {
                             t && (this.spineDie.skeletonData = t, this.spineDie.node.active = !0, this.spineDie.setAnimation(0, "wait1", e))
                         }.bind(this))) : this.cleanAllBuff(), this.spine.node.active = !1, this.nodeBlood.active = !1;
-                        else this.spine.node.active = !0, null == this.spine.setAnimation(0, t, e) && ("a5" != t && "h3" != t && ftc.err("\u6b66\u5c06" + this.battleHero.id + "\u672a\u627e\u5230\u52a8\u753b" + t), t = 0 == t.indexOf(ftc.TypeHeroAct.attack) ? "a1" : "h1", this.spine.setAnimation(0, t, e)), this.spineDie.node.active = !1, this.spriteDie.node.active = !1
+                        else this.spine.node.active = !0, null == this.spine.setAnimation(0, t, e) && ("a5" != t && "h3" != t && ftc.err("武将" + this.battleHero.id + "未找到动画" + t), t = 0 == t.indexOf(ftc.TypeHeroAct.attack) ? "a1" : "h1", this.spine.setAnimation(0, t, e)), this.spineDie.node.active = !1, this.spriteDie.node.active = !1
                     } catch (e) {
                         ftc.uploadCatch(e, "PartBattleHero._setSpineAni," + this.battleHero.id + "," + t)
                     }
@@ -317,9 +317,9 @@
                                     param: o,
                                     boom: r.addBuffAni(t, h),
                                     count: 1
-                                }, h && r.allBuffParts[n].boom.setAnimation("wait" + (r.allBuffParts[n].count + 1))), "\u7729\u6655" == o ? r.isSpinePause = !0 : "\u62a4\u76fe" == o ? r.setShowExtHp(r.battleHero.maxExtHp, r.battleHero.maxExtHp) : "\u4ea1\u9b42" == o && (r.spine.node.opacity = 64), r.allBuffIds.push(n)
+                                }, h && r.allBuffParts[n].boom.setAnimation("wait" + (r.allBuffParts[n].count + 1))), "眩晕" == o ? r.isSpinePause = !0 : "护盾" == o ? r.setShowExtHp(r.battleHero.maxExtHp, r.battleHero.maxExtHp) : "亡魂" == o && (r.spine.node.opacity = 64), r.allBuffIds.push(n)
                             } else
-                                for (var f in r.allBuffParts[n] && (r.deleteBuffImg(r.allBuffParts[n].img), r.allBuffParts[n].count--, r.allBuffParts[n].count <= 0 && (r.deleteBuffAni(r.allBuffParts[n].boom), delete r.allBuffParts[n])), "\u7729\u6655" == o ? (r.isSpinePause = !1, r.spine.paused = !1, r.nodeBlood.opacity = 255) : "\u62a4\u76fe" == o ? (r.oldExtHp = 0, r.oldMaxExtHp = 0, r.setShowExtHp(0)) : "\u4ea1\u9b42" == o && (r.spine.node.opacity = 255, this._setSpineAni(ftc.TypeHeroAct.die)), r.allBuffIds)
+                                for (var f in r.allBuffParts[n] && (r.deleteBuffImg(r.allBuffParts[n].img), r.allBuffParts[n].count--, r.allBuffParts[n].count <= 0 && (r.deleteBuffAni(r.allBuffParts[n].boom), delete r.allBuffParts[n])), "眩晕" == o ? (r.isSpinePause = !1, r.spine.paused = !1, r.nodeBlood.opacity = 255) : "护盾" == o ? (r.oldExtHp = 0, r.oldMaxExtHp = 0, r.setShowExtHp(0)) : "亡魂" == o && (r.spine.node.opacity = 255, this._setSpineAni(ftc.TypeHeroAct.die)), r.allBuffIds)
                                     if (r.allBuffIds[f] == n) {
                                         r.allBuffIds.splice(f, 1);
                                         break
@@ -454,7 +454,7 @@
                             e ? this.setJumpAct() : this.setWaitAct(), t()
                         }.bind(this), this)
                     } catch (t) {
-                        ftc.err(i + "\u9aa8\u9abc\u52a8\u753b\u6709\u8bef\uff1a" + t)
+                        ftc.err(i + "骨骼动画有误：" + t)
                     }
                 },
                 checkIsAniEnd: function () {

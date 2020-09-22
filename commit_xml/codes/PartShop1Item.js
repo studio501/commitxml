@@ -52,7 +52,7 @@
                 cleanup: function () { },
                 tick: function (t) { },
                 onClick: function (t, e) {
-                    t.target === this.buttonSelf.node && (this.data.count > 0 ? ftc.sendClient("c_onSelectShop1Item", this) : ftc.showTip("\u5df2\u552e\u7a7a"))
+                    t.target === this.buttonSelf.node && (this.data.count > 0 ? ftc.sendClient("c_onSelectShop1Item", this) : ftc.showTip("已售空"))
                 }
             })
         

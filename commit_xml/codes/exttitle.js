@@ -2,7 +2,7 @@
             
              ft.ExtTitle = {}, ftc && (ft.ExtTitle.getValue = function (t, e) { }, ft.ExtTitle.getCurTitle = function () {
                 for (var t = ftc.ManagerData.get1("ManagerTitle").titleIds.split(","), e = "", i = 0; i < t.length; i++) t[i] > 0 && (e += ft.ExtTitle.getName(t[i]));
-                return e.length > 0 ? e : "\u6682\u65e0\u79f0\u53f7"
+                return e.length > 0 ? e : "暂无称号"
             }, ft.ExtTitle.getTitles = function () {
                 for (var t = ftc.ManagerData.get1("ManagerTitle").titleIds.split(","), e = 0; e < t.length; e++) 0 == t[e] && t.splice(e, 1);
                 t[0] === t[1] && t.splice(1, 1);
@@ -92,15 +92,15 @@
                 for (var e = ft.ExtTitle.getTypes(t), i = ft.ExtTitle.getValues(t), a = "", n = 0; n < e.length; n++) a += ft.ExtPropName.getName(e[n]) + " " + i[n] + "\n";
                 return a
             }, ft.ExtTitle.getConditionDesc = function (t) {
-                var e = "\u9002\u7528\u8303\u56f4\uff1a",
+                var e = "适用范围：",
                     i = ft.ExtTitle.getCountry(t);
-                if (i) i === ft.type.country.Qun ? e += "\u7fa4\u96c4\u6b66\u5c06" : e += ft.type.country.countryNames[i] + "\u56fd\u6b66\u5c06";
-                else if (ft.ExtTitle.getWeapon(t)) e += "\u4f7f\u7528{0}\u7684\u6b66\u5c06".replace("{0}", ft.type.equip.equipNames[i]);
+                if (i) i === ft.type.country.Qun ? e += "群雄武将" : e += ft.type.country.countryNames[i] + "国武将";
+                else if (ft.ExtTitle.getWeapon(t)) e += "使用{0}的武将".replace("{0}", ft.type.equip.equipNames[i]);
                 else {
                     var a = ft.ExtTitle.getHeros(t);
                     if (a && a.length)
-                        for (var n = 0, s = a.length; n < s; n++) e += ft.ExtHero.getName(a[n]) + (n < s - 1 ? "\u3001" : "");
-                    else e += "\u6240\u6709\u6b66\u5c06"
+                        for (var n = 0, s = a.length; n < s; n++) e += ft.ExtHero.getName(a[n]) + (n < s - 1 ? "、" : "");
+                    else e += "所有武将"
                 }
                 return e
             }, ft.ExtTitle.getExp = function (t) {

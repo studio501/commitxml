@@ -41,7 +41,7 @@
                 msg: function () {
                     this.msg = {
                         copyEnter: function (t, e) {
-                            0 === t ? this.cancel() : 1 === t ? ftc.showTip("\u6b21\u6570\u4e0d\u8db3") : 2 === t ? ftc.showTip("\u4e0d\u80fd\u8fdb\u5165") : 3 === t && ftc.showTip("\u6570\u91cf\u4e0d\u8db3")
+                            0 === t ? this.cancel() : 1 === t ? ftc.showTip("次数不足") : 2 === t ? ftc.showTip("不能进入") : 3 === t && ftc.showTip("数量不足")
                         }
                     }
                 },
@@ -70,13 +70,13 @@
                                 var s = this.newPart("PartItem");
                                 s.node.y = 10, s.node.scale = .8, s.setData(n.ids[e], 0, !0), this.nodeLayoutAward.addChild(s.node)
                             }
-                    } else ftc.showTip("\u901a\u8fc7\u4e0a\u4e00\u96be\u5ea6\u540e\u89e3\u9501")
+                    } else ftc.showTip("通过上一难度后解锁")
                 },
                 onClick: function (t, e) {
-                    if (t.target === this.buttonDetail.node) "tr" === ftc.ManagerLan.getLanguage() ? ftc.showDetailInfo(this.buttonDetail.node, "\u526f\u672c\u5e6b\u52a9\uff1a\n1.\u526f\u672c\u4e2d\u5c4f\u5e55\u5de6\u4e0a\u89d2\u53ef\u67e5\u770b\u7576\u524d\u6240\u5728\u95dc\u5361\u6578\u3002(\u4f8b\u5982\uff1a\u5371\u96aa\u6d1e\u7a742-1)\n2.\u526f\u672c\u4e2d\u5b58\u5728\u5927\u91cf\u7684\u96a8\u6a5f\u6230\u9b25\uff0c\u6575\u4eba\u7684\u9663\u578b\u548c\u985e\u578b\u90fd\u662f\u96a8\u6a5f\u7684\u3002\n3.\u526f\u672c\u4e2d\u7684\u9053\u5177\u53ea\u80fd\u5728\u672c\u526f\u672c\u5167\u4f7f\u7528\u3002\n4.\u795e\u6a39\u623f\u53ef\u4ee5\u6062\u5fa9\u5175\u529b\u3001\u7b56\u7565\u503c(\u96e3\u5ea6\u8d8a\u9ad8\uff0c\u6062\u5fa9\u8d8a\u5c11)\u3002\n5.\u795d\u798f&\u8a5b\u5492\uff1a\u526f\u672c\u5167\u80fd\u7372\u5f97\u58f9\u4e9b\u7279\u6b8a\u589e\u76ca\u6216\u6e1b\u76ca\uff0c\u53ef\u9ede\u64ca\u5c4f\u5e55\u4e0a\u7684\u201c\u5370\u8a18\u201d\u6309\u9215\u4f86\u67e5\u770b\u3002\n6.\u95dc\u65bc\u4e0d\u540c\u96e3\u5ea6\uff1a\n   \u2460\u7c21\u55ae\uff1a\u521d\u59cb1\u96a8\u6a5f\u795d\u798f\n   \u2461\u666e\u901a\uff1a\u7121\u4efb\u4f55\u6548\u679c\n   \u2462\u56f0\u96e3\uff1a\u521d\u59cb1\u96a8\u6a5f\u8a5b\u5492\uff1b\n   \u2463\u5730\u7344\uff1a\u521d\u59cb2\u96a8\u6a5f\u8a5b\u5492\uff1b\u6575\u65b9\u5168\u9ad4\u514d\u75ab\u767e\u5206\u6bd4\u50b7\u5bb3\n   \u2464\u6df1\u6df5\uff1a\u521d\u59cb3\u96a8\u6a5f\u8a5b\u5492\uff1b\u6575\u65b9\u5168\u9ad4\u514d\u75ab\u767e\u5206\u6bd4\u50b7\u5bb3\n") : ftc.showDetailInfo(this.buttonDetail.node, "\u526f\u672c\u5e2e\u52a9\uff1a\n1.\u526f\u672c\u4e2d\u5c4f\u5e55\u5de6\u4e0a\u89d2\u53ef\u67e5\u770b\u5f53\u524d\u6240\u5728\u5173\u5361\u6570\u3002(\u4f8b\u5982\uff1a\u5371\u9669\u6d1e\u7a742-1)\n2.\u526f\u672c\u4e2d\u5b58\u5728\u5927\u91cf\u7684\u968f\u673a\u6218\u6597\uff0c\u654c\u4eba\u7684\u9635\u578b\u548c\u7c7b\u578b\u90fd\u662f\u968f\u673a\u7684\u3002\n3.\u526f\u672c\u4e2d\u7684\u9053\u5177\u53ea\u80fd\u5728\u672c\u526f\u672c\u5185\u4f7f\u7528\u3002\n4.\u795e\u6811\u623f\u53ef\u4ee5\u6062\u590d\u5175\u529b\u3001\u7b56\u7565\u503c(\u96be\u5ea6\u8d8a\u9ad8\uff0c\u6062\u590d\u8d8a\u5c11)\u3002\n5.\u795d\u798f&\u8bc5\u5492\uff1a\u526f\u672c\u5185\u80fd\u83b7\u5f97\u4e00\u4e9b\u7279\u6b8a\u589e\u76ca\u6216\u51cf\u76ca\uff0c\u53ef\u70b9\u51fb\u5c4f\u5e55\u4e0a\u7684\u201c\u5370\u8bb0\u201d\u6309\u94ae\u6765\u67e5\u770b\u3002\n6.\u5173\u4e8e\u4e0d\u540c\u96be\u5ea6\uff1a\n   \u2460\u7b80\u5355\uff1a\u521d\u59cb1\u968f\u673a\u795d\u798f\n   \u2461\u666e\u901a\uff1a\u65e0\u4efb\u4f55\u6548\u679c\n   \u2462\u56f0\u96be\uff1a\u521d\u59cb1\u968f\u673a\u8bc5\u5492\uff1b\n   \u2463\u5730\u72f1\uff1a\u521d\u59cb2\u968f\u673a\u8bc5\u5492\uff1b\u654c\u65b9\u5168\u4f53\u514d\u75ab\u767e\u5206\u6bd4\u4f24\u5bb3\n   \u2464\u6df1\u6e0a\uff1a\u521d\u59cb3\u968f\u673a\u8bc5\u5492\uff1b\u654c\u65b9\u5168\u4f53\u514d\u75ab\u767e\u5206\u6bd4\u4f24\u5bb3\n");
+                    if (t.target === this.buttonDetail.node) "tr" === ftc.ManagerLan.getLanguage() ? ftc.showDetailInfo(this.buttonDetail.node, "副本幫助：\n1.副本中屏幕左上角可查看當前所在關卡數。(例如：危險洞穴2-1)\n2.副本中存在大量的隨機戰鬥，敵人的陣型和類型都是隨機的。\n3.副本中的道具只能在本副本內使用。\n4.神樹房可以恢復兵力、策略值(難度越高，恢復越少)。\n5.祝福&詛咒：副本內能獲得壹些特殊增益或減益，可點擊屏幕上的“印記”按鈕來查看。\n6.關於不同難度：\n   ①簡單：初始1隨機祝福\n   ②普通：無任何效果\n   ③困難：初始1隨機詛咒；\n   ④地獄：初始2隨機詛咒；敵方全體免疫百分比傷害\n   ⑤深淵：初始3隨機詛咒；敵方全體免疫百分比傷害\n") : ftc.showDetailInfo(this.buttonDetail.node, "副本帮助：\n1.副本中屏幕左上角可查看当前所在关卡数。(例如：危险洞穴2-1)\n2.副本中存在大量的随机战斗，敌人的阵型和类型都是随机的。\n3.副本中的道具只能在本副本内使用。\n4.神树房可以恢复兵力、策略值(难度越高，恢复越少)。\n5.祝福&诅咒：副本内能获得一些特殊增益或减益，可点击屏幕上的“印记”按钮来查看。\n6.关于不同难度：\n   ①简单：初始1随机祝福\n   ②普通：无任何效果\n   ③困难：初始1随机诅咒；\n   ④地狱：初始2随机诅咒；敌方全体免疫百分比伤害\n   ⑤深渊：初始3随机诅咒；敌方全体免疫百分比伤害\n");
                     else if (t.target === this.buttonRefresh.node) ft.ExtItem.getNum(ft.value.item.yeYingZhang1) + ft.ExtItem.getNum(ft.value.item.yeYingZhang2) ? ftc.loadLayout("LayoutDialogTip2", function (t) {
                         t.setData(2)
-                    }) : ftc.showTip("\u91ce\u8425\u5e10\u6570\u91cf\u4e0d\u8db3");
+                    }) : ftc.showTip("野营帐数量不足");
                     else if (t.target === this.buttonTeam.node) ftc.loadLayout("LayoutTeam");
                     else if (t.target === this.buttonEnter.node)
                         if (ft.ExtCopy.checkConsume(ft.value.copy.XSWJ)) {
@@ -90,7 +90,7 @@
                                     break
                                 }
                             }
-                            a ? ftc.showTip("\u6709\u672a\u4e0a\u9635\u6b66\u5c06") : n ? ftc.showTip("\u5168\u961f\u5175\u529b\u672a\u6ee1") : ftc.send("copyEnter", {
+                            a ? ftc.showTip("有未上阵武将") : n ? ftc.showTip("全队兵力未满") : ftc.send("copyEnter", {
                                 id: ft.value.copy.XSWJ,
                                 param: this.tabIndex + 1
                             })

@@ -165,7 +165,7 @@ cc.Class({
                     e = this._bufferLayouts;
                     break;
                 default:
-                    return void ftc.err("\u63a7\u4ef6\u56de\u6536\u51fa\u9519:" + type)
+                    return void ftc.err("控件回收出错:" + type)
             }
             if (i) t.node.destroy();
             else {
@@ -305,7 +305,7 @@ cc.Class({
             case "body":
                 n = !0;
             default:
-                return this._restoreComponent(i), !n && ftc.warn("\u672a\u8bc6\u522b\u7684Node\u6807\u7b7e:" + a), e
+                return this._restoreComponent(i), !n && ftc.warn("未识别的Node标签:" + a), e
         }
         return i.node.prop && i.node.prop.bgColor, this._addToParent("Layout", e, i)
     },
@@ -342,7 +342,7 @@ cc.Class({
                         i.fontSize = this._h[r[0]];
                         break;
                     case "hr":
-                        i.string = "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014", i.overflow = cc.Label.Overflow.CLAMP, i.node.width = e.width, a = !0;
+                        i.string = "———————————————————————————————————————————————————————————————————————————————————", i.overflow = cc.Label.Overflow.CLAMP, i.node.width = e.width, a = !0;
                         break;
                     case "li":
                         this._olIndex > 0 ? (i.string = "    " + this._olIndex + "." + i.string, this._olIndex++) : i.string = "    \u25cf" + i.string, a = !0;
@@ -357,7 +357,7 @@ cc.Class({
                     case "col":
                         s = this._readProperty(r), this._rowWidths[this._tableIndex++] = s.width, n = !0;
                     default:
-                        return this._restoreComponent(i), void (!n && ftc.warn("\u672a\u8bc6\u522b\u7684Label\u6807\u7b7e:" + r[0]))
+                        return this._restoreComponent(i), void (!n && ftc.warn("未识别的Label标签:" + r[0]))
                 }
             }
             s && (s.labelColor && (i.node.color = s.labelColor), s.labelSize && (i.fontsize = s.labelSize))
@@ -471,11 +471,11 @@ cc.Class({
     http: function (t, e, i) {
         ftc.showTop(!0), fts || (t = ft.replaceAll(t, "http://", "https://")), ft.httpConnect(e ? "POST" : "GET", t, e, function (t, e) {
             if (ftc.cancelTop(), t) {
-                if (-1 == e || 0 == e) return void ftr.showTip("\u8fde\u63a5\u51fa\u9519");
+                if (-1 == e || 0 == e) return void ftr.showTip("连接出错");
                 try {
                     i(JSON.parse(e))
                 } catch (t) {
-                    ftc.console("\u63a5\u6536\u6570\u636e\u5f02\u5e38:" + e + t)
+                    ftc.console("接收数据异常:" + e + t)
                 }
             } else ftr.showTip(e)
         }.bind(this))

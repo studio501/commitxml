@@ -20,7 +20,7 @@
                     var e = ftc.ManagerData.get1("ManagerMsg").inviteCount,
                         i = Number(this.param.ext),
                         a = 5 * Number(this.param.ste);
-                    a > 45 && (a = 45), this.labelInviteNum.string = ftc.language("\u9080\u8bf7{0}\u4eba").replace("{0}", a + this.index + 1), this.labelNum.string = "+" + this.data.num;
+                    a > 45 && (a = 45), this.labelInviteNum.string = ftc.language("邀请{0}人").replace("{0}", a + this.index + 1), this.labelNum.string = "+" + this.data.num;
                     var n = 0;
                     a + this.index < i ? n = 2 : a + this.index === i ? e > i && (n = 1) : a + this.index < e && (n = 3), this.spriteIcon.node.active = n >= 1, this.spriteGet.node.active = 2 === n, this.buttonGet.node.active = n < 2, this.buttonGet.interactable = 1 === n, this.buttonAdd.node.active = 0 === n
                 },

@@ -33,7 +33,7 @@
                                 num: o
                             }), -1 === this._consumeItemIds.indexOf(s) && this._consumeItemIds.push(s)
                         }
-                        this.listView.setListView(i, t), this.labelTime.string = ftc.language("\u5269\u4f59\u65f6\u95f4: ") + ftc.calcTimeDelta(void 0, t.date1), this._partItems = [];
+                        this.listView.setListView(i, t), this.labelTime.string = ftc.language("剩余时间: ") + ftc.calcTimeDelta(void 0, t.date1), this._partItems = [];
                         for (a = 0; a < this.activity.ids.length; a++) {
                             var r = this.newPart("PartItem");
                             r.node.scale = .87, r.setData(this.activity.ids[a], this.activity.nums[a]), r.addClick(r.buttonSelf), this._partItems.push(r)
@@ -109,10 +109,10 @@
                 msg: function () {
                     this.msg = {
                         msgActivityGet: function (t, e) {
-                            if (t.eid === this.msgTrial.entityId) 0 === t.ret && (0 === t.type ? (ftc.showTip("\u70b9\u4eae\u6210\u529f"), this.updateData()) : this.updateData(t.index));
+                            if (t.eid === this.msgTrial.entityId) 0 === t.ret && (0 === t.type ? (ftc.showTip("点亮成功"), this.updateData()) : this.updateData(t.index));
                             else {
                                 var i = this.partActivity;
-                                i && (-1 === t.ret ? ftc.showTip("\u9886\u53d6\u5931\u8d25") : 0 === t.ret && (i.updateData(t.index), this.updateData()))
+                                i && (-1 === t.ret ? ftc.showTip("领取失败") : 0 === t.ret && (i.updateData(t.index), this.updateData()))
                             }
                         }
                     }

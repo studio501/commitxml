@@ -7,7 +7,7 @@ window.ftc = window.ftc || {}, ftc.H5 = {}, ftc.H5.init = function (t) {
 }, ftc.H5.getVersion = function () {
     return "1"
 }, ftc.H5.openCustomer = function (t) {
-    ftc.showTip("\u6682\u4e0d\u652f\u6301\u5ba2\u670d")
+    ftc.showTip("暂不支持客服")
 }, ftc.H5.getPayInfo = function (t) {
     t("")
 }, ftc.H5.startPay = function (t, e, i) {

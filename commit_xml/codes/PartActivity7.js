@@ -21,7 +21,7 @@
                         var s = this.newPart("PartItem");
                         s.setData(a[e], n[e]), this.nodeLayout.addChild(s.node)
                     }
-                    0 == this.data.ste && ftc.ManagerData.get1("Player").rmb < ft.value.com.giftVipNeed ? this.buttonGo.node.getChildByName("Label").getComponent(cc.Label).string = ftc.language("\u524d\u5f80\u5145\u503c") : this.buttonGo.node.getChildByName("Label").getComponent(cc.Label).string = ftc.language("\u9886\u53d6");
+                    0 == this.data.ste && ftc.ManagerData.get1("Player").rmb < ft.value.com.giftVipNeed ? this.buttonGo.node.getChildByName("Label").getComponent(cc.Label).string = ftc.language("前往充值") : this.buttonGo.node.getChildByName("Label").getComponent(cc.Label).string = ftc.language("领取");
                     var o = ftc.ManagerData.get2("Pet"),
                         r = [];
                     for (var e in o) {
@@ -47,9 +47,9 @@
                     else if (t.target === this.buttonDetail.node) {
                         var i = "";
                         if (this.unlockPets.length > 0) {
-                            i += "\u672a\u89e3\u9501\u7b56\u7565\n";
+                            i += "未解锁策略\n";
                             for (var a = 0; a < this.unlockPets.length; a++) i += ft.ExtPet.getName(this.unlockPets[a]) + "\n"
-                        } else i = "\u6240\u6709\u7b56\u7565\u5df2\u89e3\u9501";
+                        } else i = "所有策略已解锁";
                         ftc.showDetailInfo(t.target, i)
                     }
                 }

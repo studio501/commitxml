@@ -22,7 +22,7 @@
                     for (var t = 0; t < this.buttonTabs.length; t++) this.addClick(this.buttonTabs[t], !0)
                 },
                 load: function () {
-                    this.id = ft.value.copy.ZY, this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle(ft.ExtCopy.getName(this.id)), this.node.addChild(this.partTopStatus.node), ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u96be\u5ea6")
+                    this.id = ft.value.copy.ZY, this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle(ft.ExtCopy.getName(this.id)), this.node.addChild(this.partTopStatus.node), ftc.setTvTip(this.node, "【返回键】关闭界面，【菜单键】切换难度")
                 },
                 setData: function (t) {
                     this.levels = ftd.Copy.get(this.id, "c_open").split(",");
@@ -60,10 +60,10 @@
                 msg: function () {
                     this.msg = {
                         copyEnter: function (t, e) {
-                            0 === t || (1 === t ? ftc.showTip("\u6b21\u6570\u4e0d\u8db3") : 2 === t ? ftc.showTip("\u4e0d\u80fd\u8fdb\u5165") : 3 === t && ftc.showTip("\u6570\u91cf\u4e0d\u8db3"))
+                            0 === t || (1 === t ? ftc.showTip("次数不足") : 2 === t ? ftc.showTip("不能进入") : 3 === t && ftc.showTip("数量不足"))
                         },
                         copyMopUp: function (t, e) {
-                            0 === t ? (ftc.showTip("\u626b\u8361\u6210\u529f"), this.updateData()) : 1 === t ? ftc.showTip("\u6b21\u6570\u4e0d\u8db3") : 2 === t ? ftc.showTip("\u4e0d\u80fd\u8fdb\u5165") : 3 === t && ftc.showTip("\u6218\u5f79\u6311\u6218\u5238\u4e0d\u8db3")
+                            0 === t ? (ftc.showTip("扫荡成功"), this.updateData()) : 1 === t ? ftc.showTip("次数不足") : 2 === t ? ftc.showTip("不能进入") : 3 === t && ftc.showTip("战役挑战券不足")
                         },
                         taskSetGuide: function (t, e) {
                             ftc.sendClient("c_updateMap", void 0, "LayoutMain")
@@ -81,7 +81,7 @@
                                     if (3 === this.tabIndex) {
                                         for (var i = !0, a = ft.ExtHero.getTeam(ftc.ManagerData.get2Object("Hero"), ftc.ManagerData.get1("ManagerHero").teamIds, 0), n = 0; n < a.length; n++) a[n] && ft.ExtHero.getCountry(a[n].id) !== ft.type.country.Wei && (i = !1);
                                         i ? ftc.showDialog({
-                                            text: "\u7ec8\u6781\u96be\u5ea6\u4e2d\u5c06\u65e0\u6cd5\u66f4\u6362\u975e\u9b4f\u56fd\u6b66\u5c06\uff0c\u8fd8\u671b\u4e3b\u516c\u591a\u591a\u6ce8\u610f!",
+                                            text: "终极难度中将无法更换非魏国武将，还望主公多多注意!",
                                             click1: function () {
                                                 ftc.send("copyEnter", {
                                                     id: ft.value.copy.ZY,
@@ -89,15 +89,15 @@
                                                 }), this.cancel(), ftc.sendClient("c_copyEnter", void 0, "LayoutCopy")
                                             }.bind(this),
                                             click2: function () { }
-                                        }) : ftc.showTip("\u8be5\u96be\u5ea6\u53ea\u80fd\u4f7f\u7528\u9b4f\u56fd\u6b66\u5c06\uff0c\u8bf7\u8c03\u6574\u9635\u5bb9")
+                                        }) : ftc.showTip("该难度只能使用魏国武将，请调整阵容")
                                     } else ftc.send("copyEnter", {
                                         id: ft.value.copy.ZY,
                                         param: this.tabIndex
                                     }), this.cancel(), ftc.sendClient("c_copyEnter", void 0, "LayoutCopy");
-                                else ftc.showTip("\u6218\u5f79\u6311\u6218\u5238\u4e0d\u8db3");
-                            else ftc.ManagerData.get1("Player").level < this.levels[this.tabIndex] ? ftc.showTip(this.levels[this.tabIndex] + "\u7ea7\u5f00\u653e") : ftc.showTip("\u8bf7\u5148\u901a\u8fc7\u524d\u7f6e\u6218\u5f79");
-                        else ft.ExtCopy.checkConsume(ft.value.copy.ZY) ? ft.ExtItem.getNum(ft.value.item.mopUpTicket) < ft.value.com.mopUpTicketNumWeekly ? ftc.showTip("\u626b\u8361\u5238\u4e0d\u8db3") : ft.ExtCopy.isFinishChallenge(ft.value.copy.ZY, this.tabIndex) ? ftc.showDialog({
-                            text: "\u786e\u5b9a\u6d88\u80175\u5f20\u626b\u8361\u5238\u548c1\u5f20\u6218\u5f79\u6311\u6218\u5238?",
+                                else ftc.showTip("战役挑战券不足");
+                            else ftc.ManagerData.get1("Player").level < this.levels[this.tabIndex] ? ftc.showTip(this.levels[this.tabIndex] + "级开放") : ftc.showTip("请先通过前置战役");
+                        else ft.ExtCopy.checkConsume(ft.value.copy.ZY) ? ft.ExtItem.getNum(ft.value.item.mopUpTicket) < ft.value.com.mopUpTicketNumWeekly ? ftc.showTip("扫荡券不足") : ft.ExtCopy.isFinishChallenge(ft.value.copy.ZY, this.tabIndex) ? ftc.showDialog({
+                            text: "确定消耗5张扫荡券和1张战役挑战券?",
                             click1: function () {
                                 ftc.send("copyMopUp", {
                                     id: ft.value.copy.ZY,
@@ -105,7 +105,7 @@
                                 })
                             }.bind(this),
                             click2: function () { }
-                        }) : ftc.showTip("\u8bf7\u5148\u5b8c\u6210\u6311\u6218") : ftc.showTip("\u6218\u5f79\u6311\u6218\u5238\u4e0d\u8db3")
+                        }) : ftc.showTip("请先完成挑战") : ftc.showTip("战役挑战券不足")
                     } else if (t.target === this.buttonTeam.node) ftc.loadLayout("LayoutTeam", void 0, {
                         hide: !0
                     });

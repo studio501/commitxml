@@ -54,7 +54,7 @@
                         var d = ft.ExtEquip.getSkillLevelUp(e);
                         if (d > 0) {
                             var l = ft.ExtHero.getSkillIds(ft.ExtEquip.getType(e), 1);
-                            l && l.length > 0 && (h = !0, this.labelSkillName.string = ft.ExtSkill.getName(l[0]), this.labelSkillInfo.string = "\u6280\u80fd\u7b49\u7ea7+" + d)
+                            l && l.length > 0 && (h = !0, this.labelSkillName.string = ft.ExtSkill.getName(l[0]), this.labelSkillInfo.string = "技能等级+" + d)
                         }
                     }
                     if (this.nodeSkill.active = h, this.nodeWakeProp.active = ft.ExtEquip.canStarUp(e), this.nodeWakeProp.active) {
@@ -118,7 +118,7 @@
                         this.labelEquips.string = M, this.labelEquips2.string = P;
                         var D = ft.ExtEquipPack.getNums(S),
                             L = ft.ExtEquipPack.getInfos(S);
-                        for (a = 0; a < D.length && a < this.labelDescs.length; a++) this.labelDescs[a].node.active = !0, this.labelValues[a].node.active = !0, this.labelDescs[a].string = D[a] + ftc.language("\u4ef6\u5957\u88c5\u5c5e\u6027:"), this.labelValues[a].string = L[a], this.labelValues[a].node.color = I >= D[a] ? ftc.newColor(1084160) : ftc.newColor(8410945);
+                        for (a = 0; a < D.length && a < this.labelDescs.length; a++) this.labelDescs[a].node.active = !0, this.labelValues[a].node.active = !0, this.labelDescs[a].string = D[a] + ftc.language("件套装属性:"), this.labelValues[a].string = L[a], this.labelValues[a].node.color = I >= D[a] ? ftc.newColor(1084160) : ftc.newColor(8410945);
                         for (a = D.length; a < this.labelValues.length; a++) this.labelDescs[a].node.active = !1, this.labelValues[a].node.active = !1
                     }
                 },

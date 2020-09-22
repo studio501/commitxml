@@ -28,7 +28,7 @@
                 tick: function (t) { },
                 onClick: function (t, e) {
                     t.target === this.buttonSelf.node && (1 === this.data.ste ? ftc.showItemInfo(this.buttonSelf.node, {
-                        name: ftc.language("\u63d0\u793a\u4fe1\u606f"),
+                        name: ftc.language("提示信息"),
                         info: this.data.txt
                     }) : 2 === this.data.ste && (ftc.send("msgActivityGet", {
                         eid: this.data.entityId,

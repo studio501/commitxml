@@ -29,10 +29,10 @@
                         else {
                             this.cancel();
                             var i = {
-                                text: "\u8ba2\u5355\u5931\u8d25,\u53ef\u4ee5\u8054\u7cfb\u6211\u4eec\u7684\u5ba2\u670d\u6216\u5c1d\u8bd5\u91cd\u65b0\u767b\u5f55\u6e38\u620f",
+                                text: "订单失败,可以联系我们的客服或尝试重新登录游戏",
                                 click1: function () { }
                             };
-                            ftc.getChat() && (i.button1 = "\u8054\u7cfb\u5ba2\u670d", i.click1 = function () {
+                            ftc.getChat() && (i.button1 = "联系客服", i.click1 = function () {
                                 ftc.showChat()
                             }, i.click2 = function () { }), ftr.showDialog(i)
                         }

@@ -2,7 +2,7 @@
 
 window.ftc = window.ftc || {}, ftc.WeChatGame = {}, ftc.WeChatGame.hasRightTopMenu = !0, ftc.WeChatGame.bannerAd0 = null, ftc.WeChatGame.rewardedVideoAd1 = null, ftc.WeChatGame.from = null, ftc.WeChatGame.exportJson = {}, ftc.WeChatGame.otherOpenId = null, ftc.WeChatGame.sceneValue = null, ftc.WeChatGame.iconAd = null, ftc.WeChatGame.portalAd = null;
 var number_arr = null;
-ftc.WeChatGame.bannerId = "adunit-5a1d41591de49a20", ftc.WeChatGame.videoAdId = ["adunit-3e02e324bcc45c7d", "adunit-0a124c48e6001b29", "adunit-f90dc813ee8680d7"], ftc.WeChatGame.title = ["\u4e09\u5206\u5929\u4e0b\uff1f\u5206\u7530\u3001\u5206\u5730\u3001\u5206\u59b9\u5b50\u2026\u2026", "\u7f3a\u59b9\u5b50\u5417\uff1f\u4f1a\u5356\u840c\uff0c\u8fd8\u80fd\u6253\u3002\u3002\u3002", "\u636e\u8bf4\u53ea\u67092%\u7684\u7537\u4eba\u624d\u80fd\u631f\u5929\u5b50\u4ee5\u4ee4\u8bf8\u4faf\u3002"], ftc.WeChatGame.init = function (t) {
+ftc.WeChatGame.bannerId = "adunit-5a1d41591de49a20", ftc.WeChatGame.videoAdId = ["adunit-3e02e324bcc45c7d", "adunit-0a124c48e6001b29", "adunit-f90dc813ee8680d7"], ftc.WeChatGame.title = ["三分天下？分田、分地、分妹子……", "缺妹子吗？会卖萌，还能打。。。", "据说只有2%的男人才能挟天子以令诸侯。"], ftc.WeChatGame.init = function (t) {
     window.mainH5ServerIp = "server.ftaro.com", window.mainH5ServerPort = 34001, window.mainH5SourceId = 601, t()
 }, ftc.WeChatGame.wxLogin = function () {
     ftc.log("ftc.WeChatGame.wxLogin"), wx.login({

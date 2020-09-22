@@ -36,7 +36,7 @@ window.ftc = window.ftc || {}, ftc.ManagerRes = {
             cur: -1,
             max: this._totalLoadingSize
         }) : (cc.log("***\u8bf7\u4fee\u6539\u70ed\u66f4\u65b0\u7248\u672c!!!***"), ftr.showDialog({
-            text: "\u70ed\u66f4\u65b0\u7248\u672c\u4e0d\u5339\u914d!!!",
+            text: "热更新版本不匹配!!!",
             clickOk: function () {
                 ftc.sysRestart()
             }
@@ -60,7 +60,7 @@ window.ftc = window.ftc || {}, ftc.ManagerRes = {
     },
     _loadResDirCallback: function (t, e) {
         if (ft.isObject(e)) {
-            for (var i = 0; i < e.length; i++) this._resource[e[i].name] && ftc.warn("\u8d44\u6e90\u6587\u4ef6\u91cd\u540d " + e[i].name), this._resource[e[i].name] = e[i];
+            for (var i = 0; i < e.length; i++) this._resource[e[i].name] && ftc.warn("资源文件重名 " + e[i].name), this._resource[e[i].name] = e[i];
             this._registDirs.length > 0 ? (this._loadingProgress++, this._registDirs.splice(0, 1)) : this._registPrefabs.length > 0 && (this._loadingProgress += e.length, this._registPrefabs = [], ftc.registPrefabs = []), ftc.sendClient("c_loadResProgress", {
                 cur: this._loadingProgress,
                 max: this._totalLoadingSize
@@ -69,16 +69,16 @@ window.ftc = window.ftc || {}, ftc.ManagerRes = {
         this._loadResource()
     },
     _loadResCallback: function (t, e) {
-        this.isLoadResErr(t) || (this._registTextures.length > 0 ? (this._resource[this._registTextures[0]] && ftc.warn("\u8d44\u6e90\u6587\u4ef6\u91cd\u540d " + this._registTextures[0]), this._resource[this._registTextures[0]] = e, this._registTextures.splice(0, 1)) : this._registImgs.length > 0 ? (this._resource[this._registImgs[0]] && ftc.warn("\u8d44\u6e90\u6587\u4ef6\u91cd\u540d " + this._registImgs[0]), this._resource[this._registImgs[0]] = e, this._registImgs.splice(0, 1)) : this._registAudios.length > 0 && this._registAudios.splice(0, 1), this._loadingProgress++, ftc.sendClient("c_loadResProgress", {
+        this.isLoadResErr(t) || (this._registTextures.length > 0 ? (this._resource[this._registTextures[0]] && ftc.warn("资源文件重名 " + this._registTextures[0]), this._resource[this._registTextures[0]] = e, this._registTextures.splice(0, 1)) : this._registImgs.length > 0 ? (this._resource[this._registImgs[0]] && ftc.warn("资源文件重名 " + this._registImgs[0]), this._resource[this._registImgs[0]] = e, this._registImgs.splice(0, 1)) : this._registAudios.length > 0 && this._registAudios.splice(0, 1), this._loadingProgress++, ftc.sendClient("c_loadResProgress", {
             cur: this._loadingProgress,
             max: this._totalLoadingSize
         })), this._loadResource()
     },
     isLoadResErr: function (t, e, i) {
-        if (ft.isObject(t) && "{}" == JSON.stringify(t) && (t = void 0), t && e && (ft.isObject(t) && (t = JSON.stringify(t)), ftc.warn("\u52a0\u8f7d\u8d44\u6e90\u4e0d\u6210\u529f " + e + " err:" + t)), ftc.ManagerH5.isH5()) {
-            if (t && this.loadResourceError < 5) return this.loadResourceError++, cc.log("\u52a0\u8f7d\u8d44\u6e90\u51fa\u9519:" + t.message || t), !0;
+        if (ft.isObject(t) && "{}" == JSON.stringify(t) && (t = void 0), t && e && (ft.isObject(t) && (t = JSON.stringify(t)), ftc.warn("加载资源不成功 " + e + " err:" + t)), ftc.ManagerH5.isH5()) {
+            if (t && this.loadResourceError < 5) return this.loadResourceError++, cc.log("加载资源出错:" + t.message || t), !0;
             t && this.loadResourceError >= 5 && i && (ftc.ManagerH5.clearStorage(), ftr.showDialog({
-                text: "\u7f51\u7edc\u4e0d\u7a33\u5b9a\uff0c\u8d44\u6e90\u52a0\u8f7d\u51fa\u9519\uff0c\u8bf7\u91cd\u65b0\u8fdb\u5165\u6e38\u620f\uff01",
+                text: "网络不稳定，资源加载出错，请重新进入游戏！",
                 clickOk: function () {
                     ftc.sysRestart()
                 }
@@ -150,10 +150,10 @@ window.ftc = window.ftc || {}, ftc.ManagerRes = {
         if (this._resource[name]) return void 0 === vol && (vol = 1), ftc.openFmod ? (0 == name.indexOf("effect/") ? ft_c_fmod_effect_play(this._resource[name], parseInt(100 * vol)) : ft_c_fmod_music_play(this._resource[name], parseInt(100 * vol), loop), this.__audioIds[name] = this._resource[name]) : this.__audioIds[name] = cc.audioEngine.play(this._resource[name], loop, vol), this.__audioIds[name]
     },
     pauseSound: function (name, e) {
-        this.__audioIds[name] && (ftc.openFmod ? 0 == name.indexOf("music/") ? ft_c_fmod_music_pause(this.__audioIds[name], e) : ftc.err("\u4e0d\u652f\u6301effect\u6682\u505c") : e ? cc.audioEngine.pause(this.__audioIds[name]) : cc.audioEngine.resume(this.__audioIds[name]))
+        this.__audioIds[name] && (ftc.openFmod ? 0 == name.indexOf("music/") ? ft_c_fmod_music_pause(this.__audioIds[name], e) : ftc.err("不支持effect暂停") : e ? cc.audioEngine.pause(this.__audioIds[name]) : cc.audioEngine.resume(this.__audioIds[name]))
     },
     soundIsPlaying: function (name) {
-        return !!this.__audioIds[name] && (ftc.openFmod && 0 == name.indexOf("music/") ? ft_c_fmod_music_is_playing(this.__audioIds[name]) : void ftc.err("\u4e0d\u652f\u6301\u7684\u64cd\u4f5c"))
+        return !!this.__audioIds[name] && (ftc.openFmod && 0 == name.indexOf("music/") ? ft_c_fmod_music_is_playing(this.__audioIds[name]) : void ftc.err("不支持的操作"))
     },
     loadSound: function (name, call_back) {
         if (this._resource[name]) call_back && call_back(this._resource[name]);
@@ -165,7 +165,7 @@ window.ftc = window.ftc || {}, ftc.ManagerRes = {
             call_back ? setTimeout(i, 0) : i()
         } else try {
             cc.loader.loadRes("audio/" + name, function (i, a) {
-                a && !i ? (this._resource[name] = a, call_back && call_back(a)) : ftc.warn("\u64ad\u653e\u58f0\u97f3\u51fa\u9519 " + name + i)
+                a && !i ? (this._resource[name] = a, call_back && call_back(a)) : ftc.warn("播放声音出错 " + name + i)
             }.bind(this))
         } catch (t) {
             cc.error(t.toString())
@@ -198,7 +198,7 @@ window.ftc = window.ftc || {}, ftc.ManagerRes = {
     _subAutoReleaseRes: function (t, e) {
         if (this._autoReleaseRes[t]) {
             var i = e.___resourceBufferCount[t];
-            if (i && (this._autoReleaseRes[t] -= i, 0 == this._autoReleaseResLock[t] && this._autoReleaseRes[t] <= 0)) return cc.loader.releaseRes(t, this._autoReleaseResType[t]), ft.console("\u91ca\u653e\u8d44\u6e901:" + t), this._autoReleaseRes[t] = void 0, this._autoReleaseResType[t] = void 0, !0
+            if (i && (this._autoReleaseRes[t] -= i, 0 == this._autoReleaseResLock[t] && this._autoReleaseRes[t] <= 0)) return cc.loader.releaseRes(t, this._autoReleaseResType[t]), ft.console("释放资源1:" + t), this._autoReleaseRes[t] = void 0, this._autoReleaseResType[t] = void 0, !0
         }
     },
     releaseResource: function (t, e) {
@@ -210,7 +210,7 @@ window.ftc = window.ftc || {}, ftc.ManagerRes = {
                     t.___resourceBufferCount = void 0
                 }
                 if (t._autoReleaseRes) {
-                    for (var a in t._autoReleaseRes) this._autoReleaseRes[a] || (t._autoReleaseRes[a] ? cc.loader.releaseRes(a, t._autoReleaseRes[a]) : cc.loader.releaseRes(a), ft.console("\u91ca\u653e\u8d44\u6e902:" + a));
+                    for (var a in t._autoReleaseRes) this._autoReleaseRes[a] || (t._autoReleaseRes[a] ? cc.loader.releaseRes(a, t._autoReleaseRes[a]) : cc.loader.releaseRes(a), ft.console("释放资源2:" + a));
                     t._autoReleaseRes = void 0
                 }
             }
@@ -219,7 +219,7 @@ window.ftc = window.ftc || {}, ftc.ManagerRes = {
         var resNode;
         if (ftc.RestoreNodeTime > 0 && (this._nodes[t] || (this._nodes[t] = []), this._nodes[t].length > 0)) return (resNode = this._nodes[t][this._nodes[t].length - 1]).__ftRestored = void 0, this.countNodeTotalRestored--, this._nodes[t].splice(this._nodes[t].length - 1, 1), compName ? resNode.getComponent(compName) : resNode;
         if (this._resource[t]) {
-            if (!this._resource[t].isValid) return void ftc.err("\u7ed3\u70b9\u5df2\u88ab\u91ca\u653e\uff0c\u65e0\u6cd5\u521b\u5efa" + t);
+            if (!this._resource[t].isValid) return void ftc.err("结点已被释放，无法创建" + t);
             resNode = cc.instantiate(this._resource[t])
         } else i || (resNode = new cc.Node, compName && resNode.addComponent(compName));
         if (resNode) return this.countNodeTotalNew++, ft.console("newNode:" + t), resNode.__ftRestoreName = t, compName ? resNode.getComponent(compName) : resNode
@@ -305,7 +305,7 @@ window.ftc = window.ftc || {}, ftc.ManagerRes = {
                     if (o) {
                         this._resource[t] = o;
                         var r = ftc.ManagerRes.getNode(t, e, !0);
-                        r ? (this.initPart(r, i, t), a(r)) : cc.log("\u52a0\u8f7dPart\u8d44\u6e90\u51fa\u9519:" + t)
+                        r ? (this.initPart(r, i, t), a(r)) : cc.log("加载Part资源出错:" + t)
                     } else a();
                     this.latestOptionUrl = ""
                 }
@@ -318,7 +318,7 @@ window.ftc = window.ftc || {}, ftc.ManagerRes = {
         ft.isObject(e) && (i = e, e = void 0), void 0 == e && (e = t), void 0 == i && (i = ftc.ManagerRes.topLayout());
         var s = ftc.ManagerRes.getNode(e, t, !0);
         if (s) return this.initPart(s, i, e), a && a(s), s;
-        a ? this._loadPartResource(e, t, i, a, n) : ftc.err("\u65e0\u6cd5\u521b\u5efaPart:" + e + "," + t)
+        a ? this._loadPartResource(e, t, i, a, n) : ftc.err("无法创建Part:" + e + "," + t)
     },
     _loadLayout: function (t, e) {
         t.load && t.load(), ftc._checkUnHandlerMsg(), t.__secondFrameEnter = 0, e && e(t)
@@ -366,11 +366,11 @@ window.ftc = window.ftc || {}, ftc.ManagerRes = {
                                 if (this.__newLayoutCallback[c][1] == e && !this.__newLayoutCallback[c][0]) {
                                     r = c;
                                     break
-                                } for (r > -1 ? (this.__newLayoutCallback[r][0] = !0, this.__newLayoutCallback[r][4] = o) : ftc.err("\u52a0\u8f7d\u754c\u9762\u51fa\u9519\uff1a" + e + "," + i); this.__newLayoutCallback.length && this.__newLayoutCallback[0][0];) {
+                                } for (r > -1 ? (this.__newLayoutCallback[r][0] = !0, this.__newLayoutCallback[r][4] = o) : ftc.err("加载界面出错：" + e + "," + i); this.__newLayoutCallback.length && this.__newLayoutCallback[0][0];) {
                                     var h = this.__newLayoutCallback[0];
                                     ftc.ManagerRes._initLayout(h[4], h[1], h[3], h[2]), this.__newLayoutCallback.splice(0, 1)
                                 }
-                        } else ftc.err("\u672a\u627e\u5230\u811a\u672c" + e)
+                        } else ftc.err("未找到脚本" + e)
                     }
                     this.latestOptionUrl = ""
                 }

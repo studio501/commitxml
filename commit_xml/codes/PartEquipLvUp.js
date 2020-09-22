@@ -20,11 +20,11 @@
                     e.push({
                         id: i.ids[0],
                         num: i.nums[0],
-                        desc: ftc.language("\u4e0b\u4e00\u7ea7\u9700\u8981") + ft.ExtItem.getName(i.ids[0]) + i.nums[0]
+                        desc: ftc.language("下一级需要") + ft.ExtItem.getName(i.ids[0]) + i.nums[0]
                     }), i = ft.ExtEquip.getConsumeLevel(this.data.id), e.push({
                         id: i.ids[0],
                         num: 1,
-                        desc: ftc.language("\u6bcf\u6b21\u5347\u7ea7\u6d88\u80171\u4e2a")
+                        desc: ftc.language("每次升级消耗1个")
                     }), this.selectedItem ? this.listView.updateListViewItems(this.selectedItem.index, e) : (this.listView.setListView(e, 0), this.selectedItem = this.listView.getItem(0))
                 },
                 onSelectEquipLvUpItem: function (t) {
@@ -35,9 +35,9 @@
                 tick: function (t) { },
                 onClick: function (t, e) {
                     if (0 === this.selectedItem.index)
-                        if (this.data.lv >= ftc.ManagerData.get1("Player").level) ftc.showTip("\u4e0d\u53ef\u8d85\u8fc7\u73a9\u5bb6\u7b49\u7ea7");
-                        else if (this.data.lv >= ft.value.com.maxEquipLevel) ftc.showTip("\u5df2\u8fbe\u5230\u88c5\u5907\u7b49\u7ea7\u4e0a\u9650");
-                        else if (ft.ExtItem.getNum(this.selectedItem.data.id) < this.selectedItem.data.num) ftc.showTip("\u94f6\u5e01\u4e0d\u8db3");
+                        if (this.data.lv >= ftc.ManagerData.get1("Player").level) ftc.showTip("不可超过玩家等级");
+                        else if (this.data.lv >= ft.value.com.maxEquipLevel) ftc.showTip("已达到装备等级上限");
+                        else if (ft.ExtItem.getNum(this.selectedItem.data.id) < this.selectedItem.data.num) ftc.showTip("银币不足");
                         else if (t.target === this.buttonUp.node) ftc.send("equipLevelUp", {
                             eids: this.data.entityId,
                             ups: 1,
@@ -47,7 +47,7 @@
                             var i = Math.min(ft.value.com.maxEquipLevel, ftc.ManagerData.get1("Player").level) - this.data.lv,
                                 a = ft.ExtEquip.calcNeedGold(this.data.id, i, this.data.goldLv);
                             ftc.showDialog({
-                                text: ftc.language("\u786e\u5b9a\u4e00\u952e\u5f3a\u5316\u88c5\u5907, \u6d88\u8017") + a + ft.ExtItem.getName(this.selectedItem.data.id),
+                                text: ftc.language("确定一键强化装备, 消耗") + a + ft.ExtItem.getName(this.selectedItem.data.id),
                                 click1: function () {
                                     ftc.send("equipLevelUp", {
                                         eids: this.data.entityId,
@@ -57,9 +57,9 @@
                                 }.bind(this),
                                 click2: function () { }
                             })
-                        } else if (this.data.lv >= ftc.ManagerData.get1("Player").level) ftc.showTip("\u4e0d\u53ef\u8d85\u8fc7\u73a9\u5bb6\u7b49\u7ea7");
-                    else if (this.data.lv >= ft.value.com.maxEquipLevel) ftc.showTip("\u5df2\u8fbe\u5230\u88c5\u5907\u7b49\u7ea7\u4e0a\u9650");
-                    else if (ft.ExtItem.getNum(this.selectedItem.data.id) < this.selectedItem.data.num) ftc.showTip("\u5f3a\u5316\u5238\u4e0d\u8db3");
+                        } else if (this.data.lv >= ftc.ManagerData.get1("Player").level) ftc.showTip("不可超过玩家等级");
+                    else if (this.data.lv >= ft.value.com.maxEquipLevel) ftc.showTip("已达到装备等级上限");
+                    else if (ft.ExtItem.getNum(this.selectedItem.data.id) < this.selectedItem.data.num) ftc.showTip("强化券不足");
                     else if (t.target === this.buttonUp.node) ftc.send("equipLevelUp", {
                         eids: this.data.entityId,
                         ups: 1
@@ -67,7 +67,7 @@
                     else {
                         var n = Math.min(ft.ExtItem.getNum(this.selectedItem.data.id), Math.min(ft.value.com.maxEquipLevel, ftc.ManagerData.get1("Player").level) - this.data.lv);
                         ftc.showDialog({
-                            text: ftc.language("\u786e\u5b9a\u4e00\u952e\u5f3a\u5316\u88c5\u5907, \u6d88\u8017") + n + ft.ExtItem.getName(this.selectedItem.data.id),
+                            text: ftc.language("确定一键强化装备, 消耗") + n + ft.ExtItem.getName(this.selectedItem.data.id),
                             click1: function () {
                                 ftc.send("equipLevelUp", {
                                     eids: this.data.entityId,

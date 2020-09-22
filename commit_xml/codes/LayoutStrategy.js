@@ -16,7 +16,7 @@
                     })
                 },
                 load: function () {
-                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("\u7b56\u7565"), this.partTopStatus.setCloseCallback(function () {
+                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("策略"), this.partTopStatus.setCloseCallback(function () {
                         ftc.send("petDelTip", 2), this.cancel()
                     }.bind(this)), this.node.addChild(this.partTopStatus.node);
                     for (var t = 0; t < this.partStrategies.length; t++) this.initPart(this.partStrategies[t]);
@@ -41,7 +41,7 @@
                 },
                 updateTvTip: function () {
                     var t, e = this.getTvSelectSte();
-                    t = -2 == e ? "\u3010\u8fd4\u56de\u952e\u3011\u8fd4\u56de\u4e0a\u9635\u7b56\u7565\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u961f\u4f0d\uff0c\u3010\u786e\u5b9a\u952e\u3011\u4e0a\u9635\u7b56\u7565" : -1 == e ? "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u961f\u4f0d\uff0c\u3010\u786e\u5b9a\u952e\u3011\u9009\u62e9\u7b56\u7565" : "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u961f\u4f0d\uff0c\u3010\u786e\u5b9a\u952e\u3011\u4e0b\u9635\u7b56\u7565", ftc.setTvTip(this.node, t)
+                    t = -2 == e ? "【返回键】返回上阵策略，【菜单键】切换队伍，【确定键】上阵策略" : -1 == e ? "【返回键】关闭界面，【菜单键】切换队伍，【确定键】选择策略" : "【返回键】关闭界面，【菜单键】切换队伍，【确定键】下阵策略", ftc.setTvTip(this.node, t)
                 },
                 updateData: function () {
                     this.partTopStatus.updateData()
@@ -59,15 +59,15 @@
                 msg: function () {
                     this.msg = {
                         c_onSelectStrategyItem: function (t, e) {
-                            if (t.isUpped()) ftc.showTip("\u7b56\u7565\u5df2\u4e0a\u9635");
+                            if (t.isUpped()) ftc.showTip("策略已上阵");
                             else if (t.data.id) {
                                 var i = this.getUpPos();
                                 i >= 0 ? ftc.send("artifactSet", {
                                     id: t.data.id,
                                     pos: i,
                                     team: this.tabIndex
-                                }) : ftc.showTip("\u6ca1\u6709\u7a7a\u4f4d\u4e86")
-                            } else ftc.showTip("\u5c1a\u672a\u89e3\u9501");
+                                }) : ftc.showTip("没有空位了")
+                            } else ftc.showTip("尚未解锁");
                             if (t.data.id) {
                                 for (var a = this.tips.split(","), n = 0; n < a.length; n++)
                                     if (a[n] == t.data.id) {

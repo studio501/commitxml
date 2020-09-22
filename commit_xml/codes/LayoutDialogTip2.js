@@ -25,14 +25,14 @@
                     t.setInteractable(!1), this.nodeItem1.addChild(t.node), this.item1 = t, (t = this.newPart("PartItem")).setInteractable(!1), this.nodeItem2.addChild(t.node), this.item2 = t, this.spriteSelect1.node.active = !0, this.spriteSelect2.node.active = !1
                 },
                 setData: function (t, e) {
-                    this.type = t, 1 === t ? (this.id = e, this.item1.setData(ft.value.item.gold), this.item1.setName(ftc.language("\u94f6\u5e01\u5f3a\u5316")), this.item2.setData(ft.value.item.equipUpgrade1), this.item2.setName(ftc.language("\u5f3a\u5316\u5238\u5f3a\u5316")), this.updateData()) : 2 === t && (this.item1.setData(ft.value.item.yeYingZhang1, ft.ExtItem.getNum(ft.value.item.yeYingZhang1)), this.item1.setName(ftc.language("\u91ce\u8425\u5e10")), this.item2.setData(ft.value.item.yeYingZhang2, ft.ExtItem.getNum(ft.value.item.yeYingZhang2)), this.item2.setName(ftc.language("\u9ad8\u7ea7\u91ce\u8425\u5e10")), this.updateData())
+                    this.type = t, 1 === t ? (this.id = e, this.item1.setData(ft.value.item.gold), this.item1.setName(ftc.language("银币强化")), this.item2.setData(ft.value.item.equipUpgrade1), this.item2.setName(ftc.language("强化券强化")), this.updateData()) : 2 === t && (this.item1.setData(ft.value.item.yeYingZhang1, ft.ExtItem.getNum(ft.value.item.yeYingZhang1)), this.item1.setName(ftc.language("野营帐")), this.item2.setData(ft.value.item.yeYingZhang2, ft.ExtItem.getNum(ft.value.item.yeYingZhang2)), this.item2.setName(ftc.language("高级野营帐")), this.updateData())
                 },
                 enter: function () { },
                 updateData: function () {
                     if (1 === this.type) {
                         var t = ft.ExtHero.getPos(this.id),
                             e = ft.ExtEquip.getEquipsByPos(t);
-                        if (0 === e.length) this.labelDesc.string = ftc.language("\u65e0\u88c5\u5907");
+                        if (0 === e.length) this.labelDesc.string = ftc.language("无装备");
                         else {
                             for (var i = {}, a = {}, n = {}, s = 0; s < e.length; s++) i[e[s].entityId] = e[s].lv, a[e[s].entityId] = e[s].goldLv, n[e[s].entityId] = 0;
                             var o, r = function () {
@@ -45,13 +45,13 @@
                             for (ftc.ManagerData.get2Object("Item"), s = 0; s < 2400; s++) {
                                 var d = r();
                                 if (i[d.entityId] >= h) {
-                                    o = "\u5df2\u7ecf\u8fbe\u5230\u73a9\u5bb6\u6700\u5927\u7b49\u7ea7";
+                                    o = "已经达到玩家最大等级";
                                     break
                                 }
                                 if (this.spriteSelect1.node.active) {
                                     var l = ft.ExtEquip.calcNeedGold(d.id, 1, a[d.entityId]);
                                     if (l > ft.ExtItem.getGold()) {
-                                        o = "\u94f6\u5e01\u4e0d\u8db3";
+                                        o = "银币不足";
                                         break
                                     }
                                     if (f + l > ft.ExtItem.getGold()) break;
@@ -59,7 +59,7 @@
                                 } else {
                                     var u = ft.ExtEquip.getPart(d.id);
                                     if (!(ft.ExtItem.getNum(ft.value.item["equipUpgrade" + u]) > 0)) {
-                                        o = "\u5f3a\u5316\u5238\u4e0d\u8db3";
+                                        o = "强化券不足";
                                         break
                                     }
                                     f += 1, i[d.entityId] += 1, n[d.entityId] += 1
@@ -68,16 +68,16 @@
                             var p = [],
                                 g = [];
                             for (var s in n) p.push(s), g.push(n[s]);
-                            this.consume = f, this.tip = o, f > 0 ? this.spriteSelect1.node.active ? (this.labelDesc.string = "\u786e\u5b9a\u4e00\u952e\u5f3a\u5316\u88c5\u5907\uff0c\u6d88\u8017{0}\u94f6\u5e01".replace("{0}", f), this.lvUpParam = {
+                            this.consume = f, this.tip = o, f > 0 ? this.spriteSelect1.node.active ? (this.labelDesc.string = "确定一键强化装备，消耗{0}银币".replace("{0}", f), this.lvUpParam = {
                                 eids: p,
                                 ups: g,
                                 gold: !0
-                            }) : (this.labelDesc.string = "\u786e\u5b9a\u4e00\u952e\u5f3a\u5316\u88c5\u5907\uff0c\u6d88\u8017{0}\u5f20\u5f3a\u5316\u5238".replace("{0}", f), this.lvUpParam = {
+                            }) : (this.labelDesc.string = "确定一键强化装备，消耗{0}张强化券".replace("{0}", f), this.lvUpParam = {
                                 eids: p,
                                 ups: g
                             }) : this.labelDesc.string = ftc.language(o)
                         }
-                    } else 2 === this.type && (this.spriteSelect1.node.active ? this.labelDesc.string = ftc.language("\u6062\u590d\u6240\u6709\u6b66\u5c06\u7684\u5175\u529b\u4e0e\u7b56\u7565\uff0c\u65e0\u6cd5\u590d\u6d3b\u9635\u4ea1\u6b66\u5c06") : this.labelDesc.string = ftc.language("\u6062\u590d\u6240\u6709\u6b66\u5c06\u7684\u5175\u529b\u4e0e\u7b56\u7565\uff0c\u53ef\u590d\u6d3b\u9635\u4ea1\u6b66\u5c06"))
+                    } else 2 === this.type && (this.spriteSelect1.node.active ? this.labelDesc.string = ftc.language("恢复所有武将的兵力与策略，无法复活阵亡武将") : this.labelDesc.string = ftc.language("恢复所有武将的兵力与策略，可复活阵亡武将"))
                 },
                 tick: function (t) { },
                 cleanup: function () { },

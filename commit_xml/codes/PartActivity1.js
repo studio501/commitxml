@@ -22,7 +22,7 @@
                     for (var e = ft.ExtMsg.getAward(this.data), i = 0; i < e.ids.length; i++) {
                         if (!this.partItems[i]) {
                             var a = this.newPart("PartItem");
-                            a.setName(ftc.language("\u7b2c" + (i + 1) + ftc.language("\u5929"))), a.setNameColor(cc.Color.WHITE), a.node.scale = .85, this.nodeLayoutAward.addChild(a.node, i), this.partItems[i] = a
+                            a.setName(ftc.language("第" + (i + 1) + ftc.language("天"))), a.setNameColor(cc.Color.WHITE), a.node.scale = .85, this.nodeLayoutAward.addChild(a.node, i), this.partItems[i] = a
                         }
                         a.setData(e.ids[i], e.nums[i])
                     }
@@ -38,7 +38,7 @@
                 onClick: function (t, e) {
                     0 == this.data.ste ? ftc.send("msgActivityGet", {
                         eid: this.data.entityId
-                    }) : ftc.showTip("\u5df2\u9886\u53d6")
+                    }) : ftc.showTip("已领取")
                 }
             })
         

@@ -34,7 +34,7 @@
                 tick: function (t) { },
                 onClick: function (t, e) {
                     t.target === this.buttonDetail.node && ftc.loadLayout("LayoutAwardPreview", function (t) {
-                        for (var e = JSON.parse(ft.ExtMsg.getBase(this.data)), i = [], a = 0; a < e.ids.length; a++) i.push("\u8fde\u7eed" + (a + 1) + "\u5929");
+                        for (var e = JSON.parse(ft.ExtMsg.getBase(this.data)), i = [], a = 0; a < e.ids.length; a++) i.push("连续" + (a + 1) + "天");
                         t.setData({
                             ids: e.ids,
                             nums: e.nums,

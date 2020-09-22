@@ -46,7 +46,7 @@
                     }
                 },
                 updateTip: function () {
-                    this.labelTip2.string = this.itemNum + "/" + this.data.item.num, this.labelTip.string = "\u5171\u53ef\u83b7\u5f97{0}\u4e2a{1}".replace(/\{(\d+)\}/g, function (t, e) {
+                    this.labelTip2.string = this.itemNum + "/" + this.data.item.num, this.labelTip.string = "共可获得{0}个{1}".replace(/\{(\d+)\}/g, function (t, e) {
                         return [this.itemNum * this.selectedItemNum, this.itemName][e]
                     }.bind(this))
                 },

@@ -51,10 +51,10 @@
                             a = t[e].getChildByName("labelConsume").getComponent(cc.Label);
                         i.spriteFrame = ft.ExtItem.getLittleIconSprite(this.activity.consumeId), a.string = this.activity.consumeNum * [1, 5][e] + (this.activity.consumeId === ft.value.item.gem2 ? "" : "/" + ft.ExtItem.getNum(this.activity.consumeId))
                     }
-                    this.buttonVisit1.interactable = ft.ExtItem.getNum(this.activity.consumeId) >= 1 * this.activity.consumeNum, this.buttonVisit5.interactable = ft.ExtItem.getNum(this.activity.consumeId) >= 5 * this.activity.consumeNum, this.progressBar.progress = this.data.ext / this.activity.extMax, this.labelProgress.string = "\u7d2f\u8ba1\u5e78\u8fd0\u503c:" + this.data.ext + "/" + this.activity.extMax
+                    this.buttonVisit1.interactable = ft.ExtItem.getNum(this.activity.consumeId) >= 1 * this.activity.consumeNum, this.buttonVisit5.interactable = ft.ExtItem.getNum(this.activity.consumeId) >= 5 * this.activity.consumeNum, this.progressBar.progress = this.data.ext / this.activity.extMax, this.labelProgress.string = "累计幸运值:" + this.data.ext + "/" + this.activity.extMax
                 },
                 updateDate: function () {
-                    this.labelDeadline.string = ftc.language("\u5269\u4f59\u65f6\u95f4: ") + ftc.calcTimeDelta(void 0, this.data.date1)
+                    this.labelDeadline.string = ftc.language("剩余时间: ") + ftc.calcTimeDelta(void 0, this.data.date1)
                 },
                 setResult: function (t) {
                     this.result = [];

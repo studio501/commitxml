@@ -65,7 +65,7 @@
                     else if (t.target === this.buttonClsEdit.node) this.editBoxInput.string = "", cc.sys.localStorage.setItem("test_code" + ft.getAppId(), "");
                     else if (t.target === this.buttonOk.node) {
                         var e = this.editBoxInput.string;
-                        cc.sys.localStorage.setItem("test_code" + ft.getAppId(), e), e = ft.replaceAll(e, ";\r\n", ";"), e = ft.replaceAll(e, "\r\n", ";"), e = ft.replaceAll(e, ";\n", ";"), e = ft.replaceAll(e, "\n", ";"), e = ft.replaceAll(e, "\uff0c", ","), e = ft.replaceAll(e, "\uff1a", ":"), e = ft.replaceAll(e, "\u3000", " "), ftc.send("code", {
+                        cc.sys.localStorage.setItem("test_code" + ft.getAppId(), e), e = ft.replaceAll(e, ";\r\n", ";"), e = ft.replaceAll(e, "\r\n", ";"), e = ft.replaceAll(e, ";\n", ";"), e = ft.replaceAll(e, "\n", ";"), e = ft.replaceAll(e, "，", ","), e = ft.replaceAll(e, "：", ":"), e = ft.replaceAll(e, "　", " "), ftc.send("code", {
                             code: e,
                             debug: 1
                         })
@@ -81,16 +81,16 @@
                         c_output: function (t, e) {
                             var i = "{\r\n";
                             for (var a in ftc.ManagerData._data1) i += '\t["' + a + '"]=' + JSON.stringify(ftc.ManagerData._data1[a]) + ",\r\n";
-                            for (var a in i += "}", jsb.fileUtils.writeStringToFile(i, "c1.json"), ftc.log("\u5199\u51fa\u6587\u4ef6" + jsb.fileUtils.getWritablePath() + "c1.json"), i = "{\r\n", ftc.ManagerData._data2) {
+                            for (var a in i += "}", jsb.fileUtils.writeStringToFile(i, "c1.json"), ftc.log("写出文件" + jsb.fileUtils.getWritablePath() + "c1.json"), i = "{\r\n", ftc.ManagerData._data2) {
                                 i += '\t["' + a + '"]={\r\n';
                                 var n = "";
                                 for (var s in ftc.ManagerData._data2[a]) n += '\t\t["' + s + '"]=' + JSON.stringify(ftc.ManagerData._data2[a][s]) + ",\r\n";
                                 i += n, i += "\t}\r\n"
                             }
-                            i += "}", jsb.fileUtils.writeStringToFile(i, "c2.json"), ftc.log("\u5199\u51fa\u6587\u4ef6" + jsb.fileUtils.getWritablePath() + "c2.json")
+                            i += "}", jsb.fileUtils.writeStringToFile(i, "c2.json"), ftc.log("写出文件" + jsb.fileUtils.getWritablePath() + "c2.json")
                         },
                         exportDB: function (t, e) {
-                            ftc.isWindows() && !cc.sys.isBrowser ? (ftc.log("\u5199\u51fa\u6587\u4ef6" + jsb.fileUtils.getWritablePath() + "f_out.txt"), this.msg.outf(t)) : this.editBoxInput.string = t
+                            ftc.isWindows() && !cc.sys.isBrowser ? (ftc.log("写出文件" + jsb.fileUtils.getWritablePath() + "f_out.txt"), this.msg.outf(t)) : this.editBoxInput.string = t
                         },
                         inf: function (t, e) {
                             var i = jsb.fileUtils.getStringFromFile("f_in.txt");
@@ -105,7 +105,7 @@
                         },
                         injs: function (t, e) {
                             var i = jsb.fileUtils.getStringFromFile("f_in.js");
-                            for (i = ft.replaceAll(i, "'", "`"), i = ft.replaceAll(i, '"', "\u201c"), i = ft.replaceAll(i, "\t", ""); ;) {
+                            for (i = ft.replaceAll(i, "'", "`"), i = ft.replaceAll(i, '"', "“"), i = ft.replaceAll(i, "\t", ""); ;) {
                                 if (!((o = i.indexOf("/*")) >= 0)) break;
                                 var a = i.indexOf("*/", o);
                                 i = i.substr(0, o) + i.substr(a + 2)
@@ -152,7 +152,7 @@
                             })
                         },
                         ram: function (t, e) {
-                            t ? (ftc.ManagerRes.countNodeTotalDestroy = 0, ftc.ManagerRes.countNodeTotalNew = 0, ftc.ManagerRes.countNodeTotalRestored = 0, ftc.ManagerRes.countNodeTotalDestroyPartItem = 0, ftc.ManagerRes.countNodeTotalNewPartItem = 0, ftc.ManagerRes.countNodeTotalRestoredPartItem = 0, ftc.log("\u7edf\u8ba1\u5df2\u6e05\u96f6")) : (ftc.log("***\u5185\u5b58\u8d44\u6e90\u7edf\u8ba1***"), ftc.log("                \u5f53\u524d\u603b\u521b\u5efa\u8282\u70b9(Layout/Part):" + ftc.ManagerRes.countNodeTotalNew), ftc.log("                \u5f53\u524d\u603b\u5220\u9664\u8282\u70b9(Layout/Part):" + ftc.ManagerRes.countNodeTotalDestroy), ftc.log("                \u5f53\u524d\u603b\u56de\u6536\u8282\u70b9(Layout/Part):" + ftc.ManagerRes.countNodeTotalRestored), ftc.log("                \u5f53\u524d\u4f7f\u7528\u4e2d\u8282\u70b9(Layout/Part):" + (ftc.ManagerRes.countNodeTotalNew - ftc.ManagerRes.countNodeTotalRestored - ftc.ManagerRes.countNodeTotalDestroy)), ftc.log("                \u5f53\u524d\u603b\u521b\u5efa\u8282\u70b9(PartItem):" + ftc.ManagerRes.countNodeTotalNewPartItem), ftc.log("                \u5f53\u524d\u603b\u5220\u9664\u8282\u70b9(PartItem):" + ftc.ManagerRes.countNodeTotalDestroyPartItem), ftc.log("                \u5f53\u524d\u603b\u56de\u6536\u8282\u70b9(PartItem):" + ftc.ManagerRes.countNodeTotalRestoredPartItem), ftc.log("                \u5f53\u524d\u4f7f\u7528\u4e2d\u8282\u70b9(PartItem):" + (ftc.ManagerRes.countNodeTotalNewPartItem - ftc.ManagerRes.countNodeTotalRestoredPartItem - ftc.ManagerRes.countNodeTotalDestroyPartItem)))
+                            t ? (ftc.ManagerRes.countNodeTotalDestroy = 0, ftc.ManagerRes.countNodeTotalNew = 0, ftc.ManagerRes.countNodeTotalRestored = 0, ftc.ManagerRes.countNodeTotalDestroyPartItem = 0, ftc.ManagerRes.countNodeTotalNewPartItem = 0, ftc.ManagerRes.countNodeTotalRestoredPartItem = 0, ftc.log("统计已清零")) : (ftc.log("***\u5185\u5b58\u8d44\u6e90\u7edf\u8ba1***"), ftc.log("                \u5f53\u524d\u603b\u521b\u5efa\u8282\u70b9(Layout/Part):" + ftc.ManagerRes.countNodeTotalNew), ftc.log("                \u5f53\u524d\u603b\u5220\u9664\u8282\u70b9(Layout/Part):" + ftc.ManagerRes.countNodeTotalDestroy), ftc.log("                \u5f53\u524d\u603b\u56de\u6536\u8282\u70b9(Layout/Part):" + ftc.ManagerRes.countNodeTotalRestored), ftc.log("                \u5f53\u524d\u4f7f\u7528\u4e2d\u8282\u70b9(Layout/Part):" + (ftc.ManagerRes.countNodeTotalNew - ftc.ManagerRes.countNodeTotalRestored - ftc.ManagerRes.countNodeTotalDestroy)), ftc.log("                \u5f53\u524d\u603b\u521b\u5efa\u8282\u70b9(PartItem):" + ftc.ManagerRes.countNodeTotalNewPartItem), ftc.log("                \u5f53\u524d\u603b\u5220\u9664\u8282\u70b9(PartItem):" + ftc.ManagerRes.countNodeTotalDestroyPartItem), ftc.log("                \u5f53\u524d\u603b\u56de\u6536\u8282\u70b9(PartItem):" + ftc.ManagerRes.countNodeTotalRestoredPartItem), ftc.log("                \u5f53\u524d\u4f7f\u7528\u4e2d\u8282\u70b9(PartItem):" + (ftc.ManagerRes.countNodeTotalNewPartItem - ftc.ManagerRes.countNodeTotalRestoredPartItem - ftc.ManagerRes.countNodeTotalDestroyPartItem)))
                         }
                     }
                 }

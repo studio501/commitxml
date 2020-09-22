@@ -27,7 +27,7 @@
                 hide: function (t, e) {
                     if (e) this.delayHides.push([t, e]);
                     else {
-                        for (var i in t || (t = 0), this.counts[t] > 0 ? this.counts[t]-- : ft.console("\u9519\u8bef\u8bf7\u68c0\u67e5 ftc.cancelTop() \u591a\u8c03\u7528\u4e00\u6b21"), this.counts)
+                        for (var i in t || (t = 0), this.counts[t] > 0 ? this.counts[t]-- : ft.console("错误请检查 ftc.cancelTop() 多调用一次"), this.counts)
                             if (this.counts[i] > 0) return;
                         this.node.active = !1
                     }

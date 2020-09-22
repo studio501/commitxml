@@ -64,7 +64,7 @@
                     if (t.target === this.buttonMusic.node) ftc.send("openBGMusic", ftc.ManagerData.get1("ManagerMap").isOpenBGMusic ? 0 : 1);
                     else if (t.target === this.buttonSound.node) ftc.send("openEffect", ftc.ManagerData.get1("ManagerMap").isOpenEffect ? 0 : 1);
                     else if (t.target === this.button30.node) this.updateFrameInfo(30);
-                    else if (t.target === this.button45.node) this.updateFrameInfo(45), ftc.isIos() && ftc.showTip("\u6b64\u6863\u4f4d\u9700\u8981\u91cd\u542f\u751f\u6548");
+                    else if (t.target === this.button45.node) this.updateFrameInfo(45), ftc.isIos() && ftc.showTip("此档位需要重启生效");
                     else if (t.target === this.button60.node) this.updateFrameInfo(60);
                     else if (t.target === this.buttonAdBox.node) ftc.send("openAdBox", ftc.ManagerData.get1("ManagerMap").isOpenAdBox ? 0 : 1);
                     else if (t.target === this.buttonKefu.node) ftc.showChat();

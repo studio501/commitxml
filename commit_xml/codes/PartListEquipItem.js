@@ -35,7 +35,7 @@
                     if (this.labelInfo.string = e, this.labelNum.node.active = this.data.pos < 0, this.data.pos >= 0) {
                         var s = ft.ExtHero.getHeroByPos(this.data.pos);
                         s && (this.labelStatus.string = ft.ExtHero.getName(s.id))
-                    } else this.labelStatus.string = "", this.labelNum.string = ftc.language("\u6570\u91cf:") + this.data.num
+                    } else this.labelStatus.string = "", this.labelNum.string = ftc.language("数量:") + this.data.num
                 },
                 playAni: function () {
                     this.spineLvUp.node.active = !0, this.spineLvUp.setAnimation(0, "wait1", !1)

@@ -42,7 +42,7 @@
                     this.hypertext.cleanHtml(), this.hypertext.node.opacity = 0, this.hypertext.http(t, null, function (t) {
                         if (!ftc.ManagerRes.checkNodeIsRestored(this.node)) {
                             var e = t.title.rendered,
-                                i = e.indexOf("\u3011");
+                                i = e.indexOf("】");
                             i > 0 && (e = e.substr(i + 1)), this.labelTitle.string = e;
                             var a = ft.replaceAll(t.content.rendered, "\n", "");
                             this.hypertext.setHtml(a, this.hyperTextClick), cc.tween(this.hypertext.node).to(1, {

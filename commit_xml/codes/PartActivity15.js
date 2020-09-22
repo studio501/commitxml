@@ -34,7 +34,7 @@
                 },
                 cleanup: function () { },
                 updateData: function () {
-                    this.activity && (this.buttonRecharge.node.getChildByName("Label").getComponent(cc.Label).string = ft.ExtItem.getGem() < this.activity.items[0].price ? ftc.language("\u524d\u5f80\u5145\u503c") : "\u8d2d\u4e70\u793c\u5305")
+                    this.activity && (this.buttonRecharge.node.getChildByName("Label").getComponent(cc.Label).string = ft.ExtItem.getGem() < this.activity.items[0].price ? ftc.language("前往充值") : "购买礼包")
                 },
                 tick: function (t) {
                     this.tickAdd += t, this.tickAdd >= 1 && (this.updateRemainingTime(), this.tickAdd = 0)
@@ -44,7 +44,7 @@
                         i = ft.prefixZeroTime(Math.floor(e / 3600)),
                         a = ft.prefixZeroTime(Math.floor(e / 60 % 60)),
                         n = ft.prefixZeroTime(e % 60);
-                    this.labelTime.string = ftc.language("\u5269\u4f59\u65f6\u95f4") + i + ":" + a + ":" + n
+                    this.labelTime.string = ftc.language("剩余时间") + i + ":" + a + ":" + n
                 },
                 onClick: function (t, e) {
                     t.target === this.buttonRecharge.node && (ft.ExtItem.getGem() >= this.activity.items[0].price ? ftc.send("msgActivityGet", {

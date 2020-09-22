@@ -30,7 +30,7 @@
                     }.bind(this)), ftc.isTv() && (this.buttonDetail.node.active = !1), this.spriteLock.node.zIndex = 10
                 },
                 load: function () {
-                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("\u5408\u6210"), this.node.addChild(this.partTopStatus.node);
+                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("合成"), this.node.addChild(this.partTopStatus.node);
                     for (var t = 0; t < this.partImports.length; t++) this.initPart(this.partImports[t]);
                     this.itemExport = this.newPart("PartItem"), this.spriteEquipBg.node.addChild(this.itemExport.node), this.itemExport.node.active = !1, this.labelNum.string = "0", this._composeType = void 0, this._conditions = [!1, !1, !1, !1], this._inputNum = 0, this._inputNumMax = 0, this._checkCanCompose(), this.selectTab(0)
                 },
@@ -72,7 +72,7 @@
                             }), this.selectedIndex = t.index
                         },
                         equipCompose: function (t, e) {
-                            t > 0 ? (this._showComposeTip(), this.setRecipeInfo(this._recipeId)) : ftc.showTip("\u91cd\u94f8\u5931\u8d25")
+                            t > 0 ? (this._showComposeTip(), this.setRecipeInfo(this._recipeId)) : ftc.showTip("重铸失败")
                         },
                         itemRecipeCompose: function (t, e) {
                             this._showComposeTip(), this.setRecipeInfo(this._recipeId)
@@ -104,7 +104,7 @@
                                 s = ft.ExtItem.getJewel(a.out),
                                 o = ft.ExtJewel.getName(i.id),
                                 r = ft.ExtJewel.getName(s),
-                                c = "\u662f\u5426\u6d88\u8017{0}\u4e2a{1}\u5408\u6210{2}\u4e2a{3}".replace(/\{(\d+)\}/g, function (t, e) {
+                                c = "是否消耗{0}个{1}合成{2}个{3}".replace(/\{(\d+)\}/g, function (t, e) {
                                     return [n * this._inputNum, o, this._inputNum, r][e]
                                 }.bind(this));
                             ftc.showDialog({
@@ -149,7 +149,7 @@
                                 }
                                 this._conditions[2] = u
                             }
-                            this._checkCanCompose(), h && u ? ftc.showTip("\u653e\u5165\u6210\u529f") : ftc.showTip("\u653e\u5165\u5931\u8d25")
+                            this._checkCanCompose(), h && u ? ftc.showTip("放入成功") : ftc.showTip("放入失败")
                         } else
                         for (l = 0; l < this.buttonTabs.length; l++)
                             if (t.target === this.buttonTabs[l].node) {
@@ -160,7 +160,7 @@
                 selectTab: function (t) {
                     this.tabIndex = t, this._composeType = [ft.type.compose.equip, ft.type.compose.material, ft.type.compose.jewel][this.tabIndex];
                     for (var e = [ftc.type.tab.compose_equip, ftc.type.tab.compose_material, ftc.type.tab.compose_jewel], i = 0; i < this.buttonTabs.length; i++) this.buttonTabs[i].interactable = this.tabIndex !== i, this.buttonTabs[i].node.getChildByName("spriteTabIcon").getComponent(cc.Sprite).spriteFrame = ftc.getTabSpriteFrame(e[i], t === i), this.buttonTabs[i].node.getChildByName("labelTab").color = t !== i ? ftc.newColor(ftc.value.color.tabNormal) : ftc.newColor(ftc.value.color.tabPressed), this.buttonTabs[i].node.getChildByName("labelTab").getComponent(cc.LabelOutline).color = t !== i ? ftc.newColor(ftc.value.color.tabNormalOutline) : ftc.newColor(ftc.value.color.tabPressedOutline);
-                    this.partImports[0].node.active = this._composeType === ft.type.compose.equip, this.partImports[1].node.active = !0, this.partImports[2].node.active = this._composeType === ft.type.compose.equip || this._composeType === ft.type.compose.material, this.nodeInputNum.active = this._composeType !== ft.type.compose.equip, this.buttonPutIn.node.active = !this.nodeInputNum.active, this.buttonConfirm.node.x = this.nodeInputNum.active ? 185 : 140, this.buttonConfirm.node.getChildByName("Text").getComponent(cc.Label).string = this._composeType === ft.type.compose.equip ? "\u5f00\u59cb\u91cd\u94f8" : "\u5f00\u59cb\u5408\u6210";
+                    this.partImports[0].node.active = this._composeType === ft.type.compose.equip, this.partImports[1].node.active = !0, this.partImports[2].node.active = this._composeType === ft.type.compose.equip || this._composeType === ft.type.compose.material, this.nodeInputNum.active = this._composeType !== ft.type.compose.equip, this.buttonPutIn.node.active = !this.nodeInputNum.active, this.buttonConfirm.node.x = this.nodeInputNum.active ? 185 : 140, this.buttonConfirm.node.getChildByName("Text").getComponent(cc.Label).string = this._composeType === ft.type.compose.equip ? "开始重铸" : "开始合成";
                     var a = ft.ExtConsume.getRecipesByType(this._composeType);
                     this.listView.setListView(a, {
                         type: this._composeType,
@@ -186,7 +186,7 @@
                                                 type: ft.type.list.EquipSwitch,
                                                 datas: i
                                             })
-                                        }) : ftc.showTip("\u65e0\u6ee1\u8db3\u6761\u4ef6\u88c5\u5907")
+                                        }) : ftc.showTip("无满足条件装备")
                         }.bind(this));
                         var i = ft.ExtConsume.getItems(this._recipeId, 3);
                         1 === i.ids.length ? (this.partImports[1].setData({
@@ -228,7 +228,7 @@
                                 type: ft.type.list.ChooseJewelUpgrade,
                                 datas: t
                             })
-                        }.bind(this)) : ftc.showTip("\u65e0\u6b64\u7c7b\u578b\u5b9d\u77f3")
+                        }.bind(this)) : ftc.showTip("无此类型宝石")
                     }.bind(this)), this._inputNum = 0, this._inputNumMax = 0, this.labelNum.string = 0, this.labelNum.node.color = ftc.newColor(4855815), this.editBox.string = 0, this._conditions[1] = !1, this._checkCanCompose())
                 },
                 onSelectListGoodsItem: function (t) {
@@ -281,7 +281,7 @@
                     if (!t && !this.tvSelectList) return this.toTvUpdate = !0, this.tvSelectList = !0, this.updateTvTip(), !0
                 },
                 updateTvTip: function () {
-                    this.tvSelectList ? ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762,\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u6807\u7b7e,\u3010\u786e\u8ba4\u952e\u3011\u5408\u6210\u8be6\u60c5") : ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u8fd4\u56de\u5217\u8868,\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u6807\u7b7e")
+                    this.tvSelectList ? ftc.setTvTip(this.node, "【返回键】关闭界面,【菜单键】切换标签,【确认键】合成详情") : ftc.setTvTip(this.node, "【返回键】返回列表,【菜单键】切换标签")
                 }
             })
         

@@ -24,7 +24,7 @@
                     var e = 0,
                         i = ftc.ManagerData.get2("Title");
                     for (var a in i) e += ft.ExtTitle.getExp(i[a].id);
-                    this.sumExp = e, this.maxLevel = ft.ExtTitle.getMaxLevel(ftc.ManagerData.get2("Title")), this.updateData(), ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u6807\u7b7e")
+                    this.sumExp = e, this.maxLevel = ft.ExtTitle.getMaxLevel(ftc.ManagerData.get2("Title")), this.updateData(), ftc.setTvTip(this.node, "【返回键】关闭界面，【菜单键】切换标签")
                 },
                 setData: function (t) { },
                 selectTab: function (t) {
@@ -36,7 +36,7 @@
                 updateData: function () {
                     var t = ftc.ManagerData.get1("ManagerTitle").level,
                         e = ft.ExtTitle.getNextExp(t);
-                    this.labelTip.string = e > 0 ? ftc.language("\u603b\u7ecf\u9a8c:") + this.sumExp + "/" + e : ftc.language("\u603b\u7ecf\u9a8c:") + this.sumExp, this.buttonUpgrade.node.active = this.maxLevel > t
+                    this.labelTip.string = e > 0 ? ftc.language("总经验:") + this.sumExp + "/" + e : ftc.language("总经验:") + this.sumExp, this.buttonUpgrade.node.active = this.maxLevel > t
                 },
                 updateTitle: function () {
                     ftc.sendClient("c_updateRoleMapTitle", void 0, "LayoutMain"), this.partTitles[0].updateData(), this.partTitles[1].updateData()
@@ -52,16 +52,16 @@
                             this.partTitles[1].updateData(t)
                         },
                         titleSet: function (t, e) {
-                            0 === t ? (ftc.showTip("\u8bbe\u7f6e\u6210\u529f"), ftc.playEffect(ftc.type.effect.title_set), this.updateTitle()) : ftc.showTip("\u8bbe\u7f6e\u5931\u8d25")
+                            0 === t ? (ftc.showTip("设置成功"), ftc.playEffect(ftc.type.effect.title_set), this.updateTitle()) : ftc.showTip("设置失败")
                         },
                         titleUnload: function (t, e) {
-                            0 === t ? (ftc.showTip("\u5378\u4e0b\u6210\u529f"), this.updateTitle()) : ftc.showTip("\u5378\u4e0b\u5931\u8d25")
+                            0 === t ? (ftc.showTip("卸下成功"), this.updateTitle()) : ftc.showTip("卸下失败")
                         },
                         titleLevelUp: function (t, e) {
-                            0 === t ? (ftc.showTip("\u5347\u7ea7\u6210\u529f"), ftc.playEffect(ftc.type.effect.title_lvUp), this.updateData(), this.updateTitle()) : ftc.showTip("\u5347\u7ea7\u5931\u8d25")
+                            0 === t ? (ftc.showTip("升级成功"), ftc.playEffect(ftc.type.effect.title_lvUp), this.updateData(), this.updateTitle()) : ftc.showTip("升级失败")
                         },
                         decorationSet: function (t, e) {
-                            0 === t ? (ftc.showTip("\u8bbe\u7f6e\u6210\u529f"), this.updateData(), this.updateTitle()) : ftc.showTip("\u8bbe\u7f6e\u5931\u8d25")
+                            0 === t ? (ftc.showTip("设置成功"), this.updateData(), this.updateTitle()) : ftc.showTip("设置失败")
                         }
                     }
                 },

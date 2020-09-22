@@ -36,13 +36,13 @@
                         }.bind(this), this);
                         var n = ft.ExtHero.getPos(a.id);
                         if (this.labelTip.node.active = !0, i > 1) {
-                            this.labelTip.string = ftc.language("\u83b7\u5f97\u6b66\u5c06\u5df2\u8f6c\u6362\u6210 \u788e\u7247x") + i;
+                            this.labelTip.string = ftc.language("获得武将已转换成 碎片x") + i;
                             var s = 0,
                                 o = 10;
                             if (i > o)
                                 for (var r = 0; r < ft.value.com.maxHeroStar && i >= (o += ft.value.heroStarNeed[r]); r++) s += 1;
                             this.spriteStar.spriteFrame = ft.ExtHero.getStarSprite(s)
-                        } else 1 === i ? (this.labelTip.node.active = -1 !== n, this.labelTip.node.active && (this.labelTip.string = ftc.language("\u65b0\u83b7\u5f97\u6b66\u5c06\u5df2\u4e0a\u9635"))) : this.labelTip.string = ftc.language("\u5df2\u62e5\u6709\u8be5\u6b66\u5c06")
+                        } else 1 === i ? (this.labelTip.node.active = -1 !== n, this.labelTip.node.active && (this.labelTip.string = ftc.language("新获得武将已上阵"))) : this.labelTip.string = ftc.language("已拥有该武将")
                     }
                 },
                 enter: function () {

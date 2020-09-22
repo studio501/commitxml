@@ -8,7 +8,7 @@ uni_re = re.compile( r'\"\\u(.*?)\"')
 def fix_one_file(file_path):
     print('start fix {} ...'.format(os.path.basename(file_path)))
     def replace_func(p1):
-        return p1.group().decode('unicode_escape')
+        return p1.group().decode('unicode_escape').replace(u'\n',u'\\n')
 
     contents = None
     with open(file_path,"r") as f:
@@ -34,7 +34,6 @@ def fix_dir(sourceDir):
             fix_dir(sourceF)
 
 def main():
-    # fix_one_file("/Users/mac/Documents/my_projects/local_project/opengl_st/commit_xml/codes/PartActivity1008.js")
     if len(sys.argv) == 2:
         sourceDir = sys.argv[1]
         fix_dir(sourceDir)

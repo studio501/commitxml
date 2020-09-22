@@ -51,12 +51,12 @@
                 msg: function () {
                     this.msg = {
                         petUp: function (t, e) {
-                            t > 0 ? (ftc.playEffect(ftc.type.effect.heroUp), ftc.showTip("\u7a81\u7834\u6210\u529f"), this.partOrder.playAni(), this.listView.updateListViewItems(!0), this.updateNeeds()) : 0 == t ? ftc.showTip("\u6750\u6599\u4e0d\u8db3") : ftc.showTip("\u9635\u6cd5\u672a\u89e3\u9501")
+                            t > 0 ? (ftc.playEffect(ftc.type.effect.heroUp), ftc.showTip("突破成功"), this.partOrder.playAni(), this.listView.updateListViewItems(!0), this.updateNeeds()) : 0 == t ? ftc.showTip("材料不足") : ftc.showTip("阵法未解锁")
                         }
                     }
                 },
                 onClick: function (t, e) {
-                    t.target === this.buttonUp.node ? this.datas[this.index].up < ft.value.com.maxPetUp ? ftc.send("petUp", this.datas[this.index].id) : ftc.showTip("\u5df2\u7a81\u7834\u81f3\u6781\u9650") : t.target === this.buttonLeft.node ? this.index > 1 && this.selectOrder(this.index - 1) : t.target === this.buttonRight.node ? this.index < this.datas.length - 1 && this.selectOrder(this.index + 1) : t.target === this.buttonClose.node && this.cancel()
+                    t.target === this.buttonUp.node ? this.datas[this.index].up < ft.value.com.maxPetUp ? ftc.send("petUp", this.datas[this.index].id) : ftc.showTip("已突破至极限") : t.target === this.buttonLeft.node ? this.index > 1 && this.selectOrder(this.index - 1) : t.target === this.buttonRight.node ? this.index < this.datas.length - 1 && this.selectOrder(this.index + 1) : t.target === this.buttonClose.node && this.cancel()
                 }
             })
         

@@ -17,7 +17,7 @@
                     var t = ft.ExtCopy.getAchievements(ftc.ManagerData.get2Object("Achievement")),
                         e = [];
                     for (var i in t) e.push(t[i]);
-                    this.listView.setListView(e), this.labelTotalScore.string = "\u603b\u5206: " + ft.ExtCopy.getAchievementScore(e)
+                    this.listView.setListView(e), this.labelTotalScore.string = "总分: " + ft.ExtCopy.getAchievementScore(e)
                 },
                 setData: function (t) { },
                 enter: function () {

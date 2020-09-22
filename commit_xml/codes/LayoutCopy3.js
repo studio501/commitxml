@@ -5,7 +5,7 @@ var number_arr = {
     all: 0,
     notOwned: 1,
     owned: 2,
-    names: ["\u5168\u90e8", "\u672a\u62e5\u6709", "\u5df2\u62e5\u6709"]
+    names: ["全部", "未拥有", "已拥有"]
 };
 cc.Class({
     extends: ftc.BaseView,
@@ -42,10 +42,10 @@ cc.Class({
         }), this.addClick(this.buttonSelect1, !0), this.addClick(this.buttonSelect2, !0)
     },
     load: function () {
-        this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("\u6218\u795e\u5175"), this.node.addChild(this.partTopStatus.node), ftc.isTv() && (this.buttonSelect1.node.active = !1, this.buttonSelect2.node.active = !1), this.id = void 0, this.mode = ft.type.copyMode.challenge, this._canEnter = 1, this._selectedIndex = 0, this._tvSelectZone = 0, this.datas1 = void 0, this.datas2 = void 0, this._equipId = 0, this.addPartMenu(), this._equipItem = this.newPart("PartItem"), this._equipItem.node.scale = .9, this.nodeEquipItem.addChild(this._equipItem.node)
+        this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("战神兵"), this.node.addChild(this.partTopStatus.node), ftc.isTv() && (this.buttonSelect1.node.active = !1, this.buttonSelect2.node.active = !1), this.id = void 0, this.mode = ft.type.copyMode.challenge, this._canEnter = 1, this._selectedIndex = 0, this._tvSelectZone = 0, this.datas1 = void 0, this.datas2 = void 0, this._equipId = 0, this.addPartMenu(), this._equipItem = this.newPart("PartItem"), this._equipItem.node.scale = .9, this.nodeEquipItem.addChild(this._equipItem.node)
     },
     setData: function (t) {
-        this.id = ft.value.copy.ShenBing, this.datas = this.getListData(ft.type.country.all, ftc.isTv() ? number_arr.all : number_arr.notOwned), 0 === this.datas.length && (this.datas = this.getListData(ft.type.country.all, number_arr.all)), this.listView.setListView(this.datas), ftc.sendClient("c_onSelectCopy3Item", this.listView.getFirstItem()), this.updateTv(this.datas.length), this.updateTvTip(), this.buttonSelect1.node.getChildByName("Text").getComponent(cc.Label).string = ftc.language("\u56fd\u5bb6:") + ft.type.country.countryNames[this.select1], this.buttonSelect2.node.getChildByName("Text").getComponent(cc.Label).string = number_arr.names[this.select2]
+        this.id = ft.value.copy.ShenBing, this.datas = this.getListData(ft.type.country.all, ftc.isTv() ? number_arr.all : number_arr.notOwned), 0 === this.datas.length && (this.datas = this.getListData(ft.type.country.all, number_arr.all)), this.listView.setListView(this.datas), ftc.sendClient("c_onSelectCopy3Item", this.listView.getFirstItem()), this.updateTv(this.datas.length), this.updateTvTip(), this.buttonSelect1.node.getChildByName("Text").getComponent(cc.Label).string = ftc.language("国家:") + ft.type.country.countryNames[this.select1], this.buttonSelect2.node.getChildByName("Text").getComponent(cc.Label).string = number_arr.names[this.select2]
     },
     enter: function () { },
     updateData: function () {
@@ -58,14 +58,14 @@ cc.Class({
     onClickSelect1: function (t) {
         if (-1 !== t) {
             var e = this.getListData(t);
-            e.length > 0 ? (this.buttonSelect1.node.getChildByName("Text").getComponent(cc.Label).string = ftc.language("\u56fd\u5bb6:") + ft.type.country.countryNames[t], this.listView.setListView(e, 0), this.setEquipInfo(e[0]), this._selectedIndex = 0, this.selectMode(this.mode), this.tvZone = 1) : (ftc.showTip("\u65e0\u6b64\u56fd\u5bb6\u7684\u795e\u5175"), this.tvZone = 0), this._partMenuSelect1.node.active = !1, ftc.ManagerTV.nextSelect(void 0, this.node, this.tvZone)
+            e.length > 0 ? (this.buttonSelect1.node.getChildByName("Text").getComponent(cc.Label).string = ftc.language("国家:") + ft.type.country.countryNames[t], this.listView.setListView(e, 0), this.setEquipInfo(e[0]), this._selectedIndex = 0, this.selectMode(this.mode), this.tvZone = 1) : (ftc.showTip("无此国家的神兵"), this.tvZone = 0), this._partMenuSelect1.node.active = !1, ftc.ManagerTV.nextSelect(void 0, this.node, this.tvZone)
         }
         this.buttonSelect1.node.getChildByName("SpriteArrow").scaleY = 1
     },
     onClickSelect2: function (t) {
         if (-1 !== t) {
             var e = this.getListData(void 0, t);
-            e.length > 0 ? (this.buttonSelect2.node.getChildByName("Text").getComponent(cc.Label).string = number_arr.names[t], this.listView.setListView(e, 0), this._selectedIndex = 0, this.setEquipInfo(e[0]), this._canEnter = this.listView.getItem(this._selectedIndex).canChallenge, this.selectMode(this.mode), this.tvZone = 1) : (t == number_arr.owned ? ftc.showTip("\u65e0") : t == number_arr.notOwned && ftc.showTip("\u5168\u90e8\u6311\u6218\u5b8c\u6210"), this.tvZone = 0), this._partMenuSelect2.node.active = !1, ftc.ManagerTV.nextSelect(void 0, this.node, this.tvZone)
+            e.length > 0 ? (this.buttonSelect2.node.getChildByName("Text").getComponent(cc.Label).string = number_arr.names[t], this.listView.setListView(e, 0), this._selectedIndex = 0, this.setEquipInfo(e[0]), this._canEnter = this.listView.getItem(this._selectedIndex).canChallenge, this.selectMode(this.mode), this.tvZone = 1) : (t == number_arr.owned ? ftc.showTip("无") : t == number_arr.notOwned && ftc.showTip("全部挑战完成"), this.tvZone = 0), this._partMenuSelect2.node.active = !1, ftc.ManagerTV.nextSelect(void 0, this.node, this.tvZone)
         }
         this.buttonSelect2.node.getChildByName("SpriteArrow").scaleY = 1
     },
@@ -123,16 +123,16 @@ cc.Class({
                 this.listView.updateListViewItems(t.index), this._selectedIndex = t.index, this._canEnter = t.canChallenge, this.setEquipInfo(t.data), this.selectMode(this.mode)
             },
             copyEnter: function (t, e) {
-                0 === t || (1 === t ? ftc.showTip("\u6b21\u6570\u4e0d\u8db3") : 2 === t ? ftc.showTip("\u4e0d\u80fd\u8fdb\u5165") : 3 === t ? ftc.showTip("\u4f53\u529b\u4e0d\u8db3") : 4 === t && ftc.showTip("\u6311\u6218\u5238\u4e0d\u8db3"))
+                0 === t || (1 === t ? ftc.showTip("次数不足") : 2 === t ? ftc.showTip("不能进入") : 3 === t ? ftc.showTip("体力不足") : 4 === t && ftc.showTip("挑战券不足"))
             },
             copyEnd: function (t, e) {
                 this.id == t.id && this.updateData()
             },
             copyZSBBuyCount: function (t, e) {
-                0 === t ? (ftc.showTip("\u8d2d\u4e70\u6210\u529f"), this.updateData()) : ftc.showTip("\u8d2d\u4e70\u5931\u8d25")
+                0 === t ? (ftc.showTip("购买成功"), this.updateData()) : ftc.showTip("购买失败")
             },
             copyMopUp: function (t, e) {
-                0 === t ? this.updateData() : 1 === t ? ftc.showTip("\u6b21\u6570\u4e0d\u8db3") : 2 === t ? ftc.showTip("\u4e0d\u80fd\u8fdb\u5165") : 3 === t && ftc.showTip("\u4f53\u529b\u4e0d\u8db3")
+                0 === t ? this.updateData() : 1 === t ? ftc.showTip("次数不足") : 2 === t ? ftc.showTip("不能进入") : 3 === t && ftc.showTip("体力不足")
             }
         }
     },
@@ -154,8 +154,8 @@ cc.Class({
                 id: ft.value.copy.ShenBing,
                 param: this.heroId
             });
-        else t.target === this.buttonAdd.node ? ft.ExtItem.getNum(ft.value.item.gem) < ft.value.com.copyShenBingBuyCount ? ftc.showTip("\u5143\u5b9d\u4e0d\u8db3") : ftc.showDialog({
-            text: "\u786e\u5b9a\u82b1\u8d39%d\u5143\u5b9d\u8d2d\u4e701\u6b21\u6311\u6218".replace("%d", ft.value.com.copyShenBingBuyCount),
+        else t.target === this.buttonAdd.node ? ft.ExtItem.getNum(ft.value.item.gem) < ft.value.com.copyShenBingBuyCount ? ftc.showTip("元宝不足") : ftc.showDialog({
+            text: "确定花费%d元宝购买1次挑战".replace("%d", ft.value.com.copyShenBingBuyCount),
             click1: function () {
                 ftc.send("copyZSBBuyCount")
             },
@@ -173,6 +173,6 @@ cc.Class({
     },
     updateTvTip: function () {
         var t;
-        t = 0 === this._tvSelectZone ? "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u786e\u5b9a\u952e\u3011\u64cd\u4f5c" : "\u3010\u8fd4\u56de\u952e\u3011\u8fd4\u56de\u5217\u8868", ftc.setTvTip(this.node, t)
+        t = 0 === this._tvSelectZone ? "【返回键】关闭界面，【确定键】操作" : "【返回键】返回列表", ftc.setTvTip(this.node, t)
     }
 })

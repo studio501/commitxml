@@ -26,7 +26,7 @@
                     }), this._noticeLength = i.length, i.length > 0 ? (this.listView.setListView(i, 0), this.setNoticeInfo(i[0]), this._selectedIndex = 0, ftc.send("msgNoticeRead", {
                         id: i[0].id,
                         type: 0
-                    })) : this.labelTitle.string = ftc.language("\u6ca1\u6709\u516c\u544a"), ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u516c\u544a")
+                    })) : this.labelTitle.string = ftc.language("没有公告"), ftc.setTvTip(this.node, "【返回键】关闭，【菜单键】切换公告")
                 },
                 cleanup: function () { },
                 updateData: function () { },
@@ -45,7 +45,7 @@
                     this.url = e.url, this.hypertext.cleanHtml(), this.hypertext.node.opacity = 0, this.hypertext.http(this.url, null, function (t) {
                         if (!ftc.ManagerRes.checkNodeIsRestored(this.node)) {
                             var e = t.title.rendered,
-                                i = e.indexOf("\u3011");
+                                i = e.indexOf("】");
                             i > 0 && (e = e.substr(i + 1)), this.labelTitle.string = e;
                             var a = ft.replaceAll(t.content.rendered, "\n", "");
                             this.hypertext.setHtml(a, this.hyperTextClick), cc.tween(this.hypertext.node).to(1, {

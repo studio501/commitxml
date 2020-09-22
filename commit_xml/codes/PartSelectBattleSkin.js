@@ -24,9 +24,9 @@
                         t && (this.spineHero.skeletonData = t, this.spineHero.setAnimation(0, "w1", !0))
                     }.bind(this)), this._canUse = !1, this.spriteUsing.node.active = !1;
                     var n = this.buttonEnable.node.getChildByName("Label").getComponent(cc.Label);
-                    i ? (this._canUse = a != this.param.skin, n.string = this._canUse ? "\u4f7f\u7528" : "\u4f7f\u7528\u4e2d", this.spriteUsing.node.active = !this._canUse) : n.string = "\u672a\u83b7\u5f97", this.buttonEnable.interactable = i, this.spriteGray.node.active = !i;
+                    i ? (this._canUse = a != this.param.skin, n.string = this._canUse ? "使用" : "使用中", this.spriteUsing.node.active = !this._canUse) : n.string = "未获得", this.buttonEnable.interactable = i, this.spriteGray.node.active = !i;
                     var s = 0 == a;
-                    this.labelName.string = s ? "\u9ed8\u8ba4" : ft.ExtItem.getName(a), this.labelInfo.string = s ? "\u8fd9\u53ea\u662f\u9ed8\u8ba4\u7684\u76ae\u80a4" : ft.ExtItem.getInfo(a)
+                    this.labelName.string = s ? "默认" : ft.ExtItem.getName(a), this.labelInfo.string = s ? "这只是默认的皮肤" : ft.ExtItem.getInfo(a)
                 },
                 cleanup: function () { },
                 tick: function (t) { },

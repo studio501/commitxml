@@ -19,7 +19,7 @@
                 setData: function (t) {
                     if ((this.pos = t, this.spriteIcon.node.active = !0, this.spriteIcon.spriteFrame = ftc.ManagerRes.getSpriteFrame("program", "activity_pos" + this.pos), this.labelName.string = ftc.language(ft.ExtMsg.getPosTitle(this.pos)), this.pos === ft.type.msg.pos.ad) && (this.node.active = !1, "1" == ftc.callNativeFunction("openFullAd") && ftc.localDay > 0)) {
                         var e = ftc.ManagerData.get2Object("Msg", ft.value.msg.watchAd);
-                        e ? e.ste > 0 && (this._isShowAd = !0, this.labelInfo.string = ftc.language("\u5269\u4f59\u6b21\u6570:") + e.ste) : (ftc.send("msgActivityAdd", ft.value.msg.watchAd), this._isShowAd = !0, this.labelInfo.string = ftc.language("\u5269\u4f59\u6b21\u6570:") + 5), this.labelInfo.node.active = !0, this.node.active = !0
+                        e ? e.ste > 0 && (this._isShowAd = !0, this.labelInfo.string = ftc.language("剩余次数:") + e.ste) : (ftc.send("msgActivityAdd", ft.value.msg.watchAd), this._isShowAd = !0, this.labelInfo.string = ftc.language("剩余次数:") + 5), this.labelInfo.node.active = !0, this.node.active = !0
                     }
                 },
                 cleanup: function () { },
@@ -60,7 +60,7 @@
                             case ft.type.msg.pos.ad:
                                 if (e || (ftc.haveFullAd = "0" === ftc.callNativeFunction("getFullAdState")), this._isShowAd && ftc.haveFullAd) {
                                     var o = ftc.ManagerData.get2Object("Msg", ft.value.msg.watchAd);
-                                    o && 0 == o.ste ? a = !1 : (a = !0, this.labelInfo.string = ftc.language("\u5269\u4f59\u6b21\u6570:") + (o ? o.ste : 5))
+                                    o && 0 == o.ste ? a = !1 : (a = !0, this.labelInfo.string = ftc.language("剩余次数:") + (o ? o.ste : 5))
                                 } else a = !1;
                                 break;
                             case ft.type.msg.pos.firstCharge:
@@ -112,11 +112,11 @@
                                     t.setData(ft.type.msg.pos.gift)
                                 }, {
                                     hide: !0
-                                }) : ftc.showTip("\u6682\u65e0\u6d3b\u52a8");
+                                }) : ftc.showTip("暂无活动");
                                 break;
                             case ft.type.msg.pos.daily:
                             case ft.type.msg.pos.vip:
-                                ftc.localDay <= 0 ? ftc.showTip("\u8fde\u63a5\u7f51\u7edc\u83b7\u53d6\u66f4\u591a\u6d3b\u52a8\u6570\u636e") : ftc.loadLayout("LayoutActivity", function (t) {
+                                ftc.localDay <= 0 ? ftc.showTip("连接网络获取更多活动数据") : ftc.loadLayout("LayoutActivity", function (t) {
                                     t.setData(i)
                                 }, {
                                     hide: !0
@@ -131,7 +131,7 @@
                                 });
                                 break;
                             case ft.type.msg.pos.sevenDay:
-                                ftc.localDay <= 0 ? ftc.showTip("\u8fde\u63a5\u7f51\u7edc\u83b7\u53d6\u66f4\u591a\u6d3b\u52a8\u6570\u636e") : ftc.loadLayout("LayoutActivitySevenDay", void 0, {
+                                ftc.localDay <= 0 ? ftc.showTip("连接网络获取更多活动数据") : ftc.loadLayout("LayoutActivitySevenDay", void 0, {
                                     hide: !0
                                 });
                                 break;
@@ -149,7 +149,7 @@
                                 ftc.loadLayout("LayoutActivityInvite");
                                 break;
                             case ft.type.msg.pos.nationalDay:
-                                ftc.localDay <= 0 ? ftc.showTip("\u8fde\u63a5\u7f51\u7edc\u83b7\u53d6\u66f4\u591a\u6d3b\u52a8\u6570\u636e") : ftc.loadLayout("LayoutActivityNationDay", void 0, {
+                                ftc.localDay <= 0 ? ftc.showTip("连接网络获取更多活动数据") : ftc.loadLayout("LayoutActivityNationDay", void 0, {
                                     hide: !0
                                 });
                                 break;
@@ -160,14 +160,14 @@
                             case ft.type.msg.pos.newYear:
                             case ft.type.msg.pos.anniversary:
                             case ft.type.msg.pos.summer:
-                                ftc.localDay <= 0 ? ftc.showTip("\u8fde\u63a5\u7f51\u7edc\u83b7\u53d6\u66f4\u591a\u6d3b\u52a8\u6570\u636e") : (this.spineIcon.node.active && (this.spineIcon.node.active = !1, ftc.send("msgDelPosTip", i)), ftc.loadLayout("LayoutActivity", function (t) {
+                                ftc.localDay <= 0 ? ftc.showTip("连接网络获取更多活动数据") : (this.spineIcon.node.active && (this.spineIcon.node.active = !1, ftc.send("msgDelPosTip", i)), ftc.loadLayout("LayoutActivity", function (t) {
                                     t.setData(i)
                                 }, {
                                     hide: !0
                                 }));
                                 break;
                             case ft.type.msg.pos.firstCharge:
-                                ftc.localDay <= 0 ? ftc.showTip("\u8fde\u63a5\u7f51\u7edc\u83b7\u53d6\u66f4\u591a\u6d3b\u52a8\u6570\u636e") : ftc.loadLayout("LayoutActivityFirstCharge", function (t) {
+                                ftc.localDay <= 0 ? ftc.showTip("连接网络获取更多活动数据") : ftc.loadLayout("LayoutActivityFirstCharge", function (t) {
                                     t.setData(ft.type.msg.pos.firstCharge)
                                 });
                                 break;

@@ -28,16 +28,16 @@
                         var i = ft.ExtItem.mapPartEquips[this.data],
                             a = ft.ExtItem.getNum(i),
                             n = ft.ExtItem.getNeedPiecesNum(i);
-                        if (this.progressBar.progress = a / n, this.labelProgress.string = a + "/" + n, this.progressBar.progress >= 1) this.spriteShadow.node.active = !0, this.labelCondition.string = "\u788e\u7247\u5df2\u6ee1\n\u8bf7\u524d\u5f80\u5408\u6210";
+                        if (this.progressBar.progress = a / n, this.labelProgress.string = a + "/" + n, this.progressBar.progress >= 1) this.spriteShadow.node.active = !0, this.labelCondition.string = "碎片已满\n请前往合成";
                         else {
                             var s = ftc.ManagerData.get2Object("Hero", e);
-                            s ? s.star < 3 ? (this.spriteShadow.node.active = !0, this.labelCondition.string = "\u6b66\u5c06\u672a\u6ee13\u661f") : this.canChallenge = !0 : (this.spriteShadow.node.active = !0, this.labelCondition.string = "\u672a\u62e5\u6709\u8be5\u6b66\u5c06")
+                            s ? s.star < 3 ? (this.spriteShadow.node.active = !0, this.labelCondition.string = "武将未满3星") : this.canChallenge = !0 : (this.spriteShadow.node.active = !0, this.labelCondition.string = "未拥有该武将")
                         }
                     } else {
                         e = ft.ExtEquip.getType(this.data.id);
                         this._item.setHeroData({
                             id: e
-                        }, void 0, !0), this.progressBar.progress = 1, this.labelProgress.string = "\u5df2\u62e5\u6709", this.labelCondition.string = ""
+                        }, void 0, !0), this.progressBar.progress = 1, this.labelProgress.string = "已拥有", this.labelCondition.string = ""
                     }
                 },
                 cleanup: function () { },

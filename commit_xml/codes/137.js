@@ -80,10 +80,10 @@ function h(t, e, i) {
 }
 
 function f(t, e, i) {
-    if (128 != (192 & e[0])) return t.lastNeed = 0, "\ufffd";
+    if (128 != (192 & e[0])) return t.lastNeed = 0, "�";
     if (t.lastNeed > 1 && e.length > 1) {
-        if (128 != (192 & e[1])) return t.lastNeed = 1, "\ufffd";
-        if (t.lastNeed > 2 && e.length > 2 && 128 != (192 & e[2])) return t.lastNeed = 2, "\ufffd"
+        if (128 != (192 & e[1])) return t.lastNeed = 1, "�";
+        if (t.lastNeed > 2 && e.length > 2 && 128 != (192 & e[2])) return t.lastNeed = 2, "�"
     }
 }
 
@@ -141,7 +141,7 @@ i.StringDecoder = r, r.prototype.write = function (t) {
     return i < t.length ? e ? e + this.text(t, i) : this.text(t, i) : e || ""
 }, r.prototype.end = function (t) {
     var e = t && t.length ? this.write(t) : "";
-    return this.lastNeed ? e + "\ufffd" : e
+    return this.lastNeed ? e + "�" : e
 }, r.prototype.text = function (t, e) {
     var i = h(this, t, e);
     if (!this.lastNeed) return t.toString("utf8", e);

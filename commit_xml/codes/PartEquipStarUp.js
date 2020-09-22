@@ -27,7 +27,7 @@
                 setData: function (t) {
                     t && (this.data = t);
                     var e = ft.ExtEquip.getMaxStar(this.data.id);
-                    if (this.data.star >= e) return this.nodeItem1.parent.active = !1, this.nodeItem1.active = !1, this.nodeItem2.active = !1, this.nodeLayout.active = !1, this.labelCondition.string = e > 0 ? ftc.language("\u5df2\u7a81\u7834\u81f3\u6ee1\u7ea7") : ftc.language("\u4e0d\u53ef\u7a81\u7834"), void (this.spriteNothing.node.active = !0);
+                    if (this.data.star >= e) return this.nodeItem1.parent.active = !1, this.nodeItem1.active = !1, this.nodeItem2.active = !1, this.nodeLayout.active = !1, this.labelCondition.string = e > 0 ? ftc.language("已突破至满级") : ftc.language("不可突破"), void (this.spriteNothing.node.active = !0);
                     this.nodeItem1.parent.active = !0, this.nodeLayout.active = !0, this.spriteNothing.node.active = !1, this.nodeItem1.active = !0, this._item1.setEquipData({
                         id: this.data.id,
                         lv: this.data.lv,
@@ -47,7 +47,7 @@
                         for (s = a.length; s < 4; s++) this.partWakeUpMaterials[s].node.active = !1
                     } else
                         for (s = 0; s < 4; s++) this.partWakeUpMaterials[s].node.active = !1;
-                    this.labelCondition.node.active = !0, this.labelCondition.string = ftc.language("\u88c5\u5907\u7b49\u7ea7\u9700\u8981") + ft.value.equipStarNeed[this.data.star] + ftc.language("\u7ea7"), ftc.isTv() && (this.buttonDetail.node.active = !1)
+                    this.labelCondition.node.active = !0, this.labelCondition.string = ftc.language("装备等级需要") + ft.value.equipStarNeed[this.data.star] + ftc.language("级"), ftc.isTv() && (this.buttonDetail.node.active = !1)
                 },
                 cleanup: function () { },
                 updateData: function () {
@@ -55,12 +55,12 @@
                 },
                 tick: function (t) { },
                 onClick: function (t, e) {
-                    t.target === this.buttonDetail.node ? ftc.showDetailInfo(this.buttonDetail.node, ft.ExtDetail.getInfo(ft.value.detail.equip_wakeup)) : t.target === this.buttonUp.node && (ftd.Equip.get(this.data.id, "a_advanceditem") ? this.data.star >= ft.ExtEquip.getMaxStar(this.data.id) ? ftc.showTip("\u5df2\u7a81\u7834\u81f3\u6ee1\u661f") : this.data.lv < ft.value.equipStarNeed[this.data.star] ? ftc.showTip("\u7b49\u7ea7\u4e0d\u8db3") : this._materialEnough ? ftc.loadLayout("LayoutEquipStarUpTip", function (t) {
+                    t.target === this.buttonDetail.node ? ftc.showDetailInfo(this.buttonDetail.node, ft.ExtDetail.getInfo(ft.value.detail.equip_wakeup)) : t.target === this.buttonUp.node && (ftd.Equip.get(this.data.id, "a_advanceditem") ? this.data.star >= ft.ExtEquip.getMaxStar(this.data.id) ? ftc.showTip("已突破至满星") : this.data.lv < ft.value.equipStarNeed[this.data.star] ? ftc.showTip("等级不足") : this._materialEnough ? ftc.loadLayout("LayoutEquipStarUpTip", function (t) {
                         t.setData(this.data, this.data.star), ftc.send("equipStarUp", {
                             eid: this.data.entityId,
                             up: 1
                         })
-                    }.bind(this)) : ftc.showTip("\u6750\u6599\u4e0d\u8db3") : ftc.showTip("\u6b64\u88c5\u5907\u4e0d\u53ef\u7a81\u7834"))
+                    }.bind(this)) : ftc.showTip("材料不足") : ftc.showTip("此装备不可突破"))
                 }
             })
         

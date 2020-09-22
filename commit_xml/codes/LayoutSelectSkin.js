@@ -17,7 +17,7 @@
                 },
                 setData: function (t) {
                     var e;
-                    this.team = t, e = 0 === t ? "\u7f16\u961f\u4e00\u5730\u56fe\u5f62\u8c61" : "\u7f16\u961f\u4e8c\u5730\u56fe\u5f62\u8c61", this.labelTitle.string = ftc.language(e);
+                    this.team = t, e = 0 === t ? "编队一地图形象" : "编队二地图形象", this.labelTitle.string = ftc.language(e);
                     var i = ft.ExtHero.getLords(this.team);
                     this.listView.setListView(i, t), this.updateTv(i.length)
                 },
@@ -37,7 +37,7 @@
                                 type: t.data.type,
                                 id: t.data.id,
                                 team: this.team
-                            }), this.cancel()) : ftc.showTip("\u8bbe\u7f6e\u5931\u8d25")
+                            }), this.cancel()) : ftc.showTip("设置失败")
                         }
                     }
                 },

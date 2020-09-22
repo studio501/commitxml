@@ -69,7 +69,7 @@ ftc.MapModel = cc.Class({
     },
     loadMapFile: function (t, e, i, a) {
         var n;
-        n = 31 <= e && e <= 35 ? ft.type.wait.ship : ft.type.wait.car, this.firstEnterMap || ftc.showWait("\u52a0\u8f7d\u5730\u56fe\u4e2d...", 0, i, 255, n), this.mapNpcs = ftc.ManagerData.get2("MapNpc"), this._isloaded = !1, this._deleteMapNpcs(), this._deleteMapWjs(), this.roleSpeedUp = ftc.ManagerData.get1("ManagerMap").speedUp, this.currentMap = t;
+        n = 31 <= e && e <= 35 ? ft.type.wait.ship : ft.type.wait.car, this.firstEnterMap || ftc.showWait("加载地图中...", 0, i, 255, n), this.mapNpcs = ftc.ManagerData.get2("MapNpc"), this._isloaded = !1, this._deleteMapNpcs(), this._deleteMapWjs(), this.roleSpeedUp = ftc.ManagerData.get1("ManagerMap").speedUp, this.currentMap = t;
         var s = this.currentMap.id,
             o = this.currentMap.point,
             r = this.currentMap.x,
@@ -136,7 +136,7 @@ ftc.MapModel = cc.Class({
                         y: a
                     })
                 } catch (t) {
-                    ft.console("\u70b9\u51fb\u51fa\u9519", t), this._queueDirs = []
+                    ft.console("点击出错", t), this._queueDirs = []
                 }
                 0 == this._queueDirs.length ? this._isLastDir = !0 : this._layerfog ? (this.spriteClick.node.active = !0, this.spriteClick.node.opacity = 255, cc.tween(this.spriteClick.node).to(1, {
                     opacity: 0
@@ -182,7 +182,7 @@ ftc.MapModel = cc.Class({
         this._loadMapFile1(t, "map/" + ftd.Map.get(e, "mapfile"), i)
     },
     updateMap: function (t) {
-        for (var e in this._isUpdateMapNpcs = !0, this._newMapParts(), t && ftc.ManagerH5.isH5() && 1 === ftc.ManagerData.get1("Player").samsara && ftc.ManagerH5.countEvent("5_" + t, "\u5b8c\u6210\u4e8b\u4ef6"), this.mapNpcVisibles = {}, this.mapNpcs) {
+        for (var e in this._isUpdateMapNpcs = !0, this._newMapParts(), t && ftc.ManagerH5.isH5() && 1 === ftc.ManagerData.get1("Player").samsara && ftc.ManagerH5.countEvent("5_" + t, "完成事件"), this.mapNpcVisibles = {}, this.mapNpcs) {
             var i = this.mapNpcs[e];
             i.id > 0 && (this.mapNpcVisibles[i.id] = i.visible)
         }
@@ -592,7 +592,7 @@ ftc.MapModel = cc.Class({
                             x: a,
                             y: n
                         }), this._isLastDir = !0, this._isCrashNpc = !0, void ftc.playEffect(ftc.type.effect.map_encounter);
-                        ftc.showTip("\u4f53\u529b\u4e0d\u8db3,\u65e0\u6cd5\u6218\u6597")
+                        ftc.showTip("体力不足,无法战斗")
                     }
                     return this.stepCount++, this._moveMapAndHero(i[0], i[1]), !0
                 }

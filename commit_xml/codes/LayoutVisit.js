@@ -17,7 +17,7 @@
                     this.addClick(this.buttonExchange), this.addClick(this.buttonPreview), this.addClick(this.buttonDetail)
                 },
                 load: function () {
-                    this.initPart(this.partVisit), this.initPart(this.partVisitLimited), this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("\u5bfb\u5c06"), this.node.addChild(this.partTopStatus.node), this.tabIndex = void 0;
+                    this.initPart(this.partVisit), this.initPart(this.partVisitLimited), this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("寻将"), this.node.addChild(this.partTopStatus.node), this.tabIndex = void 0;
                     var t = ft.ExtMsg.getMsgByType(ft.type.activity.limitedVisit);
                     this.buttonTabs[1].node.active = !!t
                 },
@@ -33,8 +33,8 @@
                 msg: function () {
                     this.msg = {
                         visitHero: function (t, e) {
-                            if (0 === this.tabIndex ? this.visitType = this.partVisit.getVisitType() : this.visitType = this.partVisitLimited.getVisitType(), 1 === t) this.visitType === ft.type.visit.gold1 || this.visitType === ft.type.visit.gold10 ? ftc.showTip("\u94f6\u5e01\u4e0d\u8db3") : this.visitType === ft.type.visit.limited10 ? ftc.showTip("\u6c42\u8d24\u4ee4\u4e0d\u8db3") : ftc.showTip("\u5143\u5b9d\u4e0d\u8db3");
-                            else if (2 === t) ftc.showTip("\u6b21\u6570\u4e0d\u8db3");
+                            if (0 === this.tabIndex ? this.visitType = this.partVisit.getVisitType() : this.visitType = this.partVisitLimited.getVisitType(), 1 === t) this.visitType === ft.type.visit.gold1 || this.visitType === ft.type.visit.gold10 ? ftc.showTip("银币不足") : this.visitType === ft.type.visit.limited10 ? ftc.showTip("求贤令不足") : ftc.showTip("元宝不足");
+                            else if (2 === t) ftc.showTip("次数不足");
                             else {
                                 var i = ftc.ManagerRes.findLayout("LayoutVisitResult");
                                 i ? (i.updateData(t), this.updateData()) : ftc.loadLayout("LayoutVisitResult", function (e) {

@@ -28,7 +28,7 @@
                             num: e.nums[a],
                             isSpecial: e.indexes.indexOf(a + 1) >= 0
                         });
-                        this.listView.setListView(i, t), this.msgSign = t, this.activity = e, this.labelTime.string = ftc.language("\u5269\u4f59\u65f6\u95f4: ") + ftc.calcTimeDelta(void 0, t.date1), this.labelTxt.string = t.txt, this.labelProgress.string = "\u7d2f\u8ba1\u7b7e\u5230:" + t.ext + "/" + e.ids.length, this.spineHero.node.active = !1;
+                        this.listView.setListView(i, t), this.msgSign = t, this.activity = e, this.labelTime.string = ftc.language("剩余时间: ") + ftc.calcTimeDelta(void 0, t.date1), this.labelTxt.string = t.txt, this.labelProgress.string = "累计签到:" + t.ext + "/" + e.ids.length, this.spineHero.node.active = !1;
                         var n = ft.ExtItem.getType(e.itemId);
                         if (n === ft.type.item.specialLord) {
                             var s = ft.ExtItem.getNeedPiecesNum(e.itemId);
@@ -47,7 +47,7 @@
                 setData: function (t) { },
                 enter: function () { },
                 updateData: function () {
-                    this.listView.updateListViewItems(), this.buttonGet.node.active = 0 === Number(this.msgSign.ste), this.spriteGet.node.active = !this.buttonGet.node.active, this.labelProgress.string = "\u7d2f\u8ba1\u7b7e\u5230:" + this.msgSign.ext + "/" + this.activity.ids.length
+                    this.listView.updateListViewItems(), this.buttonGet.node.active = 0 === Number(this.msgSign.ste), this.spriteGet.node.active = !this.buttonGet.node.active, this.labelProgress.string = "累计签到:" + this.msgSign.ext + "/" + this.activity.ids.length
                 },
                 tick: function (t) { },
                 cleanup: function () { },

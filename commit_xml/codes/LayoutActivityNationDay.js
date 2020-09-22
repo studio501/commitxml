@@ -41,10 +41,10 @@
                     this.msg = {
                         msgActivityGet: function (t, e) {
                             var i = this.partActivities[t.eid];
-                            i && (-1 === t.ret ? ftc.showTip("\u9886\u53d6\u5931\u8d25") : 0 === t.ret && (i.updateData(t.index), this.updateData()))
+                            i && (-1 === t.ret ? ftc.showTip("领取失败") : 0 === t.ret && (i.updateData(t.index), this.updateData()))
                         },
                         copyEnter: function (t, e) {
-                            0 === t ? this.cancel() : 2 === t && ftc.showTip("\u7b49\u7ea7\u4e0d\u8db3")
+                            0 === t ? this.cancel() : 2 === t && ftc.showTip("等级不足")
                         }
                     }
                 },
@@ -57,7 +57,7 @@
                         else this.newPartActivity(e, function (t) {
                             for (var i in this.partActivities[e.entityId] = t, this.partActivities) this.partActivities[i].node.active = e.entityId == i
                         }.bind(this))
-                    } else ftc.showTip("\u6d3b\u52a8\u4e0d\u5b58\u5728")
+                    } else ftc.showTip("活动不存在")
                 },
                 newPartActivity: function (t, e) {
                     var i = "PartActivity" + ft.ExtMsg.getType(t),

@@ -75,7 +75,7 @@
             }, ft.ExtEquip.getInfoArr = function (t) {
                 var e, i = t.id || t,
                     a = ft.ExtEquip.getType(i);
-                a > 1e3 && (e = ft.ExtHero.getName(a) + "\u4e13\u5c5e");
+                a > 1e3 && (e = ft.ExtHero.getName(a) + "专属");
                 var n, s = "";
                 e && (s += e + "\n"), s += ft.ExtEquip.getInfo(i);
                 var o = ft.ExtEquip.getSkillAdd(i);

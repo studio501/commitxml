@@ -19,7 +19,7 @@
                     this.prepareParts(["PartEvasionNpc", "PartEvasionRole"]), this.addClick(this.buttonUp, .05, !0), this.addClick(this.buttonDown, .05, !0), this.addClick(this.buttonPause, !0)
                 },
                 load: function () {
-                    ftc.setTvTip(this.node, "\u3010\u786e\u5b9a\u3011\u952e\u6682\u505c\uff0c\u4e0a\u4e0b\u952e\u79fb\u52a8\u4eba\u7269"), ftc.playBackMusic(ftc.type.effect.musicBattle2)
+                    ftc.setTvTip(this.node, "【确定】键暂停，上下键移动人物"), ftc.playBackMusic(ftc.type.effect.musicBattle2)
                 },
                 setData: function (t, e) {
                     this._params = t, this._callback = e, this._npcPosYNext = -ftc.TileSize, this.initGame()
@@ -105,9 +105,9 @@
                     this._running = !1, ftc.pauseBackMusic(), this._mapEvasionRole.pauseAnimation(), this._mapEvasionRole2.pauseAnimation();
                     for (var e = 0; e < this._partEvasionNpcs.length; e++) this._partEvasionNpcs[e].node.pauseAllActions();
                     t || ftc.showDialog({
-                        text: "\u6e38\u620f\u5df2\u6682\u505c",
-                        button1: "\u7ee7\u7eed",
-                        button2: "\u9000\u51fa",
+                        text: "游戏已暂停",
+                        button1: "继续",
+                        button2: "退出",
                         click1: function () {
                             this.resumeGame(), ftc.playBackMusic(ftc.type.effect.musicBattle2)
                         }.bind(this),
@@ -125,8 +125,8 @@
                 },
                 gameOver: function (t) {
                     this.buttonPause.node.active = !1, this.pauseGame(!0), ftc.playEffect(ftc.type.effect.battleWin), ftc.showDialog({
-                        text: "\u6e38\u620f\u7ed3\u675f\n\n\u672c\u6b21\u5f97\u5206:" + this._curScore + "\n\n\u6700\u4f73\u5f97\u5206:" + ftapp.getItem("game_1_highest_score", 0),
-                        button1: "\u7ed3\u675f\u6e38\u620f",
+                        text: "游戏结束\n\n本次得分:" + this._curScore + "\n\n\u6700\u4f73\u5f97\u5206:" + ftapp.getItem("game_1_highest_score", 0),
+                        button1: "结束游戏",
                         click1: function () {
                             this._callback && this._callback(this._curScore), ftc.playBackMusic(ftc.type.effect.musicMap), this.cancel()
                         }.bind(this)

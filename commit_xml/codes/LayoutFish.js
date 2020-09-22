@@ -22,7 +22,7 @@
                 load: function () {
                     this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("", 1), this.partTopStatus.setCloseCallback(function () {
                         cc.director.getCollisionManager().enabled = !1, this.cancel()
-                    }.bind(this)), this.node.addChild(this.partTopStatus.node), ftc.setTvTip(this.node, "\u3010\u786e\u5b9a\u952e\u3011\u6295\u7cbd"), cc.director.getCollisionManager().enabled = !0, ftc.playBackMusic(ftc.type.effect.musicBattle1), this._bulletPool = [], this._fishPool = [];
+                    }.bind(this)), this.node.addChild(this.partTopStatus.node), ftc.setTvTip(this.node, "【确定键】投粽"), cc.director.getCollisionManager().enabled = !0, ftc.playBackMusic(ftc.type.effect.musicBattle1), this._bulletPool = [], this._fishPool = [];
                     for (var t = 0; t < 10; t++) {
                         var e = this.newPart("PartFish");
                         this._fishPool.push(e)
@@ -69,15 +69,15 @@
                 },
                 gameOver: function () {
                     this._playing = !1, ftapp.getItem("game_2_highest_score", 0) < this._curScore && ftapp.setItem("game_2_highest_score", this._curScore), this.unschedule(this.createFish), ftc.playEffect(ftc.type.effect.battleWin), ftc.showDialog({
-                        text: "\u6e38\u620f\u7ed3\u675f\n\n\u672c\u6b21\u5f97\u5206:" + this._curScore + "\n\n\u4eca\u65e5\u6700\u4f73:" + ftapp.getItem("game_2_highest_score", 0),
-                        button1: "\u7ed3\u675f\u6e38\u620f",
+                        text: "游戏结束\n\n本次得分:" + this._curScore + "\n\n\u4eca\u65e5\u6700\u4f73:" + ftapp.getItem("game_2_highest_score", 0),
+                        button1: "结束游戏",
                         click1: function () {
                             this._callback && this._callback(this._curScore), ftc.playBackMusic(ftc.type.effect.musicMap), this.cancel()
                         }.bind(this)
                     })
                 },
                 touchStart: function (t) {
-                    this._playing && (this._cd <= 0 ? (this.spineMan.setAnimation(0, "wait2", !1), this.spineMan.addAnimation(0, "wait1", !0), this.shot(), ftc.playEffect(ftc.type.effect.game2_luoshui), this._cd = .5) : ftc.showTip("\u51c6\u5907\u4e2d!"))
+                    this._playing && (this._cd <= 0 ? (this.spineMan.setAnimation(0, "wait2", !1), this.spineMan.addAnimation(0, "wait1", !0), this.shot(), ftc.playEffect(ftc.type.effect.game2_luoshui), this._cd = .5) : ftc.showTip("准备中!"))
                 },
                 msg: function () {
                     this.msg = {}

@@ -19,7 +19,7 @@
                             t && (this.spineHero.node.active = !0, this.spineHero.skeletonData = t, this.spineHero.setAnimation(0, "w1", !0))
                         }.bind(this))
                     }
-                    this.labelFloor.string = ftc.language("\u7b2c") + (t + 1) + "\u5c42", this.setSelect(e)
+                    this.labelFloor.string = ftc.language("第") + (t + 1) + "层", this.setSelect(e)
                 },
                 setSelect: function (t) { },
                 updateData: function () { },

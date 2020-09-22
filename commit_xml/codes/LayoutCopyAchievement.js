@@ -35,7 +35,7 @@
                                         }
                                 }
                                 a && this.listView.updateListViewItems(void 0, this.getDatas(this.copyId))
-                            } else ftc.showTip("\u9886\u53d6\u5931\u8d25")
+                            } else ftc.showTip("领取失败")
                         }
                     }
                 },

@@ -85,7 +85,7 @@
                     "1" == ftc.ManagerH5.isOpenRecordVideo() && (ftc.recordVideoState = !1), ft.ExtNpc.load(), ft.ExtItem.load(), ft.ExtHero.load(), ft.ExtEquip.load(), ft.ExtJewel.load(), ft.ExtPetValue.load(), ft.ExtTitle.loadHeroValues(ftc.ManagerData.get2("Hero"), ftc.ManagerData.get2("Title"))
                 },
                 load: function () {
-                    this.initPart(this.partMainControl), this.initPart(this.partMainPointer), this.mapModel = ftc.MapModel.getInstance(), this.mapModel.init(this, this.partMainPointer, this.spineClick, this.spriteClick), this.mapModel.firstEnterMap = !0, this.partMainControl.setData(this, this.mapModel), this.partMainControl.onEvent(this.partMainControl.node), this.partMainControl.cleanDirButtons(), this.partMainPointer.node.active = !1, this._isloaded = !1, this._oldLoaded = !1, this._unHandleMsgs = [], this._isOptionShow = !1, this._isOptionRunning = !1, this._noNpcTime = 0, this._noNpcCd = 0, this._isShowAd = !1, this._GuanYuCD = 0, this.currentMap = void 0, ft.ExtTask.hideTarget = ftc.ManagerData.get1("ManagerTask").hideGuide, this._playerToucing = !1, this.nodeTop.active = !1, this.nodeBottom.active = !1, this.nodeLeft.active = !1, this.nodeActivity.active = !1, this.buttonArrowRight.node.active = !1, this.nodeMap.active = !1, this.nodeRightBar.active = !1, this.nodeBottomBar.active = !1, this.nodeTvMenu && (this.nodeTvMenu.active = !1), this.nodeSmelter && (this.nodeSmelter.active = !1), this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("", 2), this.node.addChild(this.partTopStatus.node), this.partTopStatus.node.active = !1, this._loadActivityBtn(), this.buttonRecordVideo && (1 == ftc.ManagerH5.isOpenRecordVideo() ? (this.buttonRecordVideo.node.active = !0, ftc.recordVideoState ? (this.labelRecordStatus.string = "\u5f55\u5c4f\u4e2d", this.spriteRecordRedPoint.node.active = !0) : (this.labelRecordStatus.string = "\u5f55\u5c4f", this.spriteRecordRedPoint.node.active = !1)) : this.buttonRecordVideo.node.active = !1), ftc.ManagerH5.isH5() && 615 == ftc.getSourceId() && (ftc.ManagerData.get1("ManagerMap").frameRate = 60), ftc.setFrameRate(ftc.ManagerData.get1("ManagerMap").frameRate), ftc.playBackMusic(ftc.type.effect.musicMap), ftc.showPlayerLevelUp(!0), ftc.send("startGame"), this.msg.loadMap()
+                    this.initPart(this.partMainControl), this.initPart(this.partMainPointer), this.mapModel = ftc.MapModel.getInstance(), this.mapModel.init(this, this.partMainPointer, this.spineClick, this.spriteClick), this.mapModel.firstEnterMap = !0, this.partMainControl.setData(this, this.mapModel), this.partMainControl.onEvent(this.partMainControl.node), this.partMainControl.cleanDirButtons(), this.partMainPointer.node.active = !1, this._isloaded = !1, this._oldLoaded = !1, this._unHandleMsgs = [], this._isOptionShow = !1, this._isOptionRunning = !1, this._noNpcTime = 0, this._noNpcCd = 0, this._isShowAd = !1, this._GuanYuCD = 0, this.currentMap = void 0, ft.ExtTask.hideTarget = ftc.ManagerData.get1("ManagerTask").hideGuide, this._playerToucing = !1, this.nodeTop.active = !1, this.nodeBottom.active = !1, this.nodeLeft.active = !1, this.nodeActivity.active = !1, this.buttonArrowRight.node.active = !1, this.nodeMap.active = !1, this.nodeRightBar.active = !1, this.nodeBottomBar.active = !1, this.nodeTvMenu && (this.nodeTvMenu.active = !1), this.nodeSmelter && (this.nodeSmelter.active = !1), this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("", 2), this.node.addChild(this.partTopStatus.node), this.partTopStatus.node.active = !1, this._loadActivityBtn(), this.buttonRecordVideo && (1 == ftc.ManagerH5.isOpenRecordVideo() ? (this.buttonRecordVideo.node.active = !0, ftc.recordVideoState ? (this.labelRecordStatus.string = "录屏中", this.spriteRecordRedPoint.node.active = !0) : (this.labelRecordStatus.string = "录屏", this.spriteRecordRedPoint.node.active = !1)) : this.buttonRecordVideo.node.active = !1), ftc.ManagerH5.isH5() && 615 == ftc.getSourceId() && (ftc.ManagerData.get1("ManagerMap").frameRate = 60), ftc.setFrameRate(ftc.ManagerData.get1("ManagerMap").frameRate), ftc.playBackMusic(ftc.type.effect.musicMap), ftc.showPlayerLevelUp(!0), ftc.send("startGame"), this.msg.loadMap()
                 },
                 enter: function () {
                     this.updateData(), this.openShowRollTitle(), ftc.ManagerH5.setUserStorage()
@@ -107,7 +107,7 @@
                     this._oldLoaded = this._isloaded
                 },
                 tickCD: function (t) {
-                    this._noNpcTime > 0 ? (this._noNpcTime -= t, this.labelJingJieRemaining.node.parent.active = !0, this.labelJingJieRemaining.string = ftc.language("\u8b66\u6212\u8ba1\u5269\u4f59:") + parseInt(this._noNpcTime)) : this.labelJingJieRemaining.node.parent.active = !1
+                    this._noNpcTime > 0 ? (this._noNpcTime -= t, this.labelJingJieRemaining.node.parent.active = !0, this.labelJingJieRemaining.string = ftc.language("警戒计剩余:") + parseInt(this._noNpcTime)) : this.labelJingJieRemaining.node.parent.active = !1
                 },
                 cleanup: function () { },
                 msg: function () {
@@ -174,7 +174,7 @@
                                         })
                                     })
                                 } else if (1 === t.type)
-                                    for (n = 0; n < t.items.length; n++) ftc.showTip(ftc.language("\u83b7\u5f97") + ft.ExtItem.getName(t.items[n][0]) + "x" + t.items[n][1]);
+                                    for (n = 0; n < t.items.length; n++) ftc.showTip(ftc.language("获得") + ft.ExtItem.getName(t.items[n][0]) + "x" + t.items[n][1]);
                             this.updateData()
                         },
                         openAward2: function (t, e) {
@@ -216,7 +216,7 @@
                             ftc.showRollTitle([t], this)
                         },
                         openBattle: function (t, e) {
-                            this.nodeTvMenu && (this.nodeTvMenu.active = !1), ftc.showWait("\u52a0\u8f7d\u6218\u6597\u8d44\u6e90...", 0, null, 255, ft.type.wait.battle), ftc.sendClient("c_loadBattle", t, "LayoutMain", .7)
+                            this.nodeTvMenu && (this.nodeTvMenu.active = !1), ftc.showWait("加载战斗资源...", 0, null, 255, ft.type.wait.battle), ftc.sendClient("c_loadBattle", t, "LayoutMain", .7)
                         },
                         c_loadBattle: function (t, e) {
                             ftc.loadLayout("LayoutBattle", function (e) {
@@ -316,7 +316,7 @@
                             this.updateCopyInfo()
                         },
                         getPlayer: function (t, e) {
-                            0 == t.ste && t.type == ft.type.http.Touch && (this.openShowRollTitle(), this._playerToucing && (ftc.showTip("\u6570\u636e\u4fdd\u5b58\u6210\u529f"), this._playerToucing = !1))
+                            0 == t.ste && t.type == ft.type.http.Touch && (this.openShowRollTitle(), this._playerToucing && (ftc.showTip("数据保存成功"), this._playerToucing = !1))
                         },
                         playerTouchStart: function () {
                             this._playerToucing = !0
@@ -342,11 +342,11 @@
                             }
                         },
                         mapUseJinjie: function (t, e) {
-                            this._noNpcTime = t.noNpcTime, this._noNpcCd = t.noNpcCd, ftc.showTip("\u4f7f\u7528\u8b66\u6212\u8ba1\u6210\u529f\uff0c{0}\u79d2\u5185\u5c06\u4e0d\u9047\u654c".replace("{0}", t.noNpcTime))
+                            this._noNpcTime = t.noNpcTime, this._noNpcCd = t.noNpcCd, ftc.showTip("使用警戒计成功，{0}秒内将不遇敌".replace("{0}", t.noNpcTime))
                         },
                         showCopyDialog: function (t, e) {
                             var i, a = t.type;
-                            1 === a ? i = ft.replaceAll("\u9ec4\u5dfe\u8d3c\u6311\u6218\u4f24\u5bb3%d\n\u7cfb\u7edf\u81ea\u52a8\u53d1\u653e\u94f6\u5e01\u5956\u52b1%d\n\u5e0c\u671b\u60a8\u5728\u4ee5\u540e\u7684\u6311\u6218\u4e2d\u52bf\u5982\u7834\u7af9", "%d", t.param.toString()) : 2 === a && (i = "\u654c\u4eba\u5df2\u7ecf\u64a4\u9000\uff0c\u672c\u6b21\u6311\u6218\u60a8\u603b\u5171\u575a\u6301\u4e86%d\u56de\u5408".replace("%d", t.param)), i && ftc.showDialog({
+                            1 === a ? i = ft.replaceAll("黄巾贼挑战伤害%d\n系统自动发放银币奖励%d\n希望您在以后的挑战中势如破竹", "%d", t.param.toString()) : 2 === a && (i = "敌人已经撤退，本次挑战您总共坚持了%d回合".replace("%d", t.param)), i && ftc.showDialog({
                                 text: i,
                                 click1: function () { }
                             })
@@ -365,10 +365,10 @@
                         },
                         c_copyZYExit: function (t, e) {
                             var i = ft.ExtTask.getZYTaskMain(),
-                                a = "\u4f60\u7684\u6218\u5f79\u4e3b\u7ebf\u672a\u5b8c\u6210\uff0c\u786e\u5b9a\u9000\u51fa?";
+                                a = "你的战役主线未完成，确定退出?";
                             if (1 === i.length) {
                                 var n = i[0].id;
-                                ft.ExtTask.checkGuide(n, "end") && (a = "\u4f60\u7684\u6218\u5f79\u4e3b\u7ebf\u5df2\u5b8c\u6210\uff0c\u786e\u5b9a\u9000\u51fa?")
+                                ft.ExtTask.checkGuide(n, "end") && (a = "你的战役主线已完成，确定退出?")
                             }
                             ftc.showDialog({
                                 text: a,
@@ -391,7 +391,7 @@
                             ft.ExtTitle.loadHeroValues(ftc.ManagerData.get2("Hero"), ftc.ManagerData.get2("Title"))
                         },
                         titleAdd: function (t, e) {
-                            ftc.showTip(ftc.language("\u83b7\u5f97\u79f0\u53f7") + ft.ExtTitle.getName(t)), ft.ExtTitle.loadHeroValues(ftc.ManagerData.get2("Hero"), ftc.ManagerData.get2("Title"))
+                            ftc.showTip(ftc.language("获得称号") + ft.ExtTitle.getName(t)), ft.ExtTitle.loadHeroValues(ftc.ManagerData.get2("Hero"), ftc.ManagerData.get2("Title"))
                         },
                         msgActivityAdd: function (t, e) {
                             this.updateData()
@@ -437,7 +437,7 @@
                             }.bind(this))
                         },
                         showAchievementTip: function (t, e) {
-                            var i = ["\u65e5\u5e38\u6d3b\u8dc3", "\u6bcf\u5468\u6d3b\u8dc3", "\u6210\u5c31", "\u526f\u672c\u6210\u5c31", "\u526f\u672c\u6210\u5c31"][ft.ExtAchievement.getType(t.id) - 1],
+                            var i = ["日常活跃", "每周活跃", "成就", "副本成就", "副本成就"][ft.ExtAchievement.getType(t.id) - 1],
                                 a = ft.ExtAchievement.getInfo(t.id);
                             if (void 0 !== t.cur) {
                                 var n = ft.ExtAchievement.getConditions(t.id);
@@ -462,7 +462,7 @@
                         },
                         openTipDialog: function (t, e) {
                             var i = t.buttons;
-                            i && 0 !== i.length || (i = ["\u786e\u5b9a", "\u53d6\u6d88"]), ftc.showDialog({
+                            i && 0 !== i.length || (i = ["确定", "取消"]), ftc.showDialog({
                                 text: t.text,
                                 button1: i[0],
                                 button2: i[1],
@@ -559,7 +559,7 @@
                     else if (t.target === this.buttonWorldMap.node) ftc.loadLayout("LayoutWorldMap", void 0, {
                         hide: !0
                     }), this.nodeMap.active && (this.nodeMap.active = !1);
-                    else if (t.target === this.buttonSuoDi.node) ft.ExtMap.getType(this.currentMap.id) === ft.type.map.normal ? (ftc.send("mapUseSuodi"), this.nodeMap.active && (this.nodeMap.active = !1), this.nodeTvMenu && (this.nodeTvMenu.active = !1)) : ftc.showTip("\u5f53\u524d\u5730\u56fe\u65e0\u6cd5\u4f7f\u7528\u7f29\u5730\u8ba1");
+                    else if (t.target === this.buttonSuoDi.node) ft.ExtMap.getType(this.currentMap.id) === ft.type.map.normal ? (ftc.send("mapUseSuodi"), this.nodeMap.active && (this.nodeMap.active = !1), this.nodeTvMenu && (this.nodeTvMenu.active = !1)) : ftc.showTip("当前地图无法使用缩地计");
                     else if (t.target === this.buttonTask.node) ftc.loadLayout("LayoutTask", void 0, {
                         hide: !0
                     });
@@ -573,7 +573,7 @@
                                 break
                             } a || ftc.ManagerData.get2("Equip") ? ftc.loadLayout("LayoutBag", void 0, {
                                 hide: !0
-                            }) : ftc.showTip("\u6682\u65e0\u7269\u54c1")
+                            }) : ftc.showTip("暂无物品")
                     } else if (t.target === this.buttonVisit.node) ftc.loadLayout("LayoutVisit", function (t) {
                         1 == ftc.ManagerData.get1("Player").samsara && ftc.ManagerData.get1("ManagerTask").cur <= 3 ? t.selectTab(0) : ft.ExtMsg.getMsgByType(ft.type.activity.limitedVisit) ? t.selectTab(1) : t.selectTab(0)
                     }, {
@@ -588,7 +588,7 @@
                     else if (t.target === this.buttonEmbattle.node) ftc.loadLayout("LayoutOrder", void 0, {
                         hide: !0
                     });
-                    else if (t.target === this.buttonJingJie.node) this._noNpcCd > 0 ? ftc.showTip("\u8b66\u6212\u8ba1\u51b7\u5374\u4e2d") : (ftc.send("mapUseJinjie"), ftc.playEffect(ftc.type.effect.map_jinJie)), this.nodeTvMenu && (this.nodeTvMenu.active = !1), this.nodeMap.active = !1;
+                    else if (t.target === this.buttonJingJie.node) this._noNpcCd > 0 ? ftc.showTip("警戒计冷却中") : (ftc.send("mapUseJinjie"), ftc.playEffect(ftc.type.effect.map_jinJie)), this.nodeTvMenu && (this.nodeTvMenu.active = !1), this.nodeMap.active = !1;
                     else if (t.target === this.buttonHeros.node) ftc.loadLayout("LayoutHeroes", void 0, {
                         hide: !0
                     });
@@ -627,7 +627,7 @@
                                 break
                             } r ? ftc.loadLayout("LayoutMail", void 0, {
                                 hide: !0
-                            }) : ftc.showTip("\u6ca1\u6709\u90ae\u4ef6")
+                            }) : ftc.showTip("没有邮件")
                     } else if (t.target === this.buttonNotice.node) ftc.loadLayout("LayoutActivity", function (t) {
                         t.setData(ft.type.msg.pos.notice)
                     }, {
@@ -638,15 +638,15 @@
                     });
                     else if (this.buttonRecordVideo && t.target === this.buttonRecordVideo.node) {
                         if (ftc.recordVideoState) {
-                            if (ft.getSysSecond() - ftc.recordVideoTime <= 3) return void ftc.showTip("\u5f55\u5c4f\u65f6\u957f\u9700\u5927\u4e8e3s")
+                            if (ft.getSysSecond() - ftc.recordVideoTime <= 3) return void ftc.showTip("录屏时长需大于3s")
                         } else ftc.recordVideoState = !0;
-                        this.labelRecordStatus.string = "\u5f55\u5c4f", this.spriteRecordRedPoint.node.active = !1, ftc.ManagerH5.stopRecordScreen(), ftc.ManagerH5.startRecordScreen(function (t) {
-                            "start" == t ? (ftc.recordVideoTime = ft.getSysSecond(), this.labelRecordStatus.string = "\u5f55\u5c4f\u4e2d", this.spriteRecordRedPoint.node.active = !0) : "end" == t ? (ftc.recordVideoTime = 0, ftc.recordVideoState = !1, this.labelRecordStatus.string = "\u5f55\u5c4f", this.spriteRecordRedPoint.node.active = !1, ftc.ManagerH5.stopRecordScreen(), ftc.ManagerH5.shareVideo()) : "end1" == t && (ftc.recordVideoTime = 0, ftc.recordVideoState = !1, this.labelRecordStatus.string = "\u5f55\u5c4f", this.spriteRecordRedPoint.node.active = !1, ftc.ManagerH5.stopRecordScreen())
+                        this.labelRecordStatus.string = "录屏", this.spriteRecordRedPoint.node.active = !1, ftc.ManagerH5.stopRecordScreen(), ftc.ManagerH5.startRecordScreen(function (t) {
+                            "start" == t ? (ftc.recordVideoTime = ft.getSysSecond(), this.labelRecordStatus.string = "录屏中", this.spriteRecordRedPoint.node.active = !0) : "end" == t ? (ftc.recordVideoTime = 0, ftc.recordVideoState = !1, this.labelRecordStatus.string = "录屏", this.spriteRecordRedPoint.node.active = !1, ftc.ManagerH5.stopRecordScreen(), ftc.ManagerH5.shareVideo()) : "end1" == t && (ftc.recordVideoTime = 0, ftc.recordVideoState = !1, this.labelRecordStatus.string = "录屏", this.spriteRecordRedPoint.node.active = !1, ftc.ManagerH5.stopRecordScreen())
                         }.bind(this))
                     } else if (t.target === this.buttonCopyExit.node) {
                         var c, h = ft.ExtMap.getType(this.currentMap.id),
                             f = ftc.ManagerData.get1("ManagerCopy").cur;
-                        h == ft.type.map.maze ? c = "\u662f\u5426\u786e\u5b9a\u9000\u51fa\u5b9d\u85cf\u5730\u56fe\uff0c\u9000\u51fa\u540e\u5c06\u65e0\u6cd5\u518d\u6b21\u8fdb\u5165\uff1f" : h == ft.type.map.flhj ? c = "\u662f\u5426\u786e\u5b9a\u9000\u51fa\u67ab\u6797\u526f\u672c\uff0c\u9000\u51fa\u540e\u672c\u5468\u65e0\u6cd5\u518d\u6b21\u8fdb\u5165" : h == ft.type.map.zy ? c = "\u786e\u5b9a\u8981\u9000\u51fa\u6218\u5f79\u4e48\uff0c\u9000\u51fa\u540e\u91cd\u7f6e\u6218\u5f79\u5185\u5bb9\uff0c\u5e76\u4e14\u6d88\u8017\u3010\u6218\u5f79\u6311\u6218\u5238\u3011x1?" : h == ft.type.map.tfdz || h == ft.type.map.czda || h == ft.type.map.pdjd || h == ft.type.map.sbbz || h == ft.type.map.lshy ? c = "\u786e\u5b9a\u8981\u9000\u51fa\u9650\u65f6\u526f\u672c\u4e48\uff0c\u9000\u51fa\u540e\u91cd\u7f6e\u526f\u672c\u5185\u5bb9" : h == ft.type.map.hsly ? c = "\u706b\u70e7\u8fde\u8425\u4efb\u52a1\u7ebf\u6bcf\u5468\u53ef\u5b8c\u6210\u4e00\u6b21\uff0c\u79bb\u5f00\u540e\u53ef\u4ee5\u91cd\u65b0\u8fdb\u5165\u7ee7\u7eed\u5b8c\u6210\u3002\u6700\u7ec8\u6218\u6597\u53ef\u591a\u6b21\u5c1d\u8bd5\u3002" : h != ft.type.map.xswj && h != ft.type.map.qjqc || (c = "\u786e\u5b9a\u8981\u9000\u51fa\u526f\u672c\u4e48\uff0c\u9000\u51fa\u540e\u91cd\u7f6e\u526f\u672c\u5185\u5bb9"), c ? ftc.showDialog({
+                        h == ft.type.map.maze ? c = "是否确定退出宝藏地图，退出后将无法再次进入？" : h == ft.type.map.flhj ? c = "是否确定退出枫林副本，退出后本周无法再次进入" : h == ft.type.map.zy ? c = "确定要退出战役么，退出后重置战役内容，并且消耗【战役挑战券】x1?" : h == ft.type.map.tfdz || h == ft.type.map.czda || h == ft.type.map.pdjd || h == ft.type.map.sbbz || h == ft.type.map.lshy ? c = "确定要退出限时副本么，退出后重置副本内容" : h == ft.type.map.hsly ? c = "火烧连营任务线每周可完成一次，离开后可以重新进入继续完成。最终战斗可多次尝试。" : h != ft.type.map.xswj && h != ft.type.map.qjqc || (c = "确定要退出副本么，退出后重置副本内容"), c ? ftc.showDialog({
                             text: c,
                             click1: function () {
                                 if (h == ft.type.map.zy) ftc.sendClient("c_copyZYExit", f, "LayoutMain", 0);
@@ -668,7 +668,7 @@
                         i = e[ft.value.func.activity] && !e[ft.value.disable.activity];
                     this.buttonArrowRight.node.active = i && this.nodeActivity.active;
                     var a = ft.ExtMsg.getMsgDatas(ft.type.msg.pos.notice);
-                    this.buttonNotice.node.active = a.length > 0 && i, this.buttonRecordVideo && (1 == ftc.ManagerH5.isOpenRecordVideo() ? (this.buttonRecordVideo.node.active = !0, ftc.recordVideoState ? (this.labelRecordStatus.string = "\u5f55\u5c4f\u4e2d", this.spriteRecordRedPoint.node.active = !0) : (this.labelRecordStatus.string = "\u5f55\u5c4f", this.spriteRecordRedPoint.node.active = !1)) : this.buttonRecordVideo.node.active = !1)
+                    this.buttonNotice.node.active = a.length > 0 && i, this.buttonRecordVideo && (1 == ftc.ManagerH5.isOpenRecordVideo() ? (this.buttonRecordVideo.node.active = !0, ftc.recordVideoState ? (this.labelRecordStatus.string = "录屏中", this.spriteRecordRedPoint.node.active = !0) : (this.labelRecordStatus.string = "录屏", this.spriteRecordRedPoint.node.active = !1)) : this.buttonRecordVideo.node.active = !1)
                 },
                 updateFuncRedPointInfo: function () {
                     this.updateActivityRedPoint();

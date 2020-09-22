@@ -7,7 +7,7 @@
                 },
                 init: function () { },
                 load: function () {
-                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("\u5546\u5e97"), this.node.addChild(this.partTopStatus.node);
+                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("商店"), this.node.addChild(this.partTopStatus.node);
                     var t = [ft.value.shop.mystery, ft.value.shop.honor, ft.value.shop.spirit, ft.value.shop.huFu, ft.value.shop.biography, ft.value.shop.other, ft.value.shop.crystal, 10001];
                     this.listView.setListView(t), this.remainingSeconds = 0, this._tickSeconds = 0
                 },
@@ -29,7 +29,7 @@
                     var e, i, a = Math.floor(t / 3600),
                         n = Math.floor(t / 60) % 60,
                         s = t % 60;
-                    a > 0 ? e = a + "\u5c0f\u65f6" + n + "\u5206\u949f" : n > 0 ? e = n + "\u5206\u949f" : s > 0 && (e = s + "\u79d2"), i = Math.floor((ftc.getLocalTime() + 28800) / 3600) % 24 < 12 ? a + 12 + "\u5c0f\u65f6" + n + "\u5206\u949f" : e, this.listView.updateListViewItems({
+                    a > 0 ? e = a + "小时" + n + "分钟" : n > 0 ? e = n + "分钟" : s > 0 && (e = s + "秒"), i = Math.floor((ftc.getLocalTime() + 28800) / 3600) % 24 < 12 ? a + 12 + "小时" + n + "分钟" : e, this.listView.updateListViewItems({
                         timeTip1: e,
                         timeTip2: i
                     })

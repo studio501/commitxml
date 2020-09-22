@@ -39,7 +39,7 @@
                 msg: function () {
                     this.msg = {
                         heroSetBattleSkin: function (t, e) {
-                            ftc.showTip("\u5f62\u8c61\u66f4\u6362\u6210\u529f");
+                            ftc.showTip("形象更换成功");
                             for (var i = 0; i < this._partSelectBattleSkins.length; i++) this._partSelectBattleSkins[i].updateData()
                         }
                     }

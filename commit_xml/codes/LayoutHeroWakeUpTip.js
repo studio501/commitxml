@@ -49,7 +49,7 @@
                     if (void 0 === e && (e = 1), this.type = e, this.data = t, this.loadAnimation(e), this.loadResource(ft.ExtHero.getSpineRes(this.data.id), sp.SkeletonData, function (t) {
                         t && (this.spineHero.skeletonData = t, this.spineHero.setAnimation(0, "ready"), this.spineHero.addAnimation(0, "w1", !0))
                     }.bind(this)), this.spriteCountry.spriteFrame = ft.ExtHero.getCountrySprite(this.data.id), this.spriteWeapon.spriteFrame = ft.ExtHero.getWeaponSprite(this.data.id), this.spriteName.spriteFrame = ft.ExtHero.getNameSprite(this.data.id), this.spriteName.node.color = ft.ExtHero.getNameColor(this.data.id), this.spritePlus.node.active = this.data.up > 0, this.data.up > 0 && (this.spritePlus.spriteFrame = ft.ExtHero.getUpSprite(this.data.up), this.spritePlus.node.active = !!this.spritePlus.spriteFrame, this.spritePlus.node.color = ft.ExtHero.getNameColor(this.data.id)), 1 === this.type) {
-                        this.labelDesc.string = ftc.language("\u5168\u5c5e\u6027+") + ft.ExtHero.getWakeAddPercent(this.data.up) + "%";
+                        this.labelDesc.string = ftc.language("全属性+") + ft.ExtHero.getWakeAddPercent(this.data.up) + "%";
                         for (var i = 0; i < this.spriteStars.length; i++) this.spineStars[i].node.active = !1, this.spriteStars[i].spriteFrame = ftc.ManagerRes.getSpriteFrame("program", this.data.star > i ? "com_star" : "com_stargray")
                     } else if (2 === this.type) {
                         this.labelDesc.string = ft.ExtHero.getStarInfo(this.data.id, this.data.star);

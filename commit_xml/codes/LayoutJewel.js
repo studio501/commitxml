@@ -15,7 +15,7 @@
                     }), ftc.ManagerTV.setBackButton(this.buttonClose)
                 },
                 load: function () {
-                    this.initPart(this.partJewelExchange), ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762")
+                    this.initPart(this.partJewelExchange), ftc.setTvTip(this.node, "【返回键】关闭界面")
                 },
                 setData: function (t) { },
                 enter: function () { },
@@ -25,7 +25,7 @@
                 msg: function () {
                     this.msg = {
                         jewelExchange: function (t, e) {
-                            0 === t ? (ftc.showTip("\u5151\u6362\u6210\u529f"), this.partJewelExchange.updateData()) : ftc.showTip("\u5151\u6362\u5931\u8d25")
+                            0 === t ? (ftc.showTip("兑换成功"), this.partJewelExchange.updateData()) : ftc.showTip("兑换失败")
                         }
                     }
                 },

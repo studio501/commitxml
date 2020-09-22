@@ -33,7 +33,7 @@
                         try {
                             this.handleEvent[i[0]].apply(this, [a[0], a[1]])
                         } catch (t) {
-                            ftc.err("\u9519\u8bef\u4e8b\u4ef6" + e.data.name + "," + t)
+                            ftc.err("错误事件" + e.data.name + "," + t)
                         }
                     }
                 },

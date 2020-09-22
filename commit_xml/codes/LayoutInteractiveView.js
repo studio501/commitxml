@@ -23,7 +23,7 @@
                     this.clickCount = t.clickCount, this.maxClick = t.clickCount, this.limitTime = t.limitTime, this.tickLong = t.limitTime, this.labelTitle.string = t.buttonText, this.labelTxt.string = t.text, this.isLong = t.isLong, this.progressBar.progress = 0, this.isStart = !1
                 },
                 enter: function () {
-                    ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\uff0c\u3010\u786e\u5b9a\u952e\u3011\u70b9\u51fb")
+                    ftc.setTvTip(this.node, "【返回键】关闭，【确定键】点击")
                 },
                 cleanup: function () { },
                 updateData: function () { },

@@ -45,23 +45,23 @@
                 onClick: function (t, e) {
                     if (t.target === this.buttonInherit.node) this.data.lv < ftc.ManagerData.get1("Player").level ? ftc.loadLayout("LayoutHeroInherit", function (t) {
                         t.setData(this.data)
-                    }.bind(this)) : ftc.showTip("\u6b66\u5c06\u5df2\u7ecf\u8fbe\u5230\u73a9\u5bb6\u4e0a\u9650");
+                    }.bind(this)) : ftc.showTip("武将已经达到玩家上限");
                     else if (t.target === this.buttonUp.node) {
                         var i = this.selectedItem.data;
-                        ft.ExtItem.getNum(i) <= 0 ? ftc.showTip("\u6ca1\u6709\u9053\u5177") : this.data.lv >= ft.value.com.maxHeroLevel ? ftc.showTip("\u6b66\u5c06\u5df2\u7ecf\u8fbe\u5230\u7b49\u7ea7\u4e0a\u9650") : this.data.lv === ftc.ManagerData.get1("Player").level ? ftc.showTip("\u6b66\u5c06\u5df2\u7ecf\u8fbe\u5230\u73a9\u5bb6\u4e0a\u9650") : (ftc.send("heroExp", {
+                        ft.ExtItem.getNum(i) <= 0 ? ftc.showTip("没有道具") : this.data.lv >= ft.value.com.maxHeroLevel ? ftc.showTip("武将已经达到等级上限") : this.data.lv === ftc.ManagerData.get1("Player").level ? ftc.showTip("武将已经达到玩家上限") : (ftc.send("heroExp", {
                             id: this.data.id,
                             itemId: i,
                             num: 1
                         }), this.selectedItem.playAni())
                     } else if (t.target === this.buttonUpAll.node) {
                         i = this.selectedItem.data;
-                        if (ft.ExtItem.getNum(i) <= 0) ftc.showTip("\u6ca1\u6709\u9053\u5177");
-                        else if (this.data.lv >= ft.value.com.maxHeroLevel) ftc.showTip("\u6b66\u5c06\u5df2\u7ecf\u8fbe\u5230\u7b49\u7ea7\u4e0a\u9650");
-                        else if (this.data.lv === ftc.ManagerData.get1("Player").level) ftc.showTip("\u6b66\u5c06\u5df2\u7ecf\u8fbe\u5230\u73a9\u5bb6\u4e0a\u9650");
+                        if (ft.ExtItem.getNum(i) <= 0) ftc.showTip("没有道具");
+                        else if (this.data.lv >= ft.value.com.maxHeroLevel) ftc.showTip("武将已经达到等级上限");
+                        else if (this.data.lv === ftc.ManagerData.get1("Player").level) ftc.showTip("武将已经达到玩家上限");
                         else {
                             var a = this.lvUpConsume(i);
                             ftc.showDialog({
-                                text: ftc.language("\u6d88\u8017") + a + ft.ExtItem.getName(i),
+                                text: ftc.language("消耗") + a + ft.ExtItem.getName(i),
                                 click1: function () {
                                     ftc.send("heroExp", {
                                         id: this.data.id,

@@ -26,7 +26,7 @@
                     i.setData(this.data.id, this.data.num, !0), this.nodeItem.addChild(i.node), this.itemNumMax = Math.min(this.data.num, 999), this.itemNum = this.itemNumMax, this.slider.progress = 1, this.progressBar.progress = 1, this.updateTip()
                 },
                 enter: function () {
-                    this.updateData(), ftc.setTvTip(this.node, "\u8fd4\u56de\u952e\u5173\u95ed\uff0c\u5de6\u53f3\u952e\u52a0\u51cf1\uff0c\u4e0a\u4e0b\u952e\u52a0\u51cf10")
+                    this.updateData(), ftc.setTvTip(this.node, "返回键关闭，左右键加减1，上下键加减10")
                 },
                 updateData: function () { },
                 tick: function (t) { },
@@ -42,7 +42,7 @@
                     }
                 },
                 updateTip: function () {
-                    this.labelTip.string = ftc.language("\u4f7f\u7528{0}\u4e2a").replace("{0}", this.itemNum)
+                    this.labelTip.string = ftc.language("使用{0}个").replace("{0}", this.itemNum)
                 },
                 onClick: function (t, e) {
                     t.target === this.buttonConfirm.node ? (this.callback && this.callback(this.itemNum), this.cancel()) : t.target === this.buttonSub.node ? this.setItemNum(this.itemNum - 1) : t.target === this.buttonAdd.node ? this.setItemNum(this.itemNum + 1) : t.target === this.buttonClose.node && (this.callback && this.callback(0), this.cancel())

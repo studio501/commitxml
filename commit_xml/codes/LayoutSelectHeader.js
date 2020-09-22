@@ -19,7 +19,7 @@
                     }), ftc.ManagerTV.setBackButton(this.buttonClose)
                 },
                 load: function () {
-                    ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u6807\u7b7e\uff0c\u3010\u786e\u5b9a\u952e\u3011\u542f\u7528"), this.id = void 0;
+                    ftc.setTvTip(this.node, "【返回键】关闭界面，【菜单键】切换标签，【确定键】启用"), this.id = void 0;
                     var t = ftc.ManagerData.get1("ManagerDecoration");
                     this.spriteHeader.spriteFrame = ft.ExtDecoration.getSpriteFrame(t.headerId), this.spriteHeaderFrame.spriteFrame = ft.ExtDecoration.getSpriteFrame(t.headerFrameId), this.labelInfo.string = ft.ExtDecoration.getInfo(t.headerId), this.selectTab(0)
                 },
@@ -30,7 +30,7 @@
                 enter: function () { },
                 updateData: function () {
                     var t = !1;
-                    t = this.type === ft.type.decoration.header ? ftc.ManagerData.get1("ManagerDecoration").headerId == this.id : ftc.ManagerData.get1("ManagerDecoration").headerFrameId == this.id, this.buttonEnable.node.getChildByName("Label").getComponent(cc.Label).string = t ? "\u542f\u7528\u4e2d" : "\u542f\u7528", this.buttonEnable.interactable = !t
+                    t = this.type === ft.type.decoration.header ? ftc.ManagerData.get1("ManagerDecoration").headerId == this.id : ftc.ManagerData.get1("ManagerDecoration").headerFrameId == this.id, this.buttonEnable.node.getChildByName("Label").getComponent(cc.Label).string = t ? "启用中" : "启用", this.buttonEnable.interactable = !t
                 },
                 tick: function (t) { },
                 cleanup: function () { },
@@ -51,12 +51,12 @@
                             this.setHeaderInfo(t.data), this.listView.updateListViewItems(t.index)
                         },
                         decorationHeaderSet: function (t, e) {
-                            0 == t ? (this.updateData(), this.listView.updateListViewItems(), ftc.showTip("\u542f\u7528\u6210\u529f")) : ftc.showTip("\u542f\u7528\u5931\u8d25")
+                            0 == t ? (this.updateData(), this.listView.updateListViewItems(), ftc.showTip("启用成功")) : ftc.showTip("启用失败")
                         }
                     }
                 },
                 onClick: function (t, e) {
-                    if (t.target === this.buttonEnable.node) this.id ? ftc.ManagerData.get2Object("Decoration", this.id) ? ftc.send("decorationHeaderSet", this.id) : ftc.showTip("\u672a\u62e5\u6709") : ftc.showTip("\u672a\u9009\u4e2d");
+                    if (t.target === this.buttonEnable.node) this.id ? ftc.ManagerData.get2Object("Decoration", this.id) ? ftc.send("decorationHeaderSet", this.id) : ftc.showTip("未拥有") : ftc.showTip("未选中");
                     else if (t.target === this.buttonClose.node) this.cancel();
                     else
                         for (var i = 0; i < this.buttonTabs.length; i++)
@@ -73,7 +73,7 @@
                         if (this.buttonEnable.interactable) return this.onClick({
                             target: this.buttonEnable.node
                         }), !0;
-                        ftc.showTip("\u4f7f\u7528\u4e2d")
+                        ftc.showTip("使用中")
                     }
                 }
             })

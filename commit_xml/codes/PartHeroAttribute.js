@@ -17,7 +17,7 @@
                 },
                 setData: function (t) {
                     this.data = t;
-                    for (var e, i, a, n, s, o, r = [], c = 0; c < 4; c++)(s = c + 1) === ft.type.prop.wl ? (e = "\u6b66\u529b\u6210\u957f\u503c", i = this.data.addWl, a = this.data.addWlUp * ft.value.heroAttrAddMax[0] + 100, n = this.data.addWlUp) : s === ft.type.prop.zl ? (e = "\u667a\u529b\u6210\u957f\u503c", i = this.data.addZl, a = this.data.addZlUp * ft.value.heroAttrAddMax[1] + 100, n = this.data.addZlUp) : s === ft.type.prop.sd ? (e = "\u901f\u5ea6\u6210\u957f\u503c", i = this.data.addSd, a = this.data.addSdUp * ft.value.heroAttrAddMax[2] + 100, n = this.data.addSdUp) : s === ft.type.prop.nl && (e = "\u8010\u529b\u6210\u957f\u503c", i = this.data.addNl, a = this.data.addNlUp * ft.value.heroAttrAddMax[3] + 100, n = this.data.addNlUp), o = i < a ? ft.value.item.stoneAttrs[c] : ft.value.item.stoneAttrUps[c], r.push({
+                    for (var e, i, a, n, s, o, r = [], c = 0; c < 4; c++)(s = c + 1) === ft.type.prop.wl ? (e = "武力成长值", i = this.data.addWl, a = this.data.addWlUp * ft.value.heroAttrAddMax[0] + 100, n = this.data.addWlUp) : s === ft.type.prop.zl ? (e = "智力成长值", i = this.data.addZl, a = this.data.addZlUp * ft.value.heroAttrAddMax[1] + 100, n = this.data.addZlUp) : s === ft.type.prop.sd ? (e = "速度成长值", i = this.data.addSd, a = this.data.addSdUp * ft.value.heroAttrAddMax[2] + 100, n = this.data.addSdUp) : s === ft.type.prop.nl && (e = "耐力成长值", i = this.data.addNl, a = this.data.addNlUp * ft.value.heroAttrAddMax[3] + 100, n = this.data.addNlUp), o = i < a ? ft.value.item.stoneAttrs[c] : ft.value.item.stoneAttrUps[c], r.push({
                         id: this.data.id,
                         lv: this.data.lv,
                         up: n,
@@ -48,21 +48,21 @@
                 onClick: function (t, e) {
                     if (this.selectedItem) {
                         var i = this.selectedItem;
-                        if (t.target === this.buttonPromote1.node) i.data.itemNum > 0 ? (i.data.useNum = 1, ftc.sendClient("c_onClickHeroAttrUp", i), this.selectedItem.playAni()) : ftc.showTip(ftc.language("\u7f3a\u5c11") + ft.ExtItem.getName(i.data.itemId));
+                        if (t.target === this.buttonPromote1.node) i.data.itemNum > 0 ? (i.data.useNum = 1, ftc.sendClient("c_onClickHeroAttrUp", i), this.selectedItem.playAni()) : ftc.showTip(ftc.language("缺少") + ft.ExtItem.getName(i.data.itemId));
                         else if (t.target === this.buttonPromote2.node)
                             if (i.data.itemNum > 0) {
                                 var a = Math.min(i.data.needNum - i.data.num, i.data.itemNum);
                                 ftc.showDialog({
-                                    text: ftc.language("\u6d88\u8017") + a + ft.ExtItem.getName(i.data.itemId),
+                                    text: ftc.language("消耗") + a + ft.ExtItem.getName(i.data.itemId),
                                     click1: function () {
                                         i.data.useNum = a, ftc.sendClient("c_onClickHeroAttrUp", i), this.selectedItem.playAni()
                                     }.bind(this),
                                     click2: function () { }
                                 })
-                            } else ftc.showTip(ftc.language("\u7f3a\u5c11") + ft.ExtItem.getName(i.data.itemId));
+                            } else ftc.showTip(ftc.language("缺少") + ft.ExtItem.getName(i.data.itemId));
                         else if (t.target === this.buttonUp.node) {
                             var n = 50 + 4 * i.data.up;
-                            i.data.lv < n ? ftc.showTip(n + ftc.language("\u7ea7\u5f00\u653e")) : i.data.itemNum < i.data.up + 1 ? ftc.showTip(ftc.language("\u7f3a\u5c11") + ft.ExtItem.getName(i.data.itemId)) : (i.data.useNum = i.data.up + 1, ftc.sendClient("c_onClickHeroAttrUp2", i), this.selectedItem.playAni())
+                            i.data.lv < n ? ftc.showTip(n + ftc.language("级开放")) : i.data.itemNum < i.data.up + 1 ? ftc.showTip(ftc.language("缺少") + ft.ExtItem.getName(i.data.itemId)) : (i.data.useNum = i.data.up + 1, ftc.sendClient("c_onClickHeroAttrUp2", i), this.selectedItem.playAni())
                         } else t.target === this.buttonDetail.node && ftc.showDetailInfo(t.target, ft.ExtDetail.getInfo(ft.value.detail.hero_attr))
                     }
                 }

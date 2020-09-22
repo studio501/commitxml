@@ -28,7 +28,7 @@
                 msg: function () {
                     this.msg = {
                         msgActivityGet: function (t, e) {
-                            this.msgData && this.msgData.entityId == t.eid && (-1 === t && ftc.showTip("\u9886\u53d6\u5931\u8d25"), this._watchingAd = !1, this.cancel())
+                            this.msgData && this.msgData.entityId == t.eid && (-1 === t && ftc.showTip("领取失败"), this._watchingAd = !1, this.cancel())
                         },
                         c_successFullAd: function (t, e) {
                             ftc.ManagerH5.countEvent("8_3"), ftc.send("msgActivityGet", {
@@ -41,7 +41,7 @@
                     if (t.target === this.button2.node || t.target === this.buttonClose.node) this._watchingAd = !1, this.cancel();
                     else if (t.target === this.button1.node) {
                         var e;
-                        ftc.ManagerH5.countEvent("8_2"), ftc.ManagerH5.isH5() ? e = ftc.ManagerH5.showFull(0) : ftc.ManagerH5.isH5() || "1" != ftc.callNativeFunction("openFullAd") || (e = ftc.callNativeFunction("showFull", ft.type.fullAd.main + "")), "1" != e ? ftc.showTip("\u6682\u65e0\u5e7f\u544a\uff0c\u8bf7\u7a0d\u540e\u518d\u8bd5") : (ftc.watchingAd = !0, cc.audioEngine.pauseAll())
+                        ftc.ManagerH5.countEvent("8_2"), ftc.ManagerH5.isH5() ? e = ftc.ManagerH5.showFull(0) : ftc.ManagerH5.isH5() || "1" != ftc.callNativeFunction("openFullAd") || (e = ftc.callNativeFunction("showFull", ft.type.fullAd.main + "")), "1" != e ? ftc.showTip("暂无广告，请稍后再试") : (ftc.watchingAd = !0, cc.audioEngine.pauseAll())
                     }
                 }
             })

@@ -20,7 +20,7 @@
                 selectTab: function (t) {
                     if (1 !== t)
                         for (var e = [ftc.type.tab.rank_friend, ftc.type.tab.rank_world], i = 0; i < this.buttonTabs.length; i++) this.buttonTabs[i].interactable = t !== i, this.buttonTabs[i].node.getChildByName("spriteTabIcon").getComponent(cc.Sprite).spriteFrame = ftc.getTabSpriteFrame(e[i], t === i), this.buttonTabs[i].node.getChildByName("labelTab").color = t !== i ? ftc.newColor(ftc.value.color.tabNormal) : ftc.newColor(ftc.value.color.tabPressed), this.buttonTabs[i].node.getChildByName("labelTab").getComponent(cc.LabelOutline).color = t !== i ? ftc.newColor(ftc.value.color.tabNormalOutline) : ftc.newColor(ftc.value.color.tabPressedOutline);
-                    else ftc.showTip("\u6682\u672a\u5f00\u653e")
+                    else ftc.showTip("暂未开放")
                 },
                 enter: function () { },
                 updateData: function () { },

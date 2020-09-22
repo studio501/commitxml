@@ -31,7 +31,7 @@
                         var a = ft.ExtCopy.getAchievementGrade(i),
                             n = ft.ExtCopy.getCopy(ft.value.copy.XSWJ),
                             s = n.ste - 1;
-                        this.labelDifficult.string = ["\u7b80\u5355", "\u666e\u901a", "\u56f0\u96be", "\u5730\u72f1", "\u6df1\u6e0a"][s], this.labelDifficult.getComponent(cc.LabelOutline).color = ftc.newColor([1362281, 412567, 6628550, 13590528, 8458563][s]), this.labelScore.string = i;
+                        this.labelDifficult.string = ["简单", "普通", "困难", "地狱", "深渊"][s], this.labelDifficult.getComponent(cc.LabelOutline).color = ftc.newColor([1362281, 412567, 6628550, 13590528, 8458563][s]), this.labelScore.string = i;
                         var o = "copy_grade_" + a;
                         this.spriteGrade.spriteFrame = ftc.ManagerRes.getSpriteFrame("program", o), this.labelOutput.string = Number(n.ext) + "/" + ft.value.com.yearPictureMax, n.ext < ft.value.com.yearPictureMax ? this.labelOutput.node.color = ftc.newColor(65280) : this.labelOutput.node.color = ftc.newColor(16711680)
                     }

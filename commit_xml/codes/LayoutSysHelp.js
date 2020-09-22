@@ -86,7 +86,7 @@
                     this.hypertext.cleanHtml(), this.hypertext.node.opacity = 0, this.hypertext.http(t, null, function (t) {
                         this.nodeDialog.active = !0;
                         var e = t.title.rendered,
-                            i = e.indexOf("\u3011");
+                            i = e.indexOf("】");
                         i > 0 && (e = e.substr(i + 1)), this.labelTitle.string = e, this.labelTime.string = t.date;
                         var a = ft.replaceAll(t.content.rendered, "\n", "");
                         this.hypertext.setHtml(a, this.hyperTextClick), cc.tween(this.hypertext.node).to(1, {
@@ -105,7 +105,7 @@
                     }
                 },
                 hyperTextClick: function (t, e) {
-                    ft.console("\u8d85\u7ea7\u6587\u672c\u70b9\u51fb\u4e8b\u4ef6", t, e)
+                    ft.console("超级文本点击事件", t, e)
                 },
                 pushContent: function (t) {
                     this.dataStack.push(t), this.updateContent(this.dataStack)

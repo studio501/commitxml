@@ -11,7 +11,7 @@
                 },
                 load: function () {
                     var t, e = ftc.callNativeFunction("getProductPrices");
-                    e && (t = e.split("|")), this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("\u5145\u503c"), this.node.addChild(this.partTopStatus.node);
+                    e && (t = e.split("|")), this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("充值"), this.node.addChild(this.partTopStatus.node);
                     var i = ftc.ManagerH5.getOrderIds();
                     i || (i = ["2", "3", "4", "5", "6", "1"]);
                     for (var a = [], n = [], s = 0; s < i.length; s++) {
@@ -48,7 +48,7 @@
                     }
                 },
                 onClick: function (t) {
-                    t.target === this.buttonVip.node && (ftc.ManagerData.get1("Player").rmb < ft.value.com.giftVipNeed ? ftc.showTip("\u5145\u503c\u672a\u6ee130\u5143") : ftc.loadLayout("LayoutActivity", function (t) {
+                    t.target === this.buttonVip.node && (ftc.ManagerData.get1("Player").rmb < ft.value.com.giftVipNeed ? ftc.showTip("充值未满30元") : ftc.loadLayout("LayoutActivity", function (t) {
                         t.setData(ft.type.msg.pos.gift, ft.type.activity.giftVip)
                     }, {
                         hide: !0

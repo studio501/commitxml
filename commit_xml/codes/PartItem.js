@@ -75,7 +75,7 @@
                     this.spriteRare.node.active = n && ft.ExtHero.getRarity(n) >= ft.type.rarity.rare
                 },
                 setEquipData: function (t, e) {
-                    this.type = ft.type.partItemType.equip, this.data = t, this.id = t.id, this.spriteMark.node.active = !1, this.spriteQuality.node.active = !0, this.spriteIcon.node.active = !0, this.spriteQuality.spriteFrame = ft.ExtEquip.getQualitySprite(t.id), this.spriteIcon.spriteFrame = ft.ExtEquip.getIconSprite(t.id), this.labelNum.node.active = t.num > 1, this.labelNum.node.active && (this.labelNum.string = t.num), this.labelLevel.node.active = !!t.lv, this.labelLevel.node.active && (this.labelLevel.string = t.lv + ftc.language("\u7ea7")), this.labelName.node.active = e, this.labelName.node.active && (this.labelName.string = ft.trimName(ft.ExtEquip.getName(t.id))), this.spriteStar.node.active = t.star > 0, this.spriteStar.node.active && (this.spriteStar.spriteFrame = ftc.ManagerRes.getSpriteFrame("program", "common_icon_xing" + t.star))
+                    this.type = ft.type.partItemType.equip, this.data = t, this.id = t.id, this.spriteMark.node.active = !1, this.spriteQuality.node.active = !0, this.spriteIcon.node.active = !0, this.spriteQuality.spriteFrame = ft.ExtEquip.getQualitySprite(t.id), this.spriteIcon.spriteFrame = ft.ExtEquip.getIconSprite(t.id), this.labelNum.node.active = t.num > 1, this.labelNum.node.active && (this.labelNum.string = t.num), this.labelLevel.node.active = !!t.lv, this.labelLevel.node.active && (this.labelLevel.string = t.lv + ftc.language("级")), this.labelName.node.active = e, this.labelName.node.active && (this.labelName.string = ft.trimName(ft.ExtEquip.getName(t.id))), this.spriteStar.node.active = t.star > 0, this.spriteStar.node.active && (this.spriteStar.spriteFrame = ftc.ManagerRes.getSpriteFrame("program", "common_icon_xing" + t.star))
                 },
                 setEquipStarActive: function (t) {
                     this.spriteStar.node.active = t
@@ -143,7 +143,7 @@
                             if (s === ft.type.item.piece || s === ft.type.item.battleSkin) {
                                 (a = this.newPart("PartItemDetail")).setData({
                                     id: this.id
-                                }), ftc.scene.node.addChild(a.node, 256), a.nodeLayoutMenu.active = !0, n = 166, (c = ft.ExtItem.getEquip(this.id)) && (a.labelMenu.string = ftc.language("\u88c5\u5907\u8be6\u60c5"), a.setMenuCallback(function () {
+                                }), ftc.scene.node.addChild(a.node, 256), a.nodeLayoutMenu.active = !0, n = 166, (c = ft.ExtItem.getEquip(this.id)) && (a.labelMenu.string = ftc.language("装备详情"), a.setMenuCallback(function () {
                                     ftc.showEquipInfo(this.node, {
                                         id: c
                                     })
@@ -151,7 +151,7 @@
                                 var o = ft.ExtItem.getHero(this.id);
                                 if (o) {
                                     var r = ft.ExtHero.getHero(o);
-                                    a.labelMenu.string = ftc.language("\u6b66\u5c06\u8be6\u60c5"), a.setMenuCallback(function () {
+                                    a.labelMenu.string = ftc.language("武将详情"), a.setMenuCallback(function () {
                                         ftc.loadLayout("LayoutHero", function (t) {
                                             t.setData(r || o)
                                         })
@@ -202,7 +202,7 @@
                                 name: ft.ExtJewel.getName(this.id),
                                 info: ft.ExtJewel.getInfo(this.id)
                             });
-                        else this.type === ft.type.partItemType.pet && ftc.showTip("\u663e\u793a\u9635\u6cd5\u6216\u7b56\u7565\u4fe1\u606f")
+                        else this.type === ft.type.partItemType.pet && ftc.showTip("显示阵法或策略信息")
                     }
                 }
             })

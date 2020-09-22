@@ -78,14 +78,14 @@
                 },
                 onClick: function (t, e) {
                     if (t.target === this.buttonDetail.node) ftc.showDetailInfo(this.buttonDetail.node, this.data.txt);
-                    else if (t.target === this.buttonTurn.node) this.turning ? ftc.showTip("\u8f6c\u52a8\u4e2d...") : this.data.ext >= this.activity.max ? ftc.showTip("\u8f6c\u76d8\u6b21\u6570\u5df2\u8fbe\u4e0a\u9650") : ft.ExtItem.getNum(ft.value.item.turntableTicket) > 0 ? ftc.send("msgActivityGet", {
+                    else if (t.target === this.buttonTurn.node) this.turning ? ftc.showTip("转动中...") : this.data.ext >= this.activity.max ? ftc.showTip("转盘次数已达上限") : ft.ExtItem.getNum(ft.value.item.turntableTicket) > 0 ? ftc.send("msgActivityGet", {
                         eid: this.data.entityId,
                         type: 0
-                    }) : ft.ExtItem.getNum(this.activity.consumeId) < this.activity.consumeNum ? ftc.showTip(ft.ExtItem.getName(this.activity.consumeId) + ftc.language("\u4e0d\u8db3")) : ftc.mapDialogNoTip[ftc.type.dialogNoTip.turntable] ? ftc.send("msgActivityGet", {
+                    }) : ft.ExtItem.getNum(this.activity.consumeId) < this.activity.consumeNum ? ftc.showTip(ft.ExtItem.getName(this.activity.consumeId) + ftc.language("不足")) : ftc.mapDialogNoTip[ftc.type.dialogNoTip.turntable] ? ftc.send("msgActivityGet", {
                         eid: this.data.entityId,
                         type: 0
                     }) : ftc.showDialog({
-                        text: ftc.language("\u786e\u5b9a\u6d88\u8017") + ft.ExtItem.getName(this.activity.consumeId) + "*" + this.activity.consumeNum + ftc.language("\u4f7f\u75281\u6b21\u8f6c\u76d8"),
+                        text: ftc.language("确定消耗") + ft.ExtItem.getName(this.activity.consumeId) + "*" + this.activity.consumeNum + ftc.language("使用1次转盘"),
                         click1: function () {
                             ftc.send("msgActivityGet", {
                                 eid: this.data.entityId,
@@ -98,7 +98,7 @@
                     else
                         for (var i = 0; i < this.buttonBoxes.length; i++)
                             if (t.target === this.buttonBoxes[i].node) {
-                                2 === this.boxStes[i] ? ftc.showTip("\u5df2\u9886\u53d6") : 1 === this.boxStes[i] ? ftc.send("msgActivityGet", {
+                                2 === this.boxStes[i] ? ftc.showTip("已领取") : 1 === this.boxStes[i] ? ftc.send("msgActivityGet", {
                                     eid: this.data.entityId,
                                     index: i,
                                     type: 1

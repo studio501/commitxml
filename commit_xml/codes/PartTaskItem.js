@@ -17,7 +17,7 @@
                     })
                 },
                 updateData: function (t) {
-                    this.spriteIcon.spriteFrame = ft.ExtTask.geIconSpriteFrame(this.data.id), this.labelName.string = ft.ExtTask.getName(this.data.id), this.labelStatus.string = ftc.language(["\u672a\u5b8c\u6210", "\u5df2\u5b8c\u6210", "\u5df2\u9886\u53d6"][this.data.ste]), this.buttonSelf.interactable = this.index !== t, this.spriteGuide.node.active = ftc.ManagerData.get1("ManagerTask").cur == this.data.id
+                    this.spriteIcon.spriteFrame = ft.ExtTask.geIconSpriteFrame(this.data.id), this.labelName.string = ft.ExtTask.getName(this.data.id), this.labelStatus.string = ftc.language(["未完成", "已完成", "已领取"][this.data.ste]), this.buttonSelf.interactable = this.index !== t, this.spriteGuide.node.active = ftc.ManagerData.get1("ManagerTask").cur == this.data.id
                 },
                 update: function (t) { },
                 onClick: function (t, e) {

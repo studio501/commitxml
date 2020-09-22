@@ -18,7 +18,7 @@
                     this._callback = null, this.datas = [], ftc.setTvTip(this.node)
                 },
                 setData: function (t, e, i, a) {
-                    this._callback = a, this.labelTitle.string = e || ftc.language("\u7269\u54c1\u5956\u52b1"), this.labelTxt.string = i || ftc.language("\u8fd9\u662f\u4f60\u7684\u5956\u52b1");
+                    this._callback = a, this.labelTitle.string = e || ftc.language("物品奖励"), this.labelTxt.string = i || ftc.language("这是你的奖励");
                     for (var n = [], s = [], o = 0; o < t.length; o++) n.push(t[o][0]), s.push(t[o][1]);
                     var r = {};
                     for (o = 0; o < n.length; o++) ft.ExtItem.getType(n[o]) === ft.type.item.base && n[o] !== ft.value.item.exp || ft.ExtItem.getType(n[o]) === ft.type.item.task || (r[n[o]] ? r[n[o]] += s[o] : r[n[o]] = s[o]);

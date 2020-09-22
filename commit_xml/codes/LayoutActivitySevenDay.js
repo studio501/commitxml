@@ -9,7 +9,7 @@
                 },
                 init: function () { },
                 load: function () {
-                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("", 1), ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u5929\u6570"), this.node.addChild(this.partTopStatus.node);
+                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("", 1), ftc.setTvTip(this.node, "【返回键】关闭界面，【菜单键】切换天数"), this.node.addChild(this.partTopStatus.node);
                     var t = ft.ExtMsg.getMsgDatas(ft.type.msg.pos.sevenDay);
                     if (t && t.length) {
                         for (var e = [], i = 0; i < t.length; i++) {
@@ -18,7 +18,7 @@
                             n >= 0 && (e[n] ? e[n].push(t[i]) : e[n] = [t[i]])
                         }
                         this.setData(e)
-                    } else ftc.showTip("\u6d3b\u52a8\u4e0d\u5b58\u5728"), this.cancel();
+                    } else ftc.showTip("活动不存在"), this.cancel();
                     ftc.send("msgFightCount")
                 },
                 setData: function (t) {
@@ -28,7 +28,7 @@
                     this.tvTabIndex = t;
                     var e = ft.getSysDay(),
                         i = ftc.ManagerData.get1("ManagerMsg").sevenDayStart;
-                    return e < i + t ? (ftc.showTip(i + t - e + ftc.language("\u5929\u540e\u5f00\u542f")), !1) : (this.datasLeft = this.datas[t], this.listViewLeft.setListView(this.datasLeft, 0), this.selectLeftTab(0), !0)
+                    return e < i + t ? (ftc.showTip(i + t - e + ftc.language("天后开启")), !1) : (this.datasLeft = this.datas[t], this.listViewLeft.setListView(this.datasLeft, 0), this.selectLeftTab(0), !0)
                 },
                 selectLeftTab: function (t) {
                     this.leftIndex = t;
@@ -76,7 +76,7 @@
                             })
                         },
                         msgActivityGet: function (t, e) {
-                            -1 === t.ret ? ftc.showTip("\u9886\u53d6\u5931\u8d25") : 0 === t.ret && this.updateData()
+                            -1 === t.ret ? ftc.showTip("领取失败") : 0 === t.ret && this.updateData()
                         }
                     }
                 },

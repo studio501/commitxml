@@ -25,7 +25,7 @@
                     }), ftc.ManagerTV.setBackButton(this.buttonClose)
                 },
                 load: function () {
-                    ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u663e\u793a\u961f\u4f0d")
+                    ftc.setTvTip(this.node, "【返回键】关闭界面，【菜单键】切换显示队伍")
                 },
                 setData: function (t, e) {
                     this.callback = e, this.npcId = parseInt(t.id), this.battleIds = t.battleIds, this.setSkill(), this.selectBattle(0), ftc.ManagerRes.restoreNodeChildren(this.layoutRewards);
@@ -49,7 +49,7 @@
                     }
                 },
                 selectBattle: function (t) {
-                    this.battleIndex = t, this.labelIndex.string = ftc.language("\u7b2c") + (this.battleIndex + 1) + "/" + this.battleIds.length + ftc.language("\u573a"), ftc.ManagerRes.restoreNodeChildren(this.layoutHeroes), this.labelName.string = ft.ExtBattle.getName(this.battleIds[this.battleIndex]);
+                    this.battleIndex = t, this.labelIndex.string = ftc.language("第") + (this.battleIndex + 1) + "/" + this.battleIds.length + ftc.language("场"), ftc.ManagerRes.restoreNodeChildren(this.layoutHeroes), this.labelName.string = ft.ExtBattle.getName(this.battleIds[this.battleIndex]);
                     for (var e = ft.ExtBattle.getHeroIds(this.battleIds[this.battleIndex]), i = 0; i < e.length; i++)
                         if (0 != e[i]) {
                             var a = this.newPart("PartItem");
@@ -67,21 +67,21 @@
                 msg: function () {
                     this.msg = {
                         copyFantasylandBoxExchange: function (t, e) {
-                            0 === t ? (ftc.showTip("\u5151\u6362\u6210\u529f"), this.updateData()) : ftc.showTip("\u5151\u6362\u5931\u8d25")
+                            0 === t ? (ftc.showTip("兑换成功"), this.updateData()) : ftc.showTip("兑换失败")
                         },
                         copyRefreshSkill: function (t, e) {
-                            0 === t ? (ftc.showTip("\u5237\u65b0\u6210\u529f"), this.setSkill()) : ftc.showTip("\u5237\u65b0\u5931\u8d25")
+                            0 === t ? (ftc.showTip("刷新成功"), this.setSkill()) : ftc.showTip("刷新失败")
                         }
                     }
                 },
                 onClick: function (t, e) {
-                    t.target === this.buttonLeft.node ? this.selectBattle(this.battleIndex - 1) : t.target === this.buttonRight.node ? this.selectBattle(this.battleIndex + 1) : t.target === this.buttonRefresh.node ? ft.ExtItem.getNum(ft.value.item.fantasylandSandglass) < 1 ? ftc.showTip(ft.ExtItem.getName(ft.value.item.fantasylandSandglass) + ftc.language("\u4e0d\u8db3") + ")") : ftc.showDialog({
-                        text: ftc.language("\u6bcf\u6b21\u5237\u65b0\u9700\u8981\u6d88\u8017") + ft.ExtItem.getName(ft.value.item.fantasylandSandglass) + "1" + ftc.language("\u4e2a"),
+                    t.target === this.buttonLeft.node ? this.selectBattle(this.battleIndex - 1) : t.target === this.buttonRight.node ? this.selectBattle(this.battleIndex + 1) : t.target === this.buttonRefresh.node ? ft.ExtItem.getNum(ft.value.item.fantasylandSandglass) < 1 ? ftc.showTip(ft.ExtItem.getName(ft.value.item.fantasylandSandglass) + ftc.language("不足") + ")") : ftc.showDialog({
+                        text: ftc.language("每次刷新需要消耗") + ft.ExtItem.getName(ft.value.item.fantasylandSandglass) + "1" + ftc.language("个"),
                         click1: function () {
                             ftc.send("copyRefreshSkill", this.npcId)
                         }.bind(this),
                         click2: function () { }
-                    }) : t.target === this.buttonReward.node ? ft.ExtItem.getNum(ft.value.item.fantasylandScore) < ft.value.com.fantasylandBoxScore ? ftc.showTip(ft.ExtItem.getName(ft.value.item.fantasylandScore) + "\xd7" + ft.value.com.fantasylandBoxScore + ftc.language("\u5151\u6362") + ft.ExtItem.getName(ft.value.item.fantasylandBox) + "\xd71") : ftc.send("copyFantasylandBoxExchange") : t.target === this.buttonTeam.node ? ftc.loadLayout("LayoutTeam", void 0, {
+                    }) : t.target === this.buttonReward.node ? ft.ExtItem.getNum(ft.value.item.fantasylandScore) < ft.value.com.fantasylandBoxScore ? ftc.showTip(ft.ExtItem.getName(ft.value.item.fantasylandScore) + "\xd7" + ft.value.com.fantasylandBoxScore + ftc.language("兑换") + ft.ExtItem.getName(ft.value.item.fantasylandBox) + "\xd71") : ftc.send("copyFantasylandBoxExchange") : t.target === this.buttonTeam.node ? ftc.loadLayout("LayoutTeam", void 0, {
                         hide: !0
                     }) : t.target === this.buttonChallenge.node ? (this.callback && this.callback(!0), this.cancel()) : t.target === this.buttonClose.node && (this.callback && this.callback(!1), this.cancel())
                 },

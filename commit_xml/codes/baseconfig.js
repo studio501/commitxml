@@ -187,7 +187,7 @@
     }, ft._loadAllFormJson = function (t, e) {
         if (ft._isLoaded) e && e();
         else {
-            if (ft._isLoaded = !0, window.ftd) throw "\u8bf7\u5148\u5220\u9664shared/game/data\u76ee\u5f55\u6570\u636e";
+            if (ft._isLoaded = !0, window.ftd) throw "请先删除shared/game/data目录数据";
             if (t) {
                 window.ftd = {};
                 var i = JSON.parse(t);

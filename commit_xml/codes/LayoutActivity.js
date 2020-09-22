@@ -18,10 +18,10 @@ cc.Class({
         for (var t = 0; t < this.buttonTabs.length; t++) this.addClick(this.buttonTabs[t], !0)
     },
     load: function () {
-        this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("\u6d3b\u52a8"), this.node.addChild(this.partTopStatus.node), this.partActivities = [], this.selectedIndex = -1, ftc.ManagerTV.setNotShowOnEnter(this.node), this.tvSelectList = !0, this.updateTvTip(), this._tickDate = 0, this.curPartActivity = void 0, this.tabIndex = 0, this._tabLength = 0
+        this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("活动"), this.node.addChild(this.partTopStatus.node), this.partActivities = [], this.selectedIndex = -1, ftc.ManagerTV.setNotShowOnEnter(this.node), this.tvSelectList = !0, this.updateTvTip(), this._tickDate = 0, this.curPartActivity = void 0, this.tabIndex = 0, this._tabLength = 0
     },
     setData: function (t, e) {
-        if (this.pos = t, this.partTopStatus.setTitle(ft.ExtMsg.getPosTitle(t)), t !== ft.type.msg.pos.limited && t !== ft.type.msg.pos.anniversary || ftc.localDay <= 0 && ftc.showTip("\u8fde\u63a5\u7f51\u7edc\u83b7\u53d6\u66f4\u591a\u6d3b\u52a8\u6570\u636e"), this.nodeAnniversaryUI && (this.nodeAnniversaryUI.active = t === ft.type.msg.pos.anniversary), this.nodeNewYearUI && (this.nodeNewYearUI.active = t === ft.type.msg.pos.newYear), this.spriteNewYear && (this.spriteNewYear.node.active = t === ft.type.msg.pos.newYear), this.nodeMayDayUI && (this.nodeMayDayUI.active = t === ft.type.msg.pos.mayDay), this.nodeSummerUI1 && (this.nodeSummerUI1.active = this.nodeSummerUI2.active = t === ft.type.msg.pos.summer), this.datas = ft.ExtMsg.getMsgDatas(t), this.datas) {
+        if (this.pos = t, this.partTopStatus.setTitle(ft.ExtMsg.getPosTitle(t)), t !== ft.type.msg.pos.limited && t !== ft.type.msg.pos.anniversary || ftc.localDay <= 0 && ftc.showTip("连接网络获取更多活动数据"), this.nodeAnniversaryUI && (this.nodeAnniversaryUI.active = t === ft.type.msg.pos.anniversary), this.nodeNewYearUI && (this.nodeNewYearUI.active = t === ft.type.msg.pos.newYear), this.spriteNewYear && (this.spriteNewYear.node.active = t === ft.type.msg.pos.newYear), this.nodeMayDayUI && (this.nodeMayDayUI.active = t === ft.type.msg.pos.mayDay), this.nodeSummerUI1 && (this.nodeSummerUI1.active = this.nodeSummerUI2.active = t === ft.type.msg.pos.summer), this.datas = ft.ExtMsg.getMsgDatas(t), this.datas) {
             var i = 0;
             if (e)
                 for (var a = 0; a < this.datas.length; a++)
@@ -95,7 +95,7 @@ cc.Class({
                 var i = ftc.ManagerData.get2Object("Msg")[ft.value.msg.giftShare];
                 i ? ftc.send("msgActivityGet", {
                     eid: i.entityId
-                }) : ftc.showTip("\u6d3b\u52a8\u4e0d\u5b58\u5728")
+                }) : ftc.showTip("活动不存在")
             },
             c_onSelectActivity: function (t, e) {
                 for (var i = this.listView.getDatas(), a = 0; a < i.length; a++)
@@ -122,16 +122,16 @@ cc.Class({
             },
             msgActivityGet: function (t, e) {
                 var i = this.partActivities[t.eid];
-                i && (-1 === t.ret ? ftc.showTip("\u9886\u53d6\u5931\u8d25") : 0 === t.ret ? (ft.ExtMsg.getType(ftc.ManagerData.get2("Msg", t.eid)) == ft.type.activity.moonlightBox ? i.updateData(t) : i.updateData(t.index), this.listView.updateListViewItem(this.selectedIndex)) : 1 === t.ret ? (this.datas = ft.ExtMsg.getMsgDatas(this.pos), this.datas.length > 0 ? (this.listView.setListView(this.datas, 0), this.updateActivity(0), this.selectedIndex = 0) : this.cancel()) : 2 === t.ret && ftc.showTip("\u8bf7\u8fde\u63a5\u7f51\u7edc!!!"))
+                i && (-1 === t.ret ? ftc.showTip("领取失败") : 0 === t.ret ? (ft.ExtMsg.getType(ftc.ManagerData.get2("Msg", t.eid)) == ft.type.activity.moonlightBox ? i.updateData(t) : i.updateData(t.index), this.listView.updateListViewItem(this.selectedIndex)) : 1 === t.ret ? (this.datas = ft.ExtMsg.getMsgDatas(this.pos), this.datas.length > 0 ? (this.listView.setListView(this.datas, 0), this.updateActivity(0), this.selectedIndex = 0) : this.cancel()) : 2 === t.ret && ftc.showTip("请连接网络!!!"))
             },
             getPlayer: function (t, e) {
-                ftc.cancelWait(), t.type == ft.type.http.GetActiveCdkey ? t.ste ? t.txt && ftc.showTip(t.txt) : (this.updateActivity(this.selectedIndex), ftc.showTip("\u9886\u53d6\u6210\u529f")) : ftc.throwMsg("getPlayer", t, e)
+                ftc.cancelWait(), t.type == ft.type.http.GetActiveCdkey ? t.ste ? t.txt && ftc.showTip(t.txt) : (this.updateActivity(this.selectedIndex), ftc.showTip("领取成功")) : ftc.throwMsg("getPlayer", t, e)
             },
             copyEnter: function (t, e) {
                 if (0 === t)
                     for (;
                         "LayoutMain" !== ftc.ManagerRes.topLayout().getName();) ftc.ManagerRes.topLayout().cancel();
-                else 2 === t && ftc.showTip("\u7b49\u7ea7\u4e0d\u8db3")
+                else 2 === t && ftc.showTip("等级不足")
             },
             c_showExt: function (t, e) {
                 this.partTopStatus.setExt(t)
@@ -161,6 +161,6 @@ cc.Class({
         if (!t && !this.tvSelectList) return this.toTvUpdate = !0, this.tvSelectList = !0, this.updateTvTip(), !0
     },
     updateTvTip: function () {
-        this.tvSelectList ? this._tabLength > 1 ? ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762,\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u6807\u7b7e\uff0c\u3010\u786e\u8ba4\u952e\u3011\u6d3b\u52a8\u8be6\u60c5") : ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u786e\u8ba4\u952e\u3011\u6d3b\u52a8\u8be6\u60c5") : this._tabLength ? ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u8fd4\u56de\u5217\u8868,\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u6807\u7b7e") : ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u8fd4\u56de\u5217\u8868")
+        this.tvSelectList ? this._tabLength > 1 ? ftc.setTvTip(this.node, "【返回键】关闭界面,【菜单键】切换标签，【确认键】活动详情") : ftc.setTvTip(this.node, "【返回键】关闭界面，【确认键】活动详情") : this._tabLength ? ftc.setTvTip(this.node, "【返回键】返回列表,【菜单键】切换标签") : ftc.setTvTip(this.node, "【返回键】返回列表")
     }
 })

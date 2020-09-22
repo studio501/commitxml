@@ -60,13 +60,13 @@
                     t.target === this.buttonDetail0.node ? ftc.showDetailInfo(this.buttonDetail0.node, ft.replaceAll(ft.ExtMsg.getTxt(this.data), "|", "\n")) : t.target === this.buttonGet1.node ? (ftc.send("msgActivityGet", {
                         eid: this.data.entityId,
                         index: 2
-                    }), ftc.showWait("\u83b7\u53d6\u5151\u6362\u7801\u4e2d...")) : t.target === this.buttonGet2.node ? (ftc.send("msgActivityGet", {
+                    }), ftc.showWait("获取兑换码中...")) : t.target === this.buttonGet2.node ? (ftc.send("msgActivityGet", {
                         eid: this.data.entityId,
                         index: 1
-                    }), ftc.showWait("\u83b7\u53d6\u5151\u6362\u7801\u4e2d...")) : t.target === this.buttonGet3.node ? (ftc.send("msgActivityGet", {
+                    }), ftc.showWait("获取兑换码中...")) : t.target === this.buttonGet3.node ? (ftc.send("msgActivityGet", {
                         eid: this.data.entityId,
                         index: 0
-                    }), ftc.showWait("\u83b7\u53d6\u5151\u6362\u7801\u4e2d...")) : t.target === this.buttonCopy1.node ? (ftc.callNativeFunction("setClipboardData", this.labelCode1.string), ftc.showTip("\u5df2\u590d\u5236\u5230\u526a\u8d34\u677f")) : t.target === this.buttonCopy2.node ? (ftc.callNativeFunction("setClipboardData", this.labelCode2.string), ftc.showTip("\u5df2\u590d\u5236\u5230\u526a\u8d34\u677f")) : t.target === this.buttonCopy3.node ? (ftc.callNativeFunction("setClipboardData", this.labelCode3.string), ftc.showTip("\u5df2\u590d\u5236\u5230\u526a\u8d34\u677f")) : t.target === this.buttonDetail.node && ftc.showDetailInfo(this.buttonDetail.node, ft.ExtDetail.getInfo(ft.value.detail.ldjl))
+                    }), ftc.showWait("获取兑换码中...")) : t.target === this.buttonCopy1.node ? (ftc.callNativeFunction("setClipboardData", this.labelCode1.string), ftc.showTip("已复制到剪贴板")) : t.target === this.buttonCopy2.node ? (ftc.callNativeFunction("setClipboardData", this.labelCode2.string), ftc.showTip("已复制到剪贴板")) : t.target === this.buttonCopy3.node ? (ftc.callNativeFunction("setClipboardData", this.labelCode3.string), ftc.showTip("已复制到剪贴板")) : t.target === this.buttonDetail.node && ftc.showDetailInfo(this.buttonDetail.node, ft.ExtDetail.getInfo(ft.value.detail.ldjl))
                 }
             })
         

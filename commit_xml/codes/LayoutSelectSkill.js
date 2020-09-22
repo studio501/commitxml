@@ -32,7 +32,7 @@
                     }
                 },
                 onClick: function (t, e) {
-                    t.target === this.buttonConfirm.node ? void 0 !== this.selectIndex ? (this.callback(this.selectSkill), this.cancel()) : ftc.showTip("\u8bf7\u5148\u9009\u62e9\u795d\u798f") : t.target === this.buttonClose.node && ftc.showTip("\u8bf7\u5148\u9009\u62e9\u795d\u798f")
+                    t.target === this.buttonConfirm.node ? void 0 !== this.selectIndex ? (this.callback(this.selectSkill), this.cancel()) : ftc.showTip("请先选择祝福") : t.target === this.buttonClose.node && ftc.showTip("请先选择祝福")
                 }
             })
         

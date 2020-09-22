@@ -26,12 +26,12 @@
                     ftc.isTv() ? (this.buttonHelp.node.active = !1, this.buttonSelect.node.active = !1, this.buttonTvDecompose.node.active = !0, this.buttonTvOneKey.node.active = !0, this.addClick(this.buttonTvOneKey), this.addClick(this.buttonTvDecompose), this.listViewMaterial1.node.x = 26, this.listViewMaterial2.node.x = 26, this.buttonDecompose.node.active = !1, this.buttonOneKey.node.active = !1) : (this.buttonTvDecompose.node.active = !1, this.buttonTvOneKey.node.active = !1)
                 },
                 load: function () {
-                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("\u5206\u89e3"), this.node.addChild(this.partTopStatus.node), this.selectTab(0), this.updateTvTip()
+                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("分解"), this.node.addChild(this.partTopStatus.node), this.selectTab(0), this.updateTvTip()
                 },
                 selectTab: function (t) {
                     this.tabIndex = t;
                     for (var e = [ftc.type.tab.decompose_equip, ftc.type.tab.decompose_piece, ftc.type.tab.decompose_biography, ftc.type.tab.decompose_jewel, ftc.type.tab.decompose_other], i = 0; i < this.buttonTabs.length; i++) this.buttonTabs[i].interactable = i !== t, this.buttonTabs[i].node.getChildByName("spriteTabIcon").getComponent(cc.Sprite).spriteFrame = ftc.getTabSpriteFrame(e[i], t === i), this.buttonTabs[i].node.getChildByName("labelTab").color = t !== i ? ftc.newColor(ftc.value.color.tabNormal) : ftc.newColor(ftc.value.color.tabPressed), this.buttonTabs[i].node.getChildByName("labelTab").getComponent(cc.LabelOutline).color = t !== i ? ftc.newColor(ftc.value.color.tabNormalOutline) : ftc.newColor(ftc.value.color.tabPressedOutline);
-                    ftc.isTv() ? this.labelTip1.node.active = !1 : this.labelTip1.node.active = 0 === t, this.nodeHelp.active && (this.nodeHelp.active = !1), this.selectedIndex = -1, this.selectedIndexs = [], this.isSingleSelect = !1, this.setButtonOneKeyText(!1), this.labelSelect.string = ftc.language("\u591a\u9009");
+                    ftc.isTv() ? this.labelTip1.node.active = !1 : this.labelTip1.node.active = 0 === t, this.nodeHelp.active && (this.nodeHelp.active = !1), this.selectedIndex = -1, this.selectedIndexs = [], this.isSingleSelect = !1, this.setButtonOneKeyText(!1), this.labelSelect.string = ftc.language("多选");
                     var a = this.getListDatas(t);
                     a.length > 0 ? (this.listView.setListView(a, {
                         tabIndex: this.tabIndex,
@@ -85,7 +85,7 @@
                     return e
                 },
                 updateTvTip: function () {
-                    ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u6807\u7b7e")
+                    ftc.setTvTip(this.node, "【返回键】关闭界面，【菜单键】切换标签")
                 },
                 setData: function (t) { },
                 enter: function () {
@@ -131,13 +131,13 @@
                             }), this.setDecomposeInfo()
                         },
                         equipDecompose: function (t, e) {
-                            t > 0 ? this.refreshListView() : ftc.showTip("\u5206\u89e3\u5931\u8d25")
+                            t > 0 ? this.refreshListView() : ftc.showTip("分解失败")
                         },
                         itemDecompose: function (t, e) {
-                            0 === t ? this.refreshListView() : ftc.showTip("\u5206\u89e3\u5931\u8d25")
+                            0 === t ? this.refreshListView() : ftc.showTip("分解失败")
                         },
                         jewelDecompose: function (t, e) {
-                            t > 0 ? this.refreshListView() : ftc.showTip("\u5206\u89e3\u5931\u8d25")
+                            t > 0 ? this.refreshListView() : ftc.showTip("分解失败")
                         }
                     }
                 },
@@ -152,8 +152,8 @@
                 onClick: function (t, e) {
                     if (t.target === this.buttonDecompose.node || t.target == this.buttonTvDecompose.node) {
                         var i = parseInt(this.labelGold.string);
-                        if (ft.ExtItem.getNum(ft.value.item.gold) < i) ftc.showTip("\u94f6\u5e01\u4e0d\u8db3");
-                        else if (0 === this.selectedIndexs.length) ftc.showTip("\u6ca1\u6709\u9009\u4e2d");
+                        if (ft.ExtItem.getNum(ft.value.item.gold) < i) ftc.showTip("银币不足");
+                        else if (0 === this.selectedIndexs.length) ftc.showTip("没有选中");
                         else if (0 === this.tabIndex || 3 === this.tabIndex) {
                             if (this.selectedIndexs.length > 0) {
                                 var a, n, s;
@@ -165,7 +165,7 @@
                                         a.push(r.entityId), h.push(r.num), f += r.num
                                     }
                                 }
-                                0 === this.tabIndex ? (n = "\u786e\u5b9a\u6d88\u8017{0}\u94f6\u5e01,\u5206\u89e3{1}\u4ef6\u88c5\u5907?", s = "equipDecompose") : (n = "\u786e\u5b9a\u6d88\u8017{0}\u94f6\u5e01,\u5206\u89e3{1}\u4e2a\u5b9d\u77f3?", s = "jewelDecompose"), ftc.showDialog({
+                                0 === this.tabIndex ? (n = "确定消耗{0}银币,分解{1}件装备?", s = "equipDecompose") : (n = "确定消耗{0}银币,分解{1}个宝石?", s = "jewelDecompose"), ftc.showDialog({
                                     text: n.replace(/\{(\d+)\}/g, function (t, e) {
                                         return [i, f][e]
                                     }.bind(this)),
@@ -189,7 +189,7 @@
                                 }
                             }
                             ftc.showDialog({
-                                text: "\u786e\u5b9a\u6d88\u8017{0}\u94f6\u5e01,\u5206\u89e3{1}\u4ef6\u7269\u54c1?".replace(/\{(\d+)\}/g, function (t, e) {
+                                text: "确定消耗{0}银币,分解{1}件物品?".replace(/\{(\d+)\}/g, function (t, e) {
                                     return [i, f][e]
                                 }.bind(this)),
                                 click1: function () {
@@ -204,18 +204,18 @@
                     } else if (t.target === this.buttonHelp.node) ftc.showDetailInfo(t.target, ft.ExtDetail.getInfo(this.tabIndex + 1));
                     else if (t.target === this.buttonOneKey.node || t.target == this.buttonTvOneKey.node) {
                         if (this.isOneKeySelect = !this.isOneKeySelect, this.isOneKeySelect) {
-                            this.isSingleSelect = !1, this.labelSelect.string = ftc.language("\u591a\u9009");
+                            this.isSingleSelect = !1, this.labelSelect.string = ftc.language("多选");
                             var d = this.listView.getDatas();
                             if (this.selectedIndexs = [], this.selectedIndex = -1, 0 === this.tabIndex)
                                 for (o = 0; o < d.length; o++) ft.ExtEquip.getQuality(d[o].id) < 4 && this.selectedIndexs.push(o);
                             else
                                 for (o = 0; o < d.length; o++) this.selectedIndexs.push(o)
-                        } else ftc.showTip("\u53d6\u6d88\u4e00\u952e\u9009\u62e9"), this.selectedIndexs = [], this.selectedIndex = -1;
+                        } else ftc.showTip("取消一键选择"), this.selectedIndexs = [], this.selectedIndex = -1;
                         this.setButtonOneKeyText(this.isOneKeySelect), this.listView.updateListViewItems({
                             tabIndex: this.tabIndex,
                             selectedIndexs: this.selectedIndexs
                         }), this.setDecomposeInfo()
-                    } else if (t.target === this.buttonSelect.node) this.isSingleSelect = !this.isSingleSelect, this.isSingleSelect && this.setButtonOneKeyText(!1), this.labelSelect.string = this.isSingleSelect ? ftc.language("\u5355\u9009") : ftc.language("\u591a\u9009"), this.selectedIndexs = [], this.selectedIndex = -1, this.listView.updateListViewItems({
+                    } else if (t.target === this.buttonSelect.node) this.isSingleSelect = !this.isSingleSelect, this.isSingleSelect && this.setButtonOneKeyText(!1), this.labelSelect.string = this.isSingleSelect ? ftc.language("单选") : ftc.language("多选"), this.selectedIndexs = [], this.selectedIndex = -1, this.listView.updateListViewItems({
                         tabIndex: this.tabIndex,
                         selectedIndexs: this.selectedIndexs
                     }), this.setDecomposeInfo();
@@ -228,7 +228,7 @@
                 },
                 setButtonOneKeyText: function (t) {
                     var e;
-                    this.isOneKeySelect = t, e = t ? ftc.language("\u53d6\u6d88\u9009\u62e9") : ftc.language("\u4e00\u952e\u9009\u62e9"), this.buttonOneKey.node.getChildByName("Text_7").getComponent(cc.Label).string = e, ftc.isTv() && (this.buttonTvOneKey.node.getChildByName("Text_7").getComponent(cc.Label).string = e.split("").join("\n"))
+                    this.isOneKeySelect = t, e = t ? ftc.language("取消选择") : ftc.language("一键选择"), this.buttonOneKey.node.getChildByName("Text_7").getComponent(cc.Label).string = e, ftc.isTv() && (this.buttonTvOneKey.node.getChildByName("Text_7").getComponent(cc.Label).string = e.split("").join("\n"))
                 },
                 setDecomposeInfo: function () {
                     var t = [],

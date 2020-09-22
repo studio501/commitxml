@@ -19,7 +19,7 @@
                         i = this.data.up,
                         a = this.index;
                     this.spriteIndex.spriteFrame = ftc.ManagerRes.getSpriteFrame("program", "fight_" + (this.index + 1));
-                    for (var n = ["\u7269\u7406\u4f24\u5bb3", "\u7269\u7406\u627f\u4f24", "\u5143\u7d20\u4f24\u5bb3", "\u5143\u7d20\u627f\u4f24"], s = ["getWljs", "getWljm", "getYsjs", "getYsjm"], o = [], r = 0; r < s.length; r++) {
+                    for (var n = ["物理伤害", "物理承伤", "元素伤害", "元素承伤"], s = ["getWljs", "getWljm", "getYsjs", "getYsjm"], o = [], r = 0; r < s.length; r++) {
                         var c = n[r];
                         (f = ft.ExtPetValue[s[r]](e, a, i)) === (d = ft.ExtPetValue[s[r]](e, a, i + 1)) && (d = void 0), void 0 !== d && (d = parseInt(100 * d)), o.push({
                             name: c,

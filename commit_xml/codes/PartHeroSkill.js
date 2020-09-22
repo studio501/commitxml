@@ -30,7 +30,7 @@
                     var s = i[0],
                         o = i[1],
                         r = "";
-                    s ? o || (r = ftc.language(["\u4e00\u661f\u5f00\u542f", "\u89c9\u9192+2\u5f00\u542f", "\u6682\u672a\u5f00\u653e"][e])) : r = "\u6682\u672a\u5f00\u653e", this.skillId = s;
+                    s ? o || (r = ftc.language(["一星开启", "觉醒+2开启", "暂未开放"][e])) : r = "暂未开放", this.skillId = s;
                     var c = !!this.skillId;
                     this.spriteIcon.node.active = c, this.labelName.node.active = c, this.spriteZhu.node.active = c, this.spriteSelect && (this.spriteSelect.node.active = !1), c && (this.spriteIcon.spriteFrame = ft.ExtSkill.getIconSprite(s), this.labelName.string = ft.ExtSkill.getName(s), this.spriteZhu.spriteFrame = ft.ExtSkill.getSkillTypeSprite(s)), this.spriteLock.node.active = r, r && (this.labelLock.string = r)
                 },

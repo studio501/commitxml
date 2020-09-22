@@ -33,7 +33,7 @@
                     }), ftc.ManagerTV.setBackButton(this.buttonClose)
                 },
                 load: function () {
-                    this.initPart(this.partEquipDetail), this.initPart(this.partEquipLvUp), this.initPart(this.partEquipStarUp), this.spineLvUp.node.active = !1, this.partEquipTip.active = !1, this.partEquipTipPos = this.partEquipTip.getPosition(), this.equips = void 0, this.index = -1, this.equip = void 0, this.equipValue = 0, this.pos = -1, this.tabIndex = 0, this.isTeam = !1, this.isBag = !1, ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u6807\u7b7e")
+                    this.initPart(this.partEquipDetail), this.initPart(this.partEquipLvUp), this.initPart(this.partEquipStarUp), this.spineLvUp.node.active = !1, this.partEquipTip.active = !1, this.partEquipTipPos = this.partEquipTip.getPosition(), this.equips = void 0, this.index = -1, this.equip = void 0, this.equipValue = 0, this.pos = -1, this.tabIndex = 0, this.isTeam = !1, this.isBag = !1, ftc.setTvTip(this.node, "【返回键】关闭界面，【菜单键】切换标签")
                 },
                 setData: function (t, e, i, a, n) {
                     if (this.isTeam = e, this.isBag = i, e || i) {
@@ -60,7 +60,7 @@
                         n = t.star || 0;
                     this.buttonChange.node.active = this.isTeam && ft.ExtEquip.getPart(t.id) !== ft.type.part.exclusive, this.labelName.string = ft.ExtEquip.getName(i) + "  Lv" + a, this.spriteQuality.spriteFrame = ft.ExtEquip.getQualitySprite(i), this.spriteIcon.spriteFrame = ft.ExtEquip.getIconSprite(i);
                     var s = ft.ExtEquip.getType(i);
-                    s > 1e3 && (e = ft.ExtHero.getName(s) + "\u4e13\u5c5e"), this.labelInfo.string = (e ? e + "\n" : "") + ft.ExtEquip.getInfo(i);
+                    s > 1e3 && (e = ft.ExtHero.getName(s) + "专属"), this.labelInfo.string = (e ? e + "\n" : "") + ft.ExtEquip.getInfo(i);
                     for (var o = 0; o < this.spriteStars.length; o++) {
                         this.spriteStars[o].node.active = !0;
                         var r = n > o ? "com_star" : "com_stargray";
@@ -68,8 +68,8 @@
                     }
                     if (t.entityId && -1 !== t.pos) {
                         var c = ft.ExtHero.getHeroByPos(t.pos);
-                        this.labelStatus.string = c ? ft.ExtHero.getName(c.id) + ftc.language("\u5df2\u88c5\u5907") : ftc.language("\u672a\u88c5\u5907")
-                    } else this.labelStatus.string = ftc.language("\u672a\u88c5\u5907");
+                        this.labelStatus.string = c ? ft.ExtHero.getName(c.id) + ftc.language("已装备") : ftc.language("未装备")
+                    } else this.labelStatus.string = ftc.language("未装备");
                     if (t.entityId) {
                         this.buttonTabs[2].node.active = ft.ExtEquip.getMaxStar(t.id) > 0, this.buttonTabs[3].node.active = ft.ExtEquip.mapEquipPack[t.id] && ft.ExtEquip.getQuality(t.id) >= ft.type.quality.golden, (!this.buttonTabs[2].node.active && 2 === this.tabIndex || !this.buttonTabs[3].node.active && 3 === this.tabIndex) && this.selectTab(0);
                         for (o = 0; o < this.partEquips.length; o++) this.partEquips[o].setData(t)
@@ -100,10 +100,10 @@
                         },
                         equipLevelUp: function (t, e) {
                             var i, a = 0;
-                            (t[0] && t[0][1] && (a = t[0][1]), a && a > 0) ? (i = this.isTeam || this.isBag ? this.equips[this.index].id : this.equip.id, this.equipValue = a * ft.ExtEquip.getUpgradeFactor(i), this.updateEquipTip(ft.getNumShow(this.equipValue)), ftc.playEffect(ftc.type.effect.equip_lvUp), ftc.showTip("\u5347\u7ea7\u6210\u529f"), this.spineLvUp.node.active = !0, this.spineLvUp.setAnimation(0, "wait1", !1), this.updateData()) : ftc.showTip("\u5347\u7ea7\u5931\u8d25")
+                            (t[0] && t[0][1] && (a = t[0][1]), a && a > 0) ? (i = this.isTeam || this.isBag ? this.equips[this.index].id : this.equip.id, this.equipValue = a * ft.ExtEquip.getUpgradeFactor(i), this.updateEquipTip(ft.getNumShow(this.equipValue)), ftc.playEffect(ftc.type.effect.equip_lvUp), ftc.showTip("升级成功"), this.spineLvUp.node.active = !0, this.spineLvUp.setAnimation(0, "wait1", !1), this.updateData()) : ftc.showTip("升级失败")
                         },
                         equipStarUp: function (t, e) {
-                            t > 0 ? this.updateData() : ftc.showTip("\u7a81\u7834\u5931\u8d25")
+                            t > 0 ? this.updateData() : ftc.showTip("突破失败")
                         },
                         c_onSelectEquipLvUpItem: function (t, e) {
                             this.partEquipLvUp.onSelectEquipLvUpItem(t)
@@ -112,13 +112,13 @@
                             this.partEquipJewel.onSelectJewelItem(t)
                         },
                         equipUnlockSlot: function (t, e) {
-                            0 === t ? (ftc.showTip("\u89e3\u9501\u6210\u529f"), this.partEquipJewel.updateData()) : ftc.showTip("\u89e3\u9501\u5931\u8d25")
+                            0 === t ? (ftc.showTip("解锁成功"), this.partEquipJewel.updateData()) : ftc.showTip("解锁失败")
                         },
                         jewelOnload: function (t, e) {
-                            0 === t ? (this.updateData(), ftc.showTip("\u9576\u5d4c\u6210\u529f"), this.partEquipJewel.updateData()) : 1 === t ? ftc.showTip("\u5df2\u6709\u540c\u7c7b\u578b\u5b9d\u77f3") : 2 === t && ftc.showTip("\u9576\u5d4c\u7c89\u4e0d\u8db3")
+                            0 === t ? (this.updateData(), ftc.showTip("镶嵌成功"), this.partEquipJewel.updateData()) : 1 === t ? ftc.showTip("已有同类型宝石") : 2 === t && ftc.showTip("镶嵌粉不足")
                         },
                         jewelUnload: function (t, e) {
-                            0 === t ? (this.updateData(), ftc.showTip("\u53d6\u4e0b\u6210\u529f"), this.partEquipJewel.updateData()) : 1 === t && ftc.showTip("\u53d6\u94bb\u5668\u6570\u91cf\u4e0d\u8db3")
+                            0 === t ? (this.updateData(), ftc.showTip("取下成功"), this.partEquipJewel.updateData()) : 1 === t && ftc.showTip("取钻器数量不足")
                         }
                     }
                 },
@@ -134,7 +134,7 @@
                     }
                 },
                 showEquipTip: function () {
-                    this.equipTipIndex++, this.partEquipTip.active = !0, this.partEquipTip.getChildByName("labelName").getComponent(cc.Label).string = "\u6b66\u529b+", this.partEquipTip.getChildByName("labelValue").getComponent(cc.Label).string = ft.getNumShow((this.equipValue * this.equipTipIndex / 3).toFixed(2))
+                    this.equipTipIndex++, this.partEquipTip.active = !0, this.partEquipTip.getChildByName("labelName").getComponent(cc.Label).string = "武力+", this.partEquipTip.getChildByName("labelValue").getComponent(cc.Label).string = ft.getNumShow((this.equipValue * this.equipTipIndex / 3).toFixed(2))
                 },
                 hideEquipTip: function () {
                     this.partEquipTip.setPosition(this.partEquipTipPos), this.partEquipTip.active = !1
@@ -148,7 +148,7 @@
                     var e;
                     if (this.nodeInfo.active = 0 === t || 3 === t, this.nodePanelProp.active = !this.nodeInfo.active, e = this.equips ? this.equips[this.index] : this.equip, 0 === t) {
                         var i, a = e.id || e;
-                        (c = ft.ExtEquip.getType(a)) > 1e3 && (i = ft.ExtHero.getName(c) + "\u4e13\u5c5e"), this.labelInfo.string = (i ? i + "\n" : "") + ft.ExtEquip.getInfo(a)
+                        (c = ft.ExtEquip.getType(a)) > 1e3 && (i = ft.ExtHero.getName(c) + "专属"), this.labelInfo.string = (i ? i + "\n" : "") + ft.ExtEquip.getInfo(a)
                     } else if (1 === t) {
                         this.nodePanelProp.children[0].active = !0, this.nodePanelProp.children[1].active = !1;
                         var n = (g = this.nodePanelProp.children[0]).getChildByName("spriteIcon").getComponent(cc.Sprite),
@@ -189,7 +189,7 @@
                                 n = g.getChildByName("spriteIcon").getComponent(cc.Sprite), p = g.getChildByName("spriteArrow").getComponent(cc.Sprite), s = g.getChildByName("labelName").getComponent(cc.Label), o = g.getChildByName("labelValue1").getComponent(cc.Label), r = g.getChildByName("labelValue2").getComponent(cc.Label);
                                 c = l[d], n.spriteFrame = ft.ExtPropName.getSpriteIcon(c), s.string = ft.ExtPropName.getName(c), o.string = ft.ExtEquip.getStarValue(e, c, void 0, !0), r.string = ft.ExtEquip.getStarValue(e, c, Math.min(e.star + 1, u), !0), p.node.active = !0, r.node.active = !0
                             }
-                    } else 3 === t && (this.labelInfo.string = "\u4e00\u661f\uff0c\u4e94\u661f\uff0c\u5341\u661f\u53ef\u4ee5\u5404\u5f00\u542f\u4e00\u4e2a\u5b9d\u77f3\u63d2\u69fd\u3002\u7b2c\u4e00\u4e2a\u63d2\u69fd\u81ea\u52a8\u89e3\u9501,\u5176\u4f59\u63d2\u69fd\u9700\u8981\u6253\u5b54\u5668\u3002")
+                    } else 3 === t && (this.labelInfo.string = "一星，五星，十星可以各开启一个宝石插槽。第一个插槽自动解锁,其余插槽需要打孔器。")
                 },
                 onClick: function (t, e) {
                     if (t.target === this.buttonChange.node) {

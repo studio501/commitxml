@@ -25,7 +25,7 @@
                             this.labelNum.string = a + "/" + n, this.labelNum.node.color = a >= n ? ftc.newColor(65280) : ftc.newColor(16711680), this._sufficient = a >= n
                         }
                         this.labelDesc && (this.labelDesc.node.ative = !1)
-                    } else this._itemShine.node.active = !1, this.spriteNumBg && (this.spriteNumBg.node.active = !1, this.labelNum.node.active = !1), this.labelDesc && (this.labelDesc.node.ative = !0, this.labelDesc.string = "\u4efb\u610f\u7d2b\u8272\u4e94\u661f" + ft.type.equip.equipNames[ft.ExtEquip.getType(ft.ExtItem.getEquip(ft.ExtConsume.getOut(e)))])
+                    } else this._itemShine.node.active = !1, this.spriteNumBg && (this.spriteNumBg.node.active = !1, this.labelNum.node.active = !1), this.labelDesc && (this.labelDesc.node.ative = !0, this.labelDesc.string = "任意紫色五星" + ft.type.equip.equipNames[ft.ExtEquip.getType(ft.ExtItem.getEquip(ft.ExtConsume.getOut(e)))])
                 },
                 setCallback: function (t) {
                     this._callback = t, this.buttonAdd && (this.buttonAdd.node.active = !!t), this._item.setInteractable(!t)

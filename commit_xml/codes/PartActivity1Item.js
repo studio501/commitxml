@@ -16,7 +16,7 @@
                     this.item = this.newPart("PartItem"), this.item.node.scale = 1, this.nodeItem.addChild(this.item.node)
                 },
                 updateData: function (t) {
-                    this.param = t, this.labelDay.string = ftc.language("\u7b2c") + (this.index + 1) + ftc.language("\u5929");
+                    this.param = t, this.labelDay.string = ftc.language("第") + (this.index + 1) + ftc.language("天");
                     var e = this.data.aids.split(",")[0],
                         i = this.data.anums.split(",")[0];
                     this.item.setData(e, i);

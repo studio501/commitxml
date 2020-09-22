@@ -28,14 +28,14 @@
                         this.labelInfo1.string = e + ":", this.labelInfo2.string = d
                     } else {
                         var l = ftd.Skillbuff.get(n, "addtype");
-                        if (l) (e = ft.ExtPropName.getName(l)).length > 4 ? this.labelInfo1.string = "\u7279\u6b8a:" : this.labelInfo1.string = e + ":", this.labelInfo2.string = "\u672c\u56de\u5408" + ft.ExtPropName.getName(l) + (h > 0 ? "\u4e0a\u5347" : "\u4e0b\u964d") + r;
+                        if (l) (e = ft.ExtPropName.getName(l)).length > 4 ? this.labelInfo1.string = "特殊:" : this.labelInfo1.string = e + ":", this.labelInfo2.string = "本回合" + ft.ExtPropName.getName(l) + (h > 0 ? "上升" : "下降") + r;
                         o = -2
                     }
-                    if (-1 == o) this.labelInfo3.string = "\u6c38\u4e45";
+                    if (-1 == o) this.labelInfo3.string = "永久";
                     else if (-2 == o) this.labelInfo3.string = "";
                     else {
                         var u = [];
-                        s && (-1 != s.indexOf(ft.buffRemoveTimes.afterRound) && u.push(o + "\u56de\u5408"), -1 != s.indexOf(ft.buffRemoveTimes.afterHit) && u.push("\u53d7\u51fb\u540e\u79fb\u9664"), -1 != s.indexOf(ft.buffRemoveTimes.afterHurt) && u.push("\u53d7\u4f24\u540e\u79fb\u9664"), -1 != s.indexOf(ft.buffRemoveTimes.afterAct) && u.push("\u884c\u52a8\u540e\u79fb\u9664")), this.labelInfo3.string = u.join("/")
+                        s && (-1 != s.indexOf(ft.buffRemoveTimes.afterRound) && u.push(o + "回合"), -1 != s.indexOf(ft.buffRemoveTimes.afterHit) && u.push("受击后移除"), -1 != s.indexOf(ft.buffRemoveTimes.afterHurt) && u.push("受伤后移除"), -1 != s.indexOf(ft.buffRemoveTimes.afterAct) && u.push("行动后移除")), this.labelInfo3.string = u.join("/")
                     }
                 },
                 updateData: function () { },

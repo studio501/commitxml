@@ -34,7 +34,7 @@
                         } else n = ft.ExtItem.getNum(this.data.id);
                         a && n >= a ? this.nodeOwned.active = !0 : (this.nodeOwned.active = !1, this.nodeSellOut.active = !1, this.nodePriceInfo.active = !0)
                     }
-                    if (this.labelTimes.string = ftc.language("\u53ef\u8d2d\u4e70\u6b21\u6570:") + this.count + "/" + this.data.count, this.data.switchId == ft.value.item.gem || this.data.switchId == ft.value.item.gem2) {
+                    if (this.labelTimes.string = ftc.language("可购买次数:") + this.count + "/" + this.data.count, this.data.switchId == ft.value.item.gem || this.data.switchId == ft.value.item.gem2) {
                         var o = ft.ExtItem.getBuyGem(this.data.id);
                         o > 0 && (e = o * this.data.num)
                     } else if (this.data.switchId == ft.value.item.gold) {
@@ -44,7 +44,7 @@
                     if (e && e > this.data.switchNum) {
                         this.labelDiscount.node.parent.active = !0;
                         var c = 10 * this.data.switchNum / e;
-                        c = c > Math.floor(c) ? c.toFixed(1) : c, this.labelDiscount.string = c + ftc.language("\u6298"), this.labelOldPrice.node.active = !0, this.labelOldPrice.string = ftc.language("\u539f\u4ef7:") + e
+                        c = c > Math.floor(c) ? c.toFixed(1) : c, this.labelDiscount.string = c + ftc.language("折"), this.labelOldPrice.node.active = !0, this.labelOldPrice.string = ftc.language("原价:") + e
                     } else this.labelDiscount.node.parent.active = !1, this.labelOldPrice.node.active = !1
                 },
                 cleanup: function () { },
@@ -58,7 +58,7 @@
                             currencyNum: this.data.switchNum,
                             count: this.count
                         }, function (t) {
-                            ft.ExtItem.getNum(this.data.switchId) < this.data.switchNum * t ? ftc.showTip(ft.ExtItem.getName(this.data.switchId) + ftc.language("\u4e0d\u8db3")) : ftc.send("msgActivityGet", {
+                            ft.ExtItem.getNum(this.data.switchId) < this.data.switchNum * t ? ftc.showTip(ft.ExtItem.getName(this.data.switchId) + ftc.language("不足")) : ftc.send("msgActivityGet", {
                                 eid: this.param.entityId,
                                 index: this.index,
                                 num: t

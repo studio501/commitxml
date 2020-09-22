@@ -27,7 +27,7 @@
                 updateData: function () { },
                 tick: function (t) { },
                 onClick: function (t, e) {
-                    t.target === this.buttonCopy.node && (ftc.callNativeFunction("setClipboardData", this.activity.qq), ftc.showTip("\u5df2\u590d\u5236\u5230\u526a\u8d34\u677f"))
+                    t.target === this.buttonCopy.node && (ftc.callNativeFunction("setClipboardData", this.activity.qq), ftc.showTip("已复制到剪贴板"))
                 }
             })
         

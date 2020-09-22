@@ -29,9 +29,9 @@
                     var e = t.id,
                         i = 1,
                         a = 0;
-                    t.entityId && (i = t.lv, a = t.star, t.up), this._partItem.setEquipData(t, !1), this.labelName.string = ft.ExtEquip.getName(e), this.labelNum.string = "\u62e5\u6709\u6570\u91cf:" + ft.ExtEquip.getNum(e);
+                    t.entityId && (i = t.lv, a = t.star, t.up), this._partItem.setEquipData(t, !1), this.labelName.string = ft.ExtEquip.getName(e), this.labelNum.string = "拥有数量:" + ft.ExtEquip.getNum(e);
                     var n = ft.ExtEquip.getType(e);
-                    n > 1e3 && (this.labelIntro.string = ft.ExtHero.getName(n) + "\u4e13\u5c5e\u6b66\u5668"), this.labelIntro.node.active = n > 1e3;
+                    n > 1e3 && (this.labelIntro.string = ft.ExtHero.getName(n) + "专属武器"), this.labelIntro.node.active = n > 1e3;
                     var s = ft.ExtEquip.getInfo(e);
                     this.labelInfo.string = ftc.replaceDigitColor(s, "d77332"), this.nodeSkill.active = !1;
                     var o = ft.ExtEquip.getSkillAdd(e);

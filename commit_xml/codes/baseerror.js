@@ -10,15 +10,15 @@
                 ft.systemErrors = {
                     IDErrorNoAccount: {
                         id: 1,
-                        txt: "\u8d26\u53f7\u4e0d\u5b58\u5728"
+                        txt: "账号不存在"
                     },
                     IDErrorNoHeader: {
                         id: 2,
-                        txt: "\u5b58\u6863\u4e0d\u5b58\u5728"
+                        txt: "存档不存在"
                     },
                     IDErrorIllegal: {
                         id: 3,
-                        txt: "\u6570\u636e\u975e\u6cd5\u8bbf\u95ee"
+                        txt: "数据非法访问"
                     }
                 }, ft.gameErrors = {}, ft.getError = function (t) {
                     return ft.systemErrors[t] ? ft.systemErrors[t] : !!ft.gameErrors[t] && ft.gameErrors[t]

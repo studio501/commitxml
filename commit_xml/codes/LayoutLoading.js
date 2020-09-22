@@ -80,7 +80,7 @@
                     if (!fts && (this._isloadingData || this._isLoadingMap) && this.progressBar.progress < .99 && (this.tickAdd += t, this.tickAdd >= .06)) {
                         var e = Math.floor(this.tickAdd / .06),
                             i = this.progressBar.progress + .01 * e;
-                        i > .99 && (i = .99), this.progressBar.progress = i, this._isloadingData ? this.labelProgress.string = ftc.language("\u52a0\u8f7d\u6570\u636e\u4e2d... ") + Math.floor(100 * this.progressBar.progress) + "%" : this.labelProgress.string = ftc.language("\u52a0\u8f7d\u573a\u666f\u4e2d... ") + Math.floor(100 * this.progressBar.progress) + "%", this.tickAdd -= .06 * e, this.progressBar.progress >= .99 && this._clickOk && this.runLoadingAction()
+                        i > .99 && (i = .99), this.progressBar.progress = i, this._isloadingData ? this.labelProgress.string = ftc.language("加载数据中... ") + Math.floor(100 * this.progressBar.progress) + "%" : this.labelProgress.string = ftc.language("加载场景中... ") + Math.floor(100 * this.progressBar.progress) + "%", this.tickAdd -= .06 * e, this.progressBar.progress >= .99 && this._clickOk && this.runLoadingAction()
                     }
                     this._resLoadOver && this.tickRole(t), this._tickMapLoad > 0 && (this._tickMapLoad -= t, this._tickMapLoad <= 0 && (this._loadMapCallback && this._loadMapCallback(), ftc.ManagerH5.clearStorage()))
                 },
@@ -92,15 +92,15 @@
                         c_loadResProgress: function (t, e) {
                             if (-1 == t.cur) this._resLoadOver = !0, fts ? (this.runLoadingAction(), this.entryMain()) : (this.resLoadTime2 = ft.getSysMilli(), ftc.ManagerH5.countEvent(1, "LayoutLoading", {
                                 time1: this.resLoadTime2 - this.resLoadTime1
-                            }), 0 === this._loginSte ? (this.progressBar.progress = 0, this.labelProgress.string = "\u6b63\u5728\u52a0\u8f7d\u6570\u636e... 0%", this._isloadingData = !0) : this.entryMain());
-                            else if (fts) this.progressBar.progress = t.cur / t.max, this.labelProgress.string = ftc.language("\u6b63\u5728\u52a0\u8f7d\u8d44\u6e90...") + Math.floor(100 * this.progressBar.progress) + "%";
+                            }), 0 === this._loginSte ? (this.progressBar.progress = 0, this.labelProgress.string = "正在加载数据... 0%", this._isloadingData = !0) : this.entryMain());
+                            else if (fts) this.progressBar.progress = t.cur / t.max, this.labelProgress.string = ftc.language("正在加载资源...") + Math.floor(100 * this.progressBar.progress) + "%";
                             else {
                                 var i, a;
                                 if (this.resLoadTime1 || (this.resLoadTime1 = ft.getSysMilli()), t.cur < t.max) {
                                     var n = t.max / 5;
                                     i = Math.floor(t.cur / n), a = t.cur % n / n
                                 } else i = 4, a = 1;
-                                this.labelProgress.string = ftc.language(["\u6b63\u5728\u52a0\u8f7d\u91ce\u5916...", "\u6b63\u5728\u52a0\u8f7d\u57ce\u5e02...", "\u6b63\u5728\u52a0\u8f7d\u4eba\u7269...", "\u6b63\u5728\u52a0\u8f7d\u4efb\u52a1...", "\u6b63\u5728\u52a0\u8f7d\u9053\u5177..."][i]) + Math.floor(100 * a) + "%", this.progressBar.progress = a
+                                this.labelProgress.string = ftc.language(["正在加载野外...", "正在加载城市...", "正在加载人物...", "正在加载任务...", "正在加载道具..."][i]) + Math.floor(100 * a) + "%", this.progressBar.progress = a
                             }
                         },
                         c_enter: function (t, e) {
@@ -187,7 +187,7 @@
                     if (this._resLoadOver && 0 != this._loginSte) {
                         var t = ftc.ManagerData.get1("Player"),
                             e = t.nick;
-                        e || (e = ftc.ManagerData.passport.account ? "\u73a9\u5bb6" : "\u6e38\u5ba2"), this.partUserEnter.setData(e + " \u7b49\u7ea7:" + t.level, this.clickEnter.bind(this), !0), ftc.isTv() && (this.partUserEnter.nodeSecond.active ? ftc.ManagerTV.nextFrameSelect(this.partUserEnter.buttonStart) : ftc.ManagerTV.nextFrameSelect(this.partUserEnter.buttonAccount)), this.stopLoadingAction(), this.nodeProgress.active = !1, this.nodeButtons.active = !0
+                        e || (e = ftc.ManagerData.passport.account ? "玩家" : "游客"), this.partUserEnter.setData(e + " \u7b49\u7ea7:" + t.level, this.clickEnter.bind(this), !0), ftc.isTv() && (this.partUserEnter.nodeSecond.active ? ftc.ManagerTV.nextFrameSelect(this.partUserEnter.buttonStart) : ftc.ManagerTV.nextFrameSelect(this.partUserEnter.buttonAccount)), this.stopLoadingAction(), this.nodeProgress.active = !1, this.nodeButtons.active = !0
                     }
                 },
                 clickEnter: function () {

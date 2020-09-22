@@ -23,7 +23,7 @@
                 updateData: function (t) {
                     if ("number" == typeof this.data) {
                         var e = t ? t.index1 : -1;
-                        this.button1.node.active = !0, this.button2.node.active = !1, this.spriteBg1.node.active = e !== this.data, this.spriteBg2.node.active = e === this.data, this.node.height = this.button1.node.height + 8, this.spriteIcon.spriteFrame = ftc.ManagerRes.getSpriteFrame("program", "achieve_icon_" + this.data), this.labelName1.string = ftc.language(["\u6210\u957f", "\u6311\u6218", "\u6536\u96c6"][this.data - 1]), this.spriteRedPoint.node.active = ft.ExtAchievement.hasAchievementComplete(ft.type.achievement.achieve, this.data), this.spriteArrow.node.angle = e !== this.data ? 90 : 0
+                        this.button1.node.active = !0, this.button2.node.active = !1, this.spriteBg1.node.active = e !== this.data, this.spriteBg2.node.active = e === this.data, this.node.height = this.button1.node.height + 8, this.spriteIcon.spriteFrame = ftc.ManagerRes.getSpriteFrame("program", "achieve_icon_" + this.data), this.labelName1.string = ftc.language(["成长", "挑战", "收集"][this.data - 1]), this.spriteRedPoint.node.active = ft.ExtAchievement.hasAchievementComplete(ft.type.achievement.achieve, this.data), this.spriteArrow.node.angle = e !== this.data ? 90 : 0
                     } else {
                         this.button1.node.active = !1, this.button2.node.active = !0, this.button2.interactable = t.index2 !== this.index, this.node.height = this.button2.node.height + 6, this.labelName2.string = ft.ExtAchievement.getName(this.data.id);
                         var i = ft.ExtAchievement.getStatus(this.data);

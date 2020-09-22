@@ -47,7 +47,7 @@
                 },
                 tick: function (t) { },
                 onClick: function (t) {
-                    ft.console("\u70b9\u51fb\u65e5\u5fd7\uff1a" + this.data.s), 3 != this.data.c ? ftr.getTestPart().showDetail(this.data.s, this.labelText.node.color) : ftr.getTestPart().fillEditor(this.data.s)
+                    ft.console("点击日志：" + this.data.s), 3 != this.data.c ? ftr.getTestPart().showDetail(this.data.s, this.labelText.node.color) : ftr.getTestPart().fillEditor(this.data.s)
                 }
             })
         

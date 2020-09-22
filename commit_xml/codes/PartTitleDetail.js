@@ -39,7 +39,7 @@
                         var e = ftc.ManagerData.get1("ManagerTitle").titleIds.split(","),
                             i = this.buttonSet1.node.getChildByName("Text").getComponent(cc.Label),
                             a = this.buttonSet2.node.getChildByName("Text").getComponent(cc.Label);
-                        i.string = e[0] == t.id ? ftc.language("\u53d6\u4e0b\u524d\u79f0\u53f7") : ftc.language("\u8bbe\u4e3a\u524d\u79f0\u53f7"), a.string = e[1] == t.id ? ftc.language("\u53d6\u4e0b\u540e\u79f0\u53f7") : ftc.language("\u8bbe\u4e3a\u540e\u79f0\u53f7")
+                        i.string = e[0] == t.id ? ftc.language("取下前称号") : ftc.language("设为前称号"), a.string = e[1] == t.id ? ftc.language("取下后称号") : ftc.language("设为后称号")
                     } else this.labelInfo.string = "", this.labelValue.string = ""
                 },
                 tick: function (t) { },

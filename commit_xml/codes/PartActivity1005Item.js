@@ -33,12 +33,12 @@
                         n = a ? a.split(",") : [];
                     if (0 === this.data.type) {
                         var s = ftc.ManagerData.get1("Player").rmb - Number(this.param.ext);
-                        this.labelDesc.string = ftc.language("\u7d2f\u8ba1\u5145\u503c%d\u5143\u5373\u53ef\u9886\u53d6").replace("%d", this.data.pay), this.labelProgress.string = "(" + s + "/" + this.data.pay + ")", void 0 === (r = this.param.ste.split(",")[this.index]) && (r = 0), (r = Number(r)) >= this.data.count ? (this.spriteGet.node.active = !0, this.labelProgress.node.active = !1) : s >= this.data.pay ? this.buttonGet.node.active = !0 : this.buttonRecharge.node.active = !0
+                        this.labelDesc.string = ftc.language("累计充值%d元即可领取").replace("%d", this.data.pay), this.labelProgress.string = "(" + s + "/" + this.data.pay + ")", void 0 === (r = this.param.ste.split(",")[this.index]) && (r = 0), (r = Number(r)) >= this.data.count ? (this.spriteGet.node.active = !0, this.labelProgress.node.active = !1) : s >= this.data.pay ? this.buttonGet.node.active = !0 : this.buttonRecharge.node.active = !0
                     } else {
                         var o = 0;
                         for (e = 0; e < n.length; e++) ft.value["product" + [n[e]]].price == this.data.pay && o++;
                         var r;
-                        void 0 === (r = this.param.ste.split(",")[this.index]) && (r = 0), r = Number(r), this.labelDesc.string = ftc.language("\u5355\u7b14\u5145\u503c%d\u5143\u5373\u53ef\u9886\u53d6").replace("%d", this.data.pay), this.labelProgress.string = "(" + r + "/" + this.data.count + ")", r >= this.data.count ? (this.spriteGet.node.active = !0, this.labelProgress.node.active = !1) : o > r ? this.buttonGet.node.active = !0 : this.buttonRecharge.node.active = !0
+                        void 0 === (r = this.param.ste.split(",")[this.index]) && (r = 0), r = Number(r), this.labelDesc.string = ftc.language("单笔充值%d元即可领取").replace("%d", this.data.pay), this.labelProgress.string = "(" + r + "/" + this.data.count + ")", r >= this.data.count ? (this.spriteGet.node.active = !0, this.labelProgress.node.active = !1) : o > r ? this.buttonGet.node.active = !0 : this.buttonRecharge.node.active = !0
                     }
                 },
                 cleanup: function () { },

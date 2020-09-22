@@ -91,7 +91,7 @@
                 onClick: function (t, e) {
                     for (var i = 0; i < this.buttonBoxes.length; i++)
                         if (t.target === this.buttonBoxes[i].node) {
-                            if (2 === this.boxStes[i]) ftc.showTip("\u5df2\u9886\u53d6");
+                            if (2 === this.boxStes[i]) ftc.showTip("已领取");
                             else if (1 === this.boxStes[i]) ftc.send("achievementGet", {
                                 id: this.vitality.id,
                                 index: i

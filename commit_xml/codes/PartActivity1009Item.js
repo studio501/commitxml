@@ -35,7 +35,7 @@
                 tick: function (t) { },
                 onClick: function (t, e) {
                     if (t.target === this.buttonExchange.node)
-                        if (this.remainingCount <= 0) ftc.showTip("\u6b21\u6570\u4e0d\u8db3");
+                        if (this.remainingCount <= 0) ftc.showTip("次数不足");
                         else {
                             for (var i = !0, a = 0; a < this.data.switchIds.length; a++)
                                 if (ft.ExtItem.getNum(this.data.switchIds[a]) < this.data.switchNums[a]) {
@@ -44,7 +44,7 @@
                                 } i ? ftc.send("msgActivityGet", {
                                     eid: this.param.entityId,
                                     index: this.index
-                                }) : ftc.showTip("\u7269\u54c1\u6570\u91cf\u4e0d\u8db3")
+                                }) : ftc.showTip("物品数量不足")
                         }
                 }
             })

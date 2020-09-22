@@ -52,7 +52,7 @@ window.ftr = window.ftr || {}, ftr.init = function (t) {
 }, ftr.setTvTip = function (t, e, i) {
     if (ftc.isTv() && ftc.ManagerTV.isActive) {
         if (1 === ftr._partTvTip) return;
-        ftc.ManagerTV.openOkReplaceMenu && e && (e = ft.replaceAll(e, "\u3010\u83dc\u5355\u952e\u3011", "\u3010\u83dc\u5355\u952e/\u957f\u6309\u786e\u8ba4\u952e\u3011")), ftr._partTvTip ? ftr._partTvTip.setData(t, e, i) : (ftr._partTvTip = 1, ftc.ManagerRes.newPart("PartSysTvTip", "PartSysTvTip", ftc.scene, function (a) {
+        ftc.ManagerTV.openOkReplaceMenu && e && (e = ft.replaceAll(e, "【菜单键】", "【菜单键/长按确认键】")), ftr._partTvTip ? ftr._partTvTip.setData(t, e, i) : (ftr._partTvTip = 1, ftc.ManagerRes.newPart("PartSysTvTip", "PartSysTvTip", ftc.scene, function (a) {
             ftr._partTvTip = a, ftc.scene.node.addChild(a.node, 255), ftr._partTvTip.setData(t, e, i)
         }, "_ftaro"))
     }
@@ -106,7 +106,7 @@ window.ftr = window.ftr || {}, ftr.init = function (t) {
         t.setData()
     }, {
         field: "_ftaro"
-    }) : ftr.showTip("\u65e0\u6cd5\u8fdb\u5165\u7528\u6237\u4e2d\u5fc3\uff0c\u8bf7\u786e\u4fdd\u7f51\u7edc\u8fde\u901a")
+    }) : ftr.showTip("无法进入用户中心，请确保网络连通")
 }, ftr.loadLayout = function (t, e, i) {
     ftr.showTop(), ftc.ManagerRes.newLayout(t, function (t) {
         ftr.cancelTop(), e && e(t)
@@ -120,21 +120,21 @@ window.ftr = window.ftr || {}, ftr.init = function (t) {
 }, ftr.getItem = function (t) {
     return cc.sys.localStorage.getItem(ft.getAppId() + "ftr_" + t)
 }, ftr.tick = function (t) { }, ftr.checkPwd = function (t) {
-    if (t.length < 6) ftr.showTip("\u5bc6\u7801\u4e0d\u5f97\u5c0f\u4e8e6\u4f4d");
+    if (t.length < 6) ftr.showTip("密码不得小于6位");
     else {
         if (!(t.length > 18)) return !0;
-        ftr.showTip("\u5bc6\u7801\u4e0d\u5f97\u5927\u4e8e18\u4f4d")
+        ftr.showTip("密码不得大于18位")
     }
     return !1
 }, ftr.checkAccount = function (t) {
     if (t)
-        if (t.length < 3) ftr.showTip("\u8d26\u53f7\u4e0d\u5f97\u5c0f\u4e8e3\u4f4d");
-        else if (t.length > 18) ftr.showTip("\u8d26\u53f7\u4e0d\u5f97\u5927\u4e8e18\u4f4d");
+        if (t.length < 3) ftr.showTip("账号不得小于3位");
+        else if (t.length > 18) ftr.showTip("账号不得大于18位");
         else {
             if (/^[\u4e00-\u9fa5_a-zA-Z0-9]+$/.test(t)) return !0;
-            ftr.showTip("\u8d26\u53f7\u4e0d\u80fd\u5305\u542b\u7279\u6b8a\u5b57\u7b26")
-        } else ftr.showTip("\u8d26\u53f7\u4e0d\u5f97\u4e3a\u7a7a");
+            ftr.showTip("账号不能包含特殊字符")
+        } else ftr.showTip("账号不得为空");
     return !1
 }, ftr.showLoginWait = function (t) {
-    t && ftr.showWait("\u767b\u5f55\u6210\u529f\uff0c\u6b63\u5728\u4e0b\u8f7d\u6570\u636e\uff0c\u8bf7\u7a0d\u7b49...")
+    t && ftr.showWait("登录成功，正在下载数据，请稍等...")
 }

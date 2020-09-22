@@ -61,9 +61,9 @@ cc.Class({
         this._scaleStatus == h && this.scaleMap(c, t), this.listViewInfo.node.active = !1, this._showNpcId = -1
     },
     load: function () {
-        ftc.showWait("\u52a0\u8f7d\u5730\u56fe\u4e2d...", 0, void 0, 255, ft.type.wait.car), this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("\u4e16\u754c\u5730\u56fe", 1), this.partTopStatus.setCloseCallback(function () {
+        ftc.showWait("加载地图中...", 0, void 0, 255, ft.type.wait.car), this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("世界地图", 1), this.partTopStatus.setCloseCallback(function () {
             this.cancel(!1, !0), (ftc.isIos() || ftc.ManagerH5.isH5()) && ftc.sysGC()
-        }.bind(this)), this.node.addChild(this.partTopStatus.node), ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u653e\u5927\u7f29\u5c0f"), this._mapLoaded = !1, this._markedSign = !1, this._mapRunning = !1, this._touchSPos = void 0, this._touchMove = !1, this._narrowScale = 1, this._enlargeScale = 1, this._mineNpc = void 0, this._taskNpc = void 0, this._mapBorder = {
+        }.bind(this)), this.node.addChild(this.partTopStatus.node), ftc.setTvTip(this.node, "【返回键】关闭界面，【菜单键】放大缩小"), this._mapLoaded = !1, this._markedSign = !1, this._mapRunning = !1, this._touchSPos = void 0, this._touchMove = !1, this._narrowScale = 1, this._enlargeScale = 1, this._mineNpc = void 0, this._taskNpc = void 0, this._mapBorder = {
             minX: 0,
             maxX: 0,
             minY: 0,

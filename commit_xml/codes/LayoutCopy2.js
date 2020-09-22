@@ -27,7 +27,7 @@
                 },
                 load: function () {
                     for (var t = 0; t < this.partCopy2Items.length; t++) this.initPart(this.partCopy2Items[t]);
-                    this.partTopStatus = this.newPart("PartTopStatus"), this.node.addChild(this.partTopStatus.node), ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762")
+                    this.partTopStatus = this.newPart("PartTopStatus"), this.node.addChild(this.partTopStatus.node), ftc.setTvTip(this.node, "【返回键】关闭界面")
                 },
                 setData: function (t) {
                     this.id = t, this.partTopStatus.setTitle(ft.ExtCopy.getName(this.id)), this.selectTab(this.id === ft.value.copy.YXT ? 0 : 1)
@@ -77,16 +77,16 @@
                 msg: function () {
                     this.msg = {
                         copyEnter: function (t, e) {
-                            0 === t || (1 === t ? ftc.showTip("\u6b21\u6570\u4e0d\u8db3") : 2 === t ? ftc.showTip("\u4e0d\u80fd\u8fdb\u5165") : 3 === t && ftc.showTip("\u4f53\u529b\u4e0d\u8db3"))
+                            0 === t || (1 === t ? ftc.showTip("次数不足") : 2 === t ? ftc.showTip("不能进入") : 3 === t && ftc.showTip("体力不足"))
                         },
                         copyEnd: function (t, e) {
                             this.id == t.id && this.updateData()
                         },
                         copyMopUp: function (t, e) {
-                            0 === t ? ftc.showTip("\u626b\u8361\u6210\u529f") : 1 === t ? ftc.showTip("\u6b21\u6570\u4e0d\u8db3") : 2 === t ? ftc.showTip("\u4e0d\u80fd\u8fdb\u5165") : 3 === t && ftc.showTip("\u4f53\u529b\u4e0d\u8db3")
+                            0 === t ? ftc.showTip("扫荡成功") : 1 === t ? ftc.showTip("次数不足") : 2 === t ? ftc.showTip("不能进入") : 3 === t && ftc.showTip("体力不足")
                         },
                         copyYXTLower10: function (t, e) {
-                            0 === t ? (ftc.showTip("\u4e0b\u964d10\u5c42\u6210\u529f"), this.updateData()) : 1 === t ? ftc.showTip("\u4eca\u65e5\u5df2\u4e0b\u964d\u8fc7\uff0c\u65e0\u6cd5\u518d\u4e0b\u964d") : 2 === t && ftc.showTip("\u5c42\u6570\u4e0d\u8db3\uff0c\u65e0\u6cd5\u518d\u4e0b\u964d")
+                            0 === t ? (ftc.showTip("下降10层成功"), this.updateData()) : 1 === t ? ftc.showTip("今日已下降过，无法再下降") : 2 === t && ftc.showTip("层数不足，无法再下降")
                         }
                     }
                 },
@@ -94,7 +94,7 @@
                     if (t.target === this.buttonChallenge1.node) ftc.send("copyEnter", {
                         id: this.id
                     });
-                    else if (t.target === this.buttonLower.node) ftc.ManagerData.get1("ManagerCopy").battleYXTLower > 0 ? ftc.send("copyYXTLower10") : ftc.showTip("\u4eca\u65e5\u5df2\u4e0b\u964d\u8fc7\uff0c\u65e0\u6cd5\u518d\u4e0b\u964d");
+                    else if (t.target === this.buttonLower.node) ftc.ManagerData.get1("ManagerCopy").battleYXTLower > 0 ? ftc.send("copyYXTLower10") : ftc.showTip("今日已下降过，无法再下降");
                     else if (t.target === this.buttonChallenge.node) this.selectMode(ft.type.copyMode.challenge);
                     else if (t.target === this.buttonMopUp.node) this.selectMode(ft.type.copyMode.mopUp);
                     else if (t.target === this.buttonEnter.node)
@@ -103,17 +103,17 @@
                         });
                         else {
                             var i = ft.ExtItem.getPower();
-                            if (i < 1) ftc.showTip("\u4f53\u529b\u4e0d\u8db3");
-                            else if (ft.ExtItem.getNum(ft.value.item.mopUpTicket) < 1) ftc.showTip("\u626b\u8361\u5238\u4e0d\u8db3");
+                            if (i < 1) ftc.showTip("体力不足");
+                            else if (ft.ExtItem.getNum(ft.value.item.mopUpTicket) < 1) ftc.showTip("扫荡券不足");
                             else {
                                 var a = ftc.ManagerData.get1("ManagerCopy").battleYXT2,
                                     n = ftc.ManagerData.get1("ManagerCopy").battleYXT3;
-                                if (a < 1) ftc.showTip("\u6311\u6218\u5b8c\u6210\u540e\u5f00\u542f");
-                                else if (a - n < 1) ftc.showTip("\u5df2\u8fbe\u5230\u5386\u53f2\u6700\u9ad8\uff0c\u65e0\u9700\u626b\u8361");
+                                if (a < 1) ftc.showTip("挑战完成后开启");
+                                else if (a - n < 1) ftc.showTip("已达到历史最高，无需扫荡");
                                 else {
                                     var s = a - n;
                                     (s = Math.min(s, i)) > 0 && ftc.showDialog({
-                                        text: ft.replaceAll("\u786e\u5b9a\u6d88\u80171\u5f20\u626b\u8361\u5238\u548c%d\u70b9\u4f53\u529b\u4e00\u6b21\u6027\u6311\u6218%d\u5c42?", "%d", s),
+                                        text: ft.replaceAll("确定消耗1张扫荡券和%d点体力一次性挑战%d层?", "%d", s),
                                         click1: function () {
                                             ftc.send("copyMopUp", {
                                                 id: ft.value.copy.YXT2

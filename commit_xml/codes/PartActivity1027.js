@@ -38,16 +38,16 @@
                     this.data && (this.spriteRedPoint.node.active = ft.ExtMsg.checkCanGet(this.data), this.updateDate())
                 },
                 updateDate: function () {
-                    this.labelDate.string = ftc.language("\u5269\u4f59\u65f6\u95f4: ") + ftc.calcTimeDelta(void 0, this.data.date1)
+                    this.labelDate.string = ftc.language("剩余时间: ") + ftc.calcTimeDelta(void 0, this.data.date1)
                 },
                 tick: function (t) { },
                 onClick: function (t, e) {
-                    t.target === this.buttonDetail.node ? ftc.showDetailInfo(this.buttonDetail.node, this.data.txt) : t.target === this.buttonEnter.node ? ft.ExtMap.getType(ftc.ManagerData.get1("ManagerMap").cur) !== ft.type.map.normal ? ftc.showTip("\u8bf7\u5148\u79bb\u5f00\u5f53\u524d\u526f\u672c") : ftc.send("copyEnter", {
+                    t.target === this.buttonDetail.node ? ftc.showDetailInfo(this.buttonDetail.node, this.data.txt) : t.target === this.buttonEnter.node ? ft.ExtMap.getType(ftc.ManagerData.get1("ManagerMap").cur) !== ft.type.map.normal ? ftc.showTip("请先离开当前副本") : ftc.send("copyEnter", {
                         id: this.activity.copyId,
                         param: 0
                     }) : t.target === this.buttonAchievement.node ? ftc.loadLayout("LayoutCopyAchievement", function (t) {
                         t.setData(this.activity.copyId)
-                    }.bind(this)) : t.target === this.buttonExchange.node && (this.activity.activityId ? ftc.sendClient("c_onSelectActivity", this.activity.activityId) : ftc.showTip("\u6682\u65e0\u5151\u6362"))
+                    }.bind(this)) : t.target === this.buttonExchange.node && (this.activity.activityId ? ftc.sendClient("c_onSelectActivity", this.activity.activityId) : ftc.showTip("暂无兑换"))
                 }
             })
         

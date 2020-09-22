@@ -118,7 +118,7 @@ window.ftc = window.ftc || {}, ftc.ManagerData = {
         showExitDialog: function (t, e) {
             ftc.forbidGame(), ftr.cancelWait(), t.help && ftc.getChat() ? (t.txt && ftc._uploadErrors.push(t.txt), ftr.showDialog({
                 text: t.txt,
-                button2: ftc.language("\u8054\u7cfb\u5ba2\u670d"),
+                button2: ftc.language("联系客服"),
                 clickOk: function () {
                     t.restart ? ftc.sysRestart() : ftc.sysEnd()
                 },

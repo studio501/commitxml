@@ -38,7 +38,7 @@
                     this.msg = {}
                 },
                 onClick: function (t, e) {
-                    t.target === this.buttonEnter.node && (this.count >= 50 ? ftc.showTip("\u5df2\u6311\u6218\u5b8c\u6240\u6709\u5b88\u5c06") : (ftc.send("copyEnter", {
+                    t.target === this.buttonEnter.node && (this.count >= 50 ? ftc.showTip("已挑战完所有守将") : (ftc.send("copyEnter", {
                         id: this.id
                     }), ftc.sendClient("c_copyEnter", void 0, "LayoutCopy"), this.cancel()))
                 }

@@ -22,7 +22,7 @@
                 load: function () {
                     this.selectedIndex = void 0, this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setCloseCallback(function () {
                         this.checkHasUnGetMainTask() || (this.isNeedCheckTask && ftc.send("checkTask"), this.cancel())
-                    }.bind(this)), this.node.addChild(this.partTopStatus.node), this.mapType = ft.ExtMap.getType(ftc.ManagerData.get1("ManagerMap").cur), this.partTopStatus.setTitle(this.mapType == ft.type.map.zy ? "\u6218\u5f79\u4efb\u52a1" : "\u4efb\u52a1");
+                    }.bind(this)), this.node.addChild(this.partTopStatus.node), this.mapType = ft.ExtMap.getType(ftc.ManagerData.get1("ManagerMap").cur), this.partTopStatus.setTitle(this.mapType == ft.type.map.zy ? "战役任务" : "任务");
                     var t = this.getCanAcceptTasks().length > 0;
                     this.nodeTabs.active = t, this.nodeContent.position = t ? cc.v2(65.8, -33) : cc.v2(0, -33), this.selectTab(0, !0)
                 },
@@ -32,7 +32,7 @@
                     var t = ftc.ManagerData.get2("Task");
                     for (var e in t)
                         if (ftd.Task.get(t[e].id, "type") == ft.type.task.main) {
-                            if (1 == t[e].ste) return ftc.showTip("\u8bf7\u5148\u9886\u53d6\u4e3b\u7ebf\u5956\u52b1"), !0;
+                            if (1 == t[e].ste) return ftc.showTip("请先领取主线奖励"), !0;
                             break
                         } return !1
                 },
@@ -55,8 +55,8 @@
                     return t
                 },
                 updateTvTip: function (t) {
-                    var e = "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762";
-                    t && (e += "\uff0c\u3010\u786e\u5b9a\u952e\u3011" + t), this.nodeTabs.active && (e += "\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u6807\u7b7e"), ftc.setTvTip(this.node, e)
+                    var e = "【返回键】关闭界面";
+                    t && (e += "，【确定键】" + t), this.nodeTabs.active && (e += "，【菜单键】切换标签"), ftc.setTvTip(this.node, e)
                 },
                 setTaskInfo: function (t) {
                     this.selectedIndex = t;
@@ -76,10 +76,10 @@
                                         break
                                     } break
                             }
-                            this.labelTarget.string = a ? ftd.Map.get(s, "name") + "(" + a.x + "," + a.y + ")\uff0c" + ftc.language("\u5bfb\u627e") + ftd.Npc.get(i, "name") : ftd.Map.get(s, "name") + " " + ftd.Npc.get(i, "name")
+                            this.labelTarget.string = a ? ftd.Map.get(s, "name") + "(" + a.x + "," + a.y + ")\uff0c" + ftc.language("寻找") + ftd.Npc.get(i, "name") : ftd.Map.get(s, "name") + " " + ftd.Npc.get(i, "name")
                         } else this.labelTarget.string = "";
-                        ft.ExtTask.hideTarget && (this.labelTarget.string = "\u672a\u77e5"), 1108 === e.id && (this.labelTarget.string = ftc.language("\u9003\u51fa\u516b\u9635\u56fe"))
-                    } else this.labelTarget.string = ftc.language("\u4efb\u52a1\u5df2\u5b8c\u6210");
+                        ft.ExtTask.hideTarget && (this.labelTarget.string = "未知"), 1108 === e.id && (this.labelTarget.string = ftc.language("逃出八阵图"))
+                    } else this.labelTarget.string = ftc.language("任务已完成");
                     var c = ftd.Event.get(e.eventId, "c_condition");
                     if (c) {
                         var h = c.split(";")[0];
@@ -88,8 +88,8 @@
                                 d = ft.toArray(f[0]),
                                 l = ft.toArray(f[1]),
                                 u = "",
-                                p = "\u9700\u8981";
-                            for (s = 0; s < d.length; s++) u += ft.ExtItem.getName(d[s]) + "(" + ft.ExtItem.getNum(d[s]) + "/" + l[s] + ") ", p += ft.ExtItem.getName(d[s]) + (s === d.length - 1 ? "" : "\u3001");
+                                p = "需要";
+                            for (s = 0; s < d.length; s++) u += ft.ExtItem.getName(d[s]) + "(" + ft.ExtItem.getNum(d[s]) + "/" + l[s] + ") ", p += ft.ExtItem.getName(d[s]) + (s === d.length - 1 ? "" : "、");
                             this.labelProgress.node.parent.active = !0, this.labelProgress.string = u
                         } else this.labelProgress.node.parent.active = !1
                     } else this.labelProgress.node.parent.active = !1;
@@ -107,17 +107,17 @@
                         for (s = 0; s < d.length; s++) ft.ExtItem.getType(d[s]) === ft.type.item.task || d[s] !== ft.value.item.exp && ft.ExtItem.getType(d[s]) === ft.type.item.base || ((m = this.newPart("PartItem")).node.scale = .9, m.setData(d[s], l[s]), m.setInteractable(!0), this.layoutReward.addChild(m.node));
                         this.layoutReward.active = !0
                     } else this.layoutReward.active = !1;
-                    if (this.buttonGet.node.getChildByName("Label").getComponent(cc.Label).string = ftc.language("\u9886\u53d6"), ft.ExtTask.getType(e.id) === ft.type.task.main && ft.ExtTask.checkGuide(e.id, "end")) {
+                    if (this.buttonGet.node.getChildByName("Label").getComponent(cc.Label).string = ftc.language("领取"), ft.ExtTask.getType(e.id) === ft.type.task.main && ft.ExtTask.checkGuide(e.id, "end")) {
                         this.buttonGuide.node.active = !1, this.buttonGet.node.active = !0;
                         var _ = ftc.ManagerData.get1("Player").samsara;
-                        this.labelInfo.string = ft.ExtTask.getInfo(e.id).replace("{0}", _ + 1), 2 == e.ste && (this.buttonGet.node.getChildByName("Label").getComponent(cc.Label).string = ftc.language("\u65b0\u5468\u76ee"), this.isCancelOnClick = !0)
+                        this.labelInfo.string = ft.ExtTask.getInfo(e.id).replace("{0}", _ + 1), 2 == e.ste && (this.buttonGet.node.getChildByName("Label").getComponent(cc.Label).string = ftc.language("新周目"), this.isCancelOnClick = !0)
                     } else if (this.isCancelOnClick = !1, this.labelInfo.string = ft.ExtTask.getInfo(e.id), 1 === e.ste) this.buttonGuide.node.active = !1, this.buttonGet.node.active = !0;
                     else {
                         this.buttonGet.node.active = !1;
                         var x = ftc.ManagerData.get1("ManagerTask").cur == e.id;
                         e.eventId > 0 ? this.buttonGuide.node.active = !x : this.buttonGuide.node.active = !1
                     }
-                    ftc.isTv() && (this.tvIsGet = 0, this.buttonGet.node.active ? (this.updateTvTip(this.buttonGet.node.getChildByName("Label").getComponent(cc.Label).string), this.tvIsGet = 1) : this.buttonGuide.node.active ? (this.updateTvTip("\u9009\u62e9\u6307\u5f15"), this.tvIsGet = 2) : this.updateTvTip())
+                    ftc.isTv() && (this.tvIsGet = 0, this.buttonGet.node.active ? (this.updateTvTip(this.buttonGet.node.getChildByName("Label").getComponent(cc.Label).string), this.tvIsGet = 1) : this.buttonGuide.node.active ? (this.updateTvTip("选择指引"), this.tvIsGet = 2) : this.updateTvTip())
                 },
                 updateData: function () {
                     this.partTopStatus.updateData(), this.selectTab(this.tabIndex)
@@ -135,7 +135,7 @@
                         taskFinish: function (t, e) {
                             if (this.tasks = this.getTasks(), this.tasks.length > 0 ? (this.listView.setListView(this.tasks, 0), this.setTaskInfo(0), ftc.sendClient("c_updateMap", void 0, "LayoutMain"), this.isNeedCheckTask = !0) : this.updateData(), t && ftc.ManagerH5.isH5() && 1 === ftc.ManagerData.get1("Player").samsara) {
                                 var i = ft.ExtTask.getType(t);
-                                i === ft.type.task.main ? (ftc.ManagerH5.countEvent("3_" + t, "\u5b8c\u6210\u4e3b\u7ebf\u4efb\u52a1"), 1 == t && ftc.ManagerH5.countEvent("6_5")) : i === ft.type.task.branch && ftc.ManagerH5.countEvent("4_" + t, "\u5b8c\u6210\u652f\u7ebf\u4efb\u52a1")
+                                i === ft.type.task.main ? (ftc.ManagerH5.countEvent("3_" + t, "完成主线任务"), 1 == t && ftc.ManagerH5.countEvent("6_5")) : i === ft.type.task.branch && ftc.ManagerH5.countEvent("4_" + t, "完成支线任务")
                             }
                             25 !== t && 50 !== t && 100 !== t || ftsdk && ftsdk.showUserComment()
                         }
@@ -163,11 +163,11 @@
                                     } else this.listView.setListView(i, n), this.setTaskInfo(n);
                                 else this.listView.setListView(i, 0), this.setTaskInfo(0)
                             } else this.listView.setListView(i, -1 !== n ? n : 0), this.setTaskInfo(-1 !== n ? n : 0)
-                    } else ftc.showTip("\u6682\u65e0\u4efb\u52a1")
+                    } else ftc.showTip("暂无任务")
                 },
                 onClick: function (t, e) {
                     if (t.target === this.buttonGet.node) (i = this.listView.getDatas()[this.selectedIndex]) && (this.isCancelOnClick ? ftc.showDialog({
-                        text: "\u786e\u5b9a\u5f00\u542f\u65b0\u5468\u76ee?",
+                        text: "确定开启新周目?",
                         click1: function () {
                             this.isCancelOnClick = void 0, this.cancel(), ftc.send("taskFinish", i.id)
                         }.bind(this),

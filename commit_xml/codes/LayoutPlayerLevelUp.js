@@ -48,7 +48,7 @@
                                 1 === ft.ExtPet.getType(l) ? h += ft.ExtPet.getName(l) + " " : f += ft.ExtPet.getName(l) + " "
                             }
                     }
-                    this.labelDesc1.node.active = h, h && (this.labelDesc1.string = "\u89e3\u9501\u9635\u6cd5:" + h), this.labelDesc2.node.active = f, f && (this.labelDesc2.string = "\u89e3\u9501\u7b56\u7565:" + f)
+                    this.labelDesc1.node.active = h, h && (this.labelDesc1.string = "解锁阵法:" + h), this.labelDesc2.node.active = f, f && (this.labelDesc2.string = "解锁策略:" + f)
                 },
                 setLevel: function (t) {
                     for (var e = []; t;) e.splice(0, 0, t % 10), t = parseInt(t / 10);

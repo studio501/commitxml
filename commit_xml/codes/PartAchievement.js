@@ -178,16 +178,16 @@
                     });
                     else if (t.target === this.buttonDetail.node) {
                         if (this.selectedAchievement) ft.ExtAchievement.getEvent(this.selectedAchievement.id) === ft.type.eventAchievement.WMZZ && (this.unfinishedTasks && this.unfinishedTasks.length > 0 ? ftc.showItemInfo(t.target, {
-                            name: ftc.language("\u672a\u5b8c\u6210\u7684\u652f\u7ebf"),
+                            name: ftc.language("未完成的支线"),
                             info: this.unfinishedTasks
                         }) : ftc.showItemInfo(t.target, {
-                            name: ftc.language("\u5df2\u5b8c\u6210\u6240\u6709\u652f\u7ebf"),
-                            info: "\u5f00\u542f\u65b0\u5468\u76ee\u540e\u5373\u53ef\u9886\u53d6"
+                            name: ftc.language("已完成所有支线"),
+                            info: "开启新周目后即可领取"
                         }))
                     } else
                         for (var i = 0; i < this.buttonBoxes.length; i++)
                             if (t.target === this.buttonBoxes[i].node) {
-                                if (2 === this.boxStes[i]) ftc.showTip("\u5df2\u9886\u53d6");
+                                if (2 === this.boxStes[i]) ftc.showTip("已领取");
                                 else if (1 === this.boxStes[i]) ftc.send("achievementGet", {
                                     id: this.achievement.id,
                                     index: i

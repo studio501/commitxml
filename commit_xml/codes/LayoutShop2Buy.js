@@ -26,7 +26,7 @@
                     }, this), ftc.ManagerTV.setBackButton(this.buttonClose)
                 },
                 load: function () {
-                    this._item = this.newPart("PartItem"), this._item.node.scale = .9, this.nodeItem.addChild(this._item.node), ftc.setTvTip(this.node, "\u8fd4\u56de\u952e\u5173\u95ed\uff0c\u5de6\u53f3\u952e\u52a0\u51cf1\uff0c\u4e0a\u4e0b\u952e\u52a0\u51cf10")
+                    this._item = this.newPart("PartItem"), this._item.node.scale = .9, this.nodeItem.addChild(this._item.node), ftc.setTvTip(this.node, "返回键关闭，左右键加减1，上下键加减10")
                 },
                 setData: function (t, e) {
                     this.data = t, this.callback = e, this._item.setData(this.data.id), this.setItemNumDesc(1), this.spritePrice.spriteFrame = ft.ExtItem.getLittleIconSprite(this.data.currency), this.labelInfo.string = ft.ExtItem.getInfo(this.data.id), this.itemNum = 1, this.data.count > 1 ? (this.nodeGoods.y = 0, this.nodeSelectNum.active = !0) : (this.nodeGoods.y = -38, this.nodeSelectNum.active = !1), this.slider.progress = this.itemNum / this.data.count, this.updateTip()

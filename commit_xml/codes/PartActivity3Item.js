@@ -21,7 +21,7 @@
                             var s = this._partItems[n];
                             s || ((s = this.newPart("PartItem")).node.scale = .9, this.layoutEquip.addChild(s.node), this._partItems[n] = s), s.setData(e[n], i[n])
                         } else this._partItems[n] && (this._partItems[n].cancel(), this._partItems.splice(n, 1));
-                    this.labelPriceOld.string = ftc.language("\u539f\u4ef7:") + this.data.oldPrice, this.labelPrice.string = ftc.language("\u73b0\u4ef7:") + this.data.price;
+                    this.labelPriceOld.string = ftc.language("原价:") + this.data.oldPrice, this.labelPrice.string = ftc.language("现价:") + this.data.price;
                     var o = this.param.ext.split(",");
                     this.buttonBuy.interactable = 0 == o[this.index]
                 },
@@ -31,7 +31,7 @@
                     t.target === this.buttonBuy.node && (ft.ExtItem.getGem() >= this.data.price ? ftc.send("msgActivityGet", {
                         eid: this.param.entityId,
                         index: this.index
-                    }) : ftc.showTip("\u5143\u5b9d\u4e0d\u8db3"))
+                    }) : ftc.showTip("元宝不足"))
                 }
             })
         

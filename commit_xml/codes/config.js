@@ -10,7 +10,7 @@
     ft.getAppId = function () {
         return 0
     }, ft.getAppName = function () {
-        return "\u4e09\u56fd\u6f14\u4e49:\u541e\u566c\u65e0\u754c"
+        return "三国演义:吞噬无界"
     }, ft.getVersion = function () {
         return 4333
     }, ft.getHotupdateVersion = function () {
@@ -48,7 +48,7 @@
     }, ft.prefixZeroTime = function (t) {
         return 0 <= t && t < 10 && (t = "0" + t), t
     }, ft.getNumShow = function (t) {
-        return t < 1e5 ? t : t < 1e9 ? (t / 1e4).toFixed(2) + "\u4e07" : t < 1e13 ? (t / 1e8).toFixed(2) + "\u4ebf" : t < 1e17 ? (t / 1e12).toFixed(2) + "\u4e07\u4ebf" : t < 1e21 ? (t / 1e16).toFixed(2) + "\u4ebf\u4ebf" : (t / 1e20).toFixed(2) + "\u4e07\u4ebf\u4ebf"
+        return t < 1e5 ? t : t < 1e9 ? (t / 1e4).toFixed(2) + "万" : t < 1e13 ? (t / 1e8).toFixed(2) + "亿" : t < 1e17 ? (t / 1e12).toFixed(2) + "万亿" : t < 1e21 ? (t / 1e16).toFixed(2) + "亿亿" : (t / 1e20).toFixed(2) + "万亿亿"
     }, ft.trimName = function (t, e) {
         return t ? (void 0 === e && (e = 5), t.length > e && (t = t.substr(0, e) + ".."), t) : ""
     }, ft.getSysDay = function () {
@@ -789,8 +789,8 @@
             equipMaterial: 12,
             specialLord: 13,
             battleSkin: 14,
-            goodsNames: ["\u5168\u90e8", "\u53ef\u7528\u9053\u5177", "\u4e0d\u53ef\u7528\u9053\u5177"],
-            pieceNames: ["\u5168\u90e8", "\u6b66\u5c06\u788e\u7247", "\u88c5\u5907\u788e\u7247"]
+            goodsNames: ["全部", "可用道具", "不可用道具"],
+            pieceNames: ["全部", "武将碎片", "装备碎片"]
         },
         equip: {
             general: 0,
@@ -804,7 +804,7 @@
             armet: 8,
             shoes: 9,
             rider: 10,
-            equipNames: ["\u901a\u7528\u6b66\u5668", "\u5251", "\u67aa", "\u5200", "\u5f13", "\u65a7", "\u8863\u670d", "\u9970\u54c1", "\u5934\u76d4", "\u978b\u5b50", "\u5750\u9a91"]
+            equipNames: ["通用武器", "剑", "枪", "刀", "弓", "斧", "衣服", "饰品", "头盔", "鞋子", "坐骑"]
         },
         part: {
             all: 0,
@@ -815,7 +815,7 @@
             shoes: 5,
             rider: 6,
             exclusive: 7,
-            partNames: ["\u5168\u90e8", "\u6b66\u5668", "\u8863\u670d", "\u9970\u54c1", "\u5934\u76d4", "\u978b\u5b50", "\u5750\u9a91", "\u4e13\u5c5e"]
+            partNames: ["全部", "武器", "衣服", "饰品", "头盔", "鞋子", "坐骑", "专属"]
         },
         prop: {
             wl: 1,
@@ -895,7 +895,7 @@
             Shu: 2,
             Wu: 3,
             Qun: 4,
-            countryNames: ["\u5168\u90e8", "\u9b4f", "\u8700", "\u5434", "\u7fa4"]
+            countryNames: ["全部", "魏", "蜀", "吴", "群"]
         },
         quality: {
             white: 1,
@@ -1011,14 +1011,14 @@
             blue: 2,
             violet: 3,
             yellow: 4,
-            jewelNames: ["\u5168\u90e8", "\u7eff\u5b9d\u77f3", "\u84dd\u5b9d\u77f3", "\u7d2b\u5b9d\u77f3", "\u9ec4\u5b9d\u77f3"]
+            jewelNames: ["全部", "绿宝石", "蓝宝石", "紫宝石", "黄宝石"]
         },
         resource: {
             all: 0,
             heroMaterial: 11,
             equipMaterial: 12,
             jewel: 3,
-            resourceNames: ["\u5168\u90e8", "\u6b66\u5c06\u76f8\u5173", "\u88c5\u5907\u76f8\u5173", "\u5b9d\u77f3"]
+            resourceNames: ["全部", "武将相关", "装备相关", "宝石"]
         },
         compose: {
             equip: 1,
@@ -1048,7 +1048,7 @@
             limited: 3,
             challenge: 4,
             shenBing: 5,
-            names: ["", "\u65e5\u5e38\u526f\u672c", "\u5468\u5e38\u526f\u672c", "\u9650\u65f6\u526f\u672c", "\u6311\u6218\u526f\u672c", "\u795e\u5175\u526f\u672c"]
+            names: ["", "日常副本", "周常副本", "限时副本", "挑战副本", "神兵副本"]
         },
         copyMode: {
             challenge: 0,

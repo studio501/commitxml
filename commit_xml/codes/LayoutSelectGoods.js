@@ -40,7 +40,7 @@
                     }
                 },
                 onClick: function (t, e) {
-                    t.target === this.buttonSelf.node || t.target === this.buttonClose.node ? this.cancel() : t.target === this.buttonConfirm.node && (this._selectItem ? (this.cancel(), this._callback && this._callback(this._selectItem)) : ftc.showTip("\u8bf7\u9009\u62e9\u7269\u54c1"))
+                    t.target === this.buttonSelf.node || t.target === this.buttonClose.node ? this.cancel() : t.target === this.buttonConfirm.node && (this._selectItem ? (this.cancel(), this._callback && this._callback(this._selectItem)) : ftc.showTip("请选择物品"))
                 }
             })
         

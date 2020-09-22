@@ -52,7 +52,7 @@
                     }
                 },
                 updateDate: function () {
-                    this.labelDeadline.string = ftc.language("\u5269\u4f59\u65f6\u95f4: ") + ftc.calcTimeDelta(void 0, this.data.date1)
+                    this.labelDeadline.string = ftc.language("剩余时间: ") + ftc.calcTimeDelta(void 0, this.data.date1)
                 },
                 tick: function (t) { },
                 onClick: function (t, e) {

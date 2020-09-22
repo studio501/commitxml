@@ -82,7 +82,7 @@ cc.Class((n(number_arr = {
             ftc.isTv() ? this._tickLoad = 1 : this._tickLoad = 4, this.setLayout();
             var t = this.node.getChildByName("view");
             this._content = t.getChildByName("content"), this._partItem = this._content.getChildByName("item"), this._scrollView = this.node.getComponent(cc.ScrollView), this._lineSize = 1, this._contentAnchor = 0, this._partItem.removeFromParent(!1)
-        } else ftc.err("\u672a\u586b\u5199ListView \u4e2d\u7684 ItemName")
+        } else ftc.err("未填写ListView 中的 ItemName")
     },
     _initSize: function () {
         if (this._scrollView.vertical) {

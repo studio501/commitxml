@@ -23,7 +23,7 @@ cc.Class({
     msg: function () {
         this.msg = {
             msgActivityGet: function (t, e) {
-                -1 === t.ret ? ftc.showTip("\u9886\u53d6\u5931\u8d25") : 0 === t.ret && this.partActivity1004.updateData(t.index)
+                -1 === t.ret ? ftc.showTip("领取失败") : 0 === t.ret && this.partActivity1004.updateData(t.index)
             }
         }
     },

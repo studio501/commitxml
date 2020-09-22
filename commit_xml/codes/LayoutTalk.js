@@ -37,7 +37,7 @@ cc.Class({
         this._isAutoTalk = !1, this.tickAdd = 0, this._tickText = !1, this._setNext = !1, this._texts = void 0, this._imgs = void 0, this._names = void 0, 0 == ftc.ManagerData.get1("Player").vip && (ftc.ManagerH5.isH5() ? ftc.ManagerH5.showBanner() : "1" == ftc.callNativeFunction("openAd") && (ft.ExtPlayer.getLevel(), ft.value.com.showAdLevel))
     },
     updateTvTip: function () {
-        ftc.isTv() && (this.nodeButtonList.active || this._isAutoTalk ? this.labelTvTip.node.active = !1 : (this.labelTvTip.node.active = !0, this.labelTvTip.string = "\u3010\u83dc\u5355\u952e\u3011\u5feb\u8fdb\uff0c\u3010\u786e\u5b9a\u952e\u3011\u7ee7\u7eed"))
+        ftc.isTv() && (this.nodeButtonList.active || this._isAutoTalk ? this.labelTvTip.node.active = !1 : (this.labelTvTip.node.active = !0, this.labelTvTip.string = "【菜单键】快进，【确定键】继续"))
     },
     setData: function (t, e, i, n, s) {
         if (this.buttonQuick.node.active = !1, this.buttonClick.interactable = !0, this.nodeButtonList.active = !1, this._callback = i, this._texts = void 0, this.hold = n, this.npcId = s, t && t.length > 0) {

@@ -13,7 +13,7 @@
                     for (var t = 0; t < this.buttonTabs.length; t++) this.addClick(this.buttonTabs[t], !0)
                 },
                 load: function () {
-                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("\u8bbe\u7f6e"), this.node.addChild(this.partTopStatus.node), ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u6807\u7b7e");
+                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("设置"), this.node.addChild(this.partTopStatus.node), ftc.setTvTip(this.node, "【返回键】关闭界面，【菜单键】切换标签");
                     var t = ftc.ManagerData.get1("ManagerMsg").excludeMsg,
                         e = t && t.length > 0 ? t.split(",") : [];
                     ftc.localDay <= 0 || -1 !== e.indexOf(ft.type.activity.exchangeCode.toString()) ? (this.buttonTabs[2].node.active = !1, this.partSettingExchange.node.active = !1) : (this.buttonTabs[2].node.active = !0, this.partSettingExchange.updateData()), this.partSettings = [this.partSettingInfo, this.partSetting, this.partSettingExchange];
@@ -32,7 +32,7 @@
                 msg: function () {
                     this.msg = {
                         mapSetSkin: function (t, e) {
-                            0 === t ? (ftc.showTip("\u8bbe\u7f6e\u6210\u529f"), this.partSettingInfo.updateData()) : ftc.showTip("\u4e3b\u516c\u4e0d\u5b58\u5728")
+                            0 === t ? (ftc.showTip("设置成功"), this.partSettingInfo.updateData()) : ftc.showTip("主公不存在")
                         },
                         openBGMusic: function (t, e) {
                             this.partSetting.openBGMusic(t, e)

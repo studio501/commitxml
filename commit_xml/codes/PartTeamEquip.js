@@ -22,7 +22,7 @@
                 setData: function (t, e) {
                     this.data = t, this.index = e;
                     var i = !!this.data;
-                    this.isChange = !i, this.spriteIcon.node.active = i, this.spriteQuality.node.active = i, this.spriteStar.node.active = i, this.labelLv.node.active = i, this.spriteRedPoint.node.active = !1, this.spriteUp.node.active = !1, i && (this.spriteQuality.spriteFrame = ft.ExtEquip.getQualitySprite(this.data.id), this.spriteIcon.spriteFrame = ft.ExtEquip.getIconSprite(this.data.id), this.spriteStar.spriteFrame = ft.ExtEquip.getStarSprite(this.data.star), this.labelLv.string = this.data.lv + ftc.language("\u7ea7"))
+                    this.isChange = !i, this.spriteIcon.node.active = i, this.spriteQuality.node.active = i, this.spriteStar.node.active = i, this.labelLv.node.active = i, this.spriteRedPoint.node.active = !1, this.spriteUp.node.active = !1, i && (this.spriteQuality.spriteFrame = ft.ExtEquip.getQualitySprite(this.data.id), this.spriteIcon.spriteFrame = ft.ExtEquip.getIconSprite(this.data.id), this.spriteStar.spriteFrame = ft.ExtEquip.getStarSprite(this.data.star), this.labelLv.string = this.data.lv + ftc.language("级"))
                 },
                 getData: function () {
                     return this.data

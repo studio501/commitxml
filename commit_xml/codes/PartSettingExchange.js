@@ -17,7 +17,7 @@
                 },
                 tick: function (t) { },
                 onClick: function (t, e) {
-                    t.target === this.buttonConfirm.node ? this.editBox.string.length > 0 ? (ftc.showWait("\u6b63\u5728\u4f7f\u7528\u5151\u6362\u7801\uff0c\u8bf7\u7a0d\u7b49..."), ftc.send("useCDKey", this.editBox.string)) : ftc.showTip("\u8bf7\u8f93\u5165\u5151\u6362\u7801") : t.target == this.editBox.node && this.editBox.setFocus()
+                    t.target === this.buttonConfirm.node ? this.editBox.string.length > 0 ? (ftc.showWait("正在使用兑换码，请稍等..."), ftc.send("useCDKey", this.editBox.string)) : ftc.showTip("请输入兑换码") : t.target == this.editBox.node && this.editBox.setFocus()
                 }
             })
         

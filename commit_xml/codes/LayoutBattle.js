@@ -79,7 +79,7 @@
                     }
                     ftc.battleView = this, ftc.isIphoneX() ? (this.nodeButtons.width = cc.winSize.width - 100, this.spriteRankBg.node.x = 72, this.nodeRank.x = 72, this.buttonImprint.node.x = 70) : (this.nodeButtons.width = cc.winSize.width, this.spriteRankBg.node.x = 24, this.nodeRank.x = 22, this.buttonImprint.node.x = 40), ftc.ManagerTV.setNotShowOnEnter(this.node);
                     var o = this.buttonExit.node.getComponent(cc.Widget);
-                    ftc.ManagerH5.hasRightTopMenu() ? (o.isAlignRight = !1, o.isAlignLeft = !0, o.left = 38.5) : (o.isAlignRight = !0, o.isAlignLeft = !1, o.left = 6.5), o.updateAlignment(), this.buttonRecordVideo && (1 == ftc.ManagerH5.isOpenRecordVideo() ? (this.buttonRecordVideo.node.active = !0, ftc.recordVideoState ? (this.labelRecordStatus.string = "\u5f55\u5c4f\u4e2d", this.spriteRecordRedPoint.node.active = !0) : (this.labelRecordStatus.string = "\u5f55\u5c4f", this.spriteRecordRedPoint.node.active = !1)) : this.buttonRecordVideo.node.active = !1)
+                    ftc.ManagerH5.hasRightTopMenu() ? (o.isAlignRight = !1, o.isAlignLeft = !0, o.left = 38.5) : (o.isAlignRight = !0, o.isAlignLeft = !1, o.left = 6.5), o.updateAlignment(), this.buttonRecordVideo && (1 == ftc.ManagerH5.isOpenRecordVideo() ? (this.buttonRecordVideo.node.active = !0, ftc.recordVideoState ? (this.labelRecordStatus.string = "录屏中", this.spriteRecordRedPoint.node.active = !0) : (this.labelRecordStatus.string = "录屏", this.spriteRecordRedPoint.node.active = !1)) : this.buttonRecordVideo.node.active = !1)
                 },
                 load: function () {
                     this.spineBigMove1.setEventListener(function (t, e) {
@@ -124,7 +124,7 @@
                     this.updateOrderPos(1, this.battle.pet1), this.updateOrderPos(2, this.battle.pet2), this.updateOrderInfo(1), this.updateOrderInfo(2), this.updatePets()
                 },
                 updateBattleInfo: function () {
-                    this.labelName.string = ftd.Battle.get(this.battle.id, "name"), this.labelBattleName.node.active = !0, this.labelBattleName.node.opacity = 255, this.labelBattleName.string = ftd.Battle.get(this.battle.id, "name"), this.labelBattleLevel.string = this.battle.lv + ftc.language("\u7ea7"), this.labelBattleName.node.runAction(cc.fadeOut(3)), this.labelStage.string = "", this.nodeRepairInfo.active = ftc.ManagerData.get1("ManagerBattle").model == ft.type.battleModel.turns, this.updateRepairIcons([{
+                    this.labelName.string = ftd.Battle.get(this.battle.id, "name"), this.labelBattleName.node.active = !0, this.labelBattleName.node.opacity = 255, this.labelBattleName.string = ftd.Battle.get(this.battle.id, "name"), this.labelBattleLevel.string = this.battle.lv + ftc.language("级"), this.labelBattleName.node.runAction(cc.fadeOut(3)), this.labelStage.string = "", this.nodeRepairInfo.active = ftc.ManagerData.get1("ManagerBattle").model == ft.type.battleModel.turns, this.updateRepairIcons([{
                         type: 1,
                         arr: []
                     }, {
@@ -136,9 +136,9 @@
                     if (ftc.isTv()) {
                         if (ftc.isShowNewGuide()) return void ftc.hideTvTip(this.node);
                         if (this.waitInputCallback) {
-                            var t = "\u3010\u8fd4\u56de\u952e\u3011";
-                            this.nodeBagList.active ? t += "\u53d6\u6d88\u5217\u8868" : this.selectType > -1 ? t += "\u53d6\u6d88\u4f7f\u7528" : t += "\u64a4\u9000", 1 == this.tvZone ? -1 == this.selectType && (t += "\uff0c\u3010\u83dc\u5355\u952e\u3011\u9009\u62e9\u529f\u80fd") : t += "\uff0c\u3010\u83dc\u5355\u952e\u3011\u66f4\u6362\u76ee\u6807", ftc.setTvTip(this.node, t)
-                        } else this.battle.isAuto ? ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u53d6\u6d88\u603b\u653b") : ftc.hideTvTip(this.node)
+                            var t = "【返回键】";
+                            this.nodeBagList.active ? t += "取消列表" : this.selectType > -1 ? t += "取消使用" : t += "撤退", 1 == this.tvZone ? -1 == this.selectType && (t += "，【菜单键】选择功能") : t += "，【菜单键】更换目标", ftc.setTvTip(this.node, t)
+                        } else this.battle.isAuto ? ftc.setTvTip(this.node, "【返回键】取消总攻") : ftc.hideTvTip(this.node)
                     }
                 },
                 updateOrderInfo: function (t) { },
@@ -190,14 +190,14 @@
                     return ftc.ManagerData.get1("ManagerPet")["selectArtifacts" + t].split(",")
                 },
                 updateRoundInfo: function () {
-                    this.labelBattleRound.string = ftc.language("\u56de\u5408:") + this.battle.round + "/" + ftd.Battle.get(this.battle.id, "roundlimit"), 1 === this.battle.id ? ftc.ManagerH5.countEvent("6_3", "\u56de\u5408" + this.battle.round) : 1001 === this.battle.id ? ftc.ManagerH5.countEvent("6_7", "\u56de\u5408" + this.battle.round) : 1002 === this.battle.id ? ftc.ManagerH5.countEvent("6_10", "\u56de\u5408" + this.battle.round) : 1003 === this.battle.id ? ftc.ManagerH5.countEvent("6_13", "\u56de\u5408" + this.battle.round) : 1004 === this.battle.id && ftc.ManagerH5.countEvent("6_16", "\u56de\u5408" + this.battle.round)
+                    this.labelBattleRound.string = ftc.language("回合:") + this.battle.round + "/" + ftd.Battle.get(this.battle.id, "roundlimit"), 1 === this.battle.id ? ftc.ManagerH5.countEvent("6_3", "回合" + this.battle.round) : 1001 === this.battle.id ? ftc.ManagerH5.countEvent("6_7", "回合" + this.battle.round) : 1002 === this.battle.id ? ftc.ManagerH5.countEvent("6_10", "回合" + this.battle.round) : 1003 === this.battle.id ? ftc.ManagerH5.countEvent("6_13", "回合" + this.battle.round) : 1004 === this.battle.id && ftc.ManagerH5.countEvent("6_16", "回合" + this.battle.round)
                 },
                 updateSpeedInfo: function () {
                     var t = ftc.ManagerData.get1("ManagerBattle").speed;
-                    1.5 == t ? t = 2 : 2 == t && (t = 4), this.buttonSpeed.node.getChildByName("Text").getComponent(cc.Label).string = t + ftc.language("\u901f")
+                    1.5 == t ? t = 2 : 2 == t && (t = 4), this.buttonSpeed.node.getChildByName("Text").getComponent(cc.Label).string = t + ftc.language("速")
                 },
                 updateAutoInfo: function () {
-                    this.buttonAuto.node.getChildByName("Text").getComponent(cc.Label).string = 1 == this.battle.isAuto ? ftc.language("\u53d6\u6d88") : ftc.language("\u603b\u653b")
+                    this.buttonAuto.node.getChildByName("Text").getComponent(cc.Label).string = 1 == this.battle.isAuto ? ftc.language("取消") : ftc.language("总攻")
                 },
                 updateRepairIcons: function (t) {
                     for (var e = 0; e < t.length; ++e) {
@@ -236,7 +236,7 @@
                     } else this.nodeBottom.active = !1
                 },
                 updateExtInfo: function () {
-                    this.nodeTip.active && (1 == this.extInfoType ? this.labelExtTip.string = ftc.language("\u5f53\u524d\u603b\u4f24\u5bb3:") + this.battle.totalAttack : 2 == this.extInfoType && (this.labelExtTip.string = ftc.language("\u654c\u65b9\u5f53\u524d\u589e\u4f24:") + 50 * (this.battle.round - 1) + "%")), 1 === this.battle.id ? ftc.ManagerH5.countEvent("6_4") : 1001 === this.battle.id ? ftc.ManagerH5.countEvent("6_8") : 1002 === this.battle.id ? ftc.ManagerH5.countEvent("6_11") : 1003 === this.battle.id ? ftc.ManagerH5.countEvent("6_14") : 1004 === this.battle.id && ftc.ManagerH5.countEvent("6_17")
+                    this.nodeTip.active && (1 == this.extInfoType ? this.labelExtTip.string = ftc.language("当前总伤害:") + this.battle.totalAttack : 2 == this.extInfoType && (this.labelExtTip.string = ftc.language("敌方当前增伤:") + 50 * (this.battle.round - 1) + "%")), 1 === this.battle.id ? ftc.ManagerH5.countEvent("6_4") : 1001 === this.battle.id ? ftc.ManagerH5.countEvent("6_8") : 1002 === this.battle.id ? ftc.ManagerH5.countEvent("6_11") : 1003 === this.battle.id ? ftc.ManagerH5.countEvent("6_14") : 1004 === this.battle.id && ftc.ManagerH5.countEvent("6_17")
                 },
                 getBattleShowSkill: function (t) {
                     var e, i = ft.ExtHero.getPos(t.id),
@@ -250,17 +250,17 @@
                     return this.skillData.skillId = n[0], this.skillData.isOpen = n[1], this.skillData.showLvInfo = !1, n
                 },
                 waitInput: function (t) {
-                    this.waitInputCallback = t, this.itemsPreviewUse = {}, this.setSelectTarget(this.getNextInputHeroEntityId()), this.labelStage.string = ftc.language("\u6218\u6597\u90e8\u7f72\u9636\u6bb5")
+                    this.waitInputCallback = t, this.itemsPreviewUse = {}, this.setSelectTarget(this.getNextInputHeroEntityId()), this.labelStage.string = ftc.language("战斗部署阶段")
                 },
                 switchSelectType: function (t, e, i) {
                     var a, n = this.getCurrentInputHero();
                     if (0 == t) {
                         if (a = e, ft.ExtSkill.getCD(a) > 0 && n.cd > 0) return void ftc.showTip("cd\u672a\u51b7\u5374\uff0c\u65e0\u6cd5\u4f7f\u7528")
                     } else if (1 == t) {
-                        if (a = ft.ExtPet.getStrategySkill(e), ft.ExtPet.getSP(a) > n.curMp) return void ftc.showTip("\u7b56\u7565\u503c\u4e0d\u8db3\uff0c\u65e0\u6cd5\u4f7f\u7528")
+                        if (a = ft.ExtPet.getStrategySkill(e), ft.ExtPet.getSP(a) > n.curMp) return void ftc.showTip("策略值不足，无法使用")
                     } else if (2 == t) a = ft.ExtItem.getSkill(e);
                     else {
-                        if (3 == t) return ftc.showTip("\u9009\u62e9" + ftd.Pet.get(e, "name")), void this.addInputCmd(t, e);
+                        if (3 == t) return ftc.showTip("选择" + ftd.Pet.get(e, "name")), void this.addInputCmd(t, e);
                         if (4 == t || 5 == t) return void this.addInputCmd(t)
                     }
                     i || (i = this.selectTarget);
@@ -270,7 +270,7 @@
                         for (var o in this.cleanAllTarget(), this.cleanAllSelect(), s[1]) this.packHeros[s[1][o].entityId].part.setTarget();
                         return this.nodeBottom.active = !1, this.buttonOrder.node.active = !1, this.buttonBag.node.active = !1, this.buttonExit.node.active = !1, this.buttonImprint.node.active = !1, this.selectType = t, this.selectId = e, ftc.isShowNewGuide() || (this.tvZone = 1, ftc.ManagerTV.nextFrameSelect(s[1][0].button, this.node, this.tvZone)), this.updateTvTip(), !0
                     }
-                    ftc.showTip("\u4e0d\u6ee1\u8db3\u6761\u4ef6\uff0c\u65e0\u6cd5\u4f7f\u7528")
+                    ftc.showTip("不满足条件，无法使用")
                 },
                 setSelectTarget: function (t) {
                     if (void 0 !== t) {
@@ -359,7 +359,7 @@
                                     this.itemsPreviewUse[i[s].id] && (c = this.itemsPreviewUse[i[s].id]), r - c > 0 && a.push(i[s])
                                 }
                             }
-                            if (!(a.length > 0)) return void ftc.showTip("\u6ca1\u6709\u53ef\u4f7f\u7528\u9053\u5177");
+                            if (!(a.length > 0)) return void ftc.showTip("没有可使用道具");
                             a.sort(function (t, e) {
                                 return ft.ExtItem.getIndex(t.id) - ft.ExtItem.getIndex(e.id)
                             }), this.listViewGoods.node.active = !0, this.listViewOrder.node.active = !1, 2 == this.selectType ? this.listViewGoods.updateListViewItems([this.selectId, this.itemsPreviewUse], a) : this.listViewGoods.setListView(a, [0, this.itemsPreviewUse]), ftc.ManagerTV.nextFrameSelect(this.listViewGoods.getItem(0).buttonSelf)
@@ -369,11 +369,11 @@
                                 var f = this.packHeros[s].hero;
                                 1 == f.type && f.curHp > 0 && h++
                             }
-                            if (5 != h) return void ftc.showTip("\u4eba\u6570\u4e0d\u8db3\uff0c\u65e0\u6cd5\u4f7f\u7528\u9635\u6cd5");
+                            if (5 != h) return void ftc.showTip("人数不足，无法使用阵法");
                             var d = ftc.ManagerData.get2("Pet"),
                                 l = [];
                             for (var s in d) 1 === ft.ExtPet.getType(d[s].id) && this.battle.pet1 != d[s].id && l.push(d[s]);
-                            if (!(l.length > 0)) return void ftc.showTip("\u6ca1\u6709\u53ef\u66f4\u6362\u7684\u9635\u6cd5");
+                            if (!(l.length > 0)) return void ftc.showTip("没有可更换的阵法");
                             this.listViewGoods.node.active = !1, this.listViewOrder.node.active = !0, this.listViewOrder.setListView(l), ftc.ManagerTV.nextFrameSelect(this.listViewOrder.getItem(0).buttonSelf)
                         }
                         this._listViewType = e
@@ -393,7 +393,7 @@
                             if (2 == t) {
                                 var a = ftc.ManagerData.get2Object("Item")[e],
                                     n = 0;
-                                if (this.itemsPreviewUse[e] && (n = -this.itemsPreviewUse[e]), a.num + n <= 0) return void ftc.showTip("\u9053\u5177\u4e0d\u8db3");
+                                if (this.itemsPreviewUse[e] && (n = -this.itemsPreviewUse[e]), a.num + n <= 0) return void ftc.showTip("道具不足");
                                 this.itemsPreviewUse[e] || (this.itemsPreviewUse[e] = 0), this.itemsPreviewUse[e]++
                             }
                             var s = this.acts[this.currentActEntityId];
@@ -573,50 +573,50 @@
                     if (!(this._unHandleMsgs.length > 0)) {
                         for (this.showSkillInfo(); ;) {
                             if (t.target === this.buttonRoot.node) {
-                                this.selectType > -1 && (ftc.showTip("\u53d6\u6d88\u9009\u62e9"), this.setSelectTarget(this.getCurrentInputHero().entityId));
+                                this.selectType > -1 && (ftc.showTip("取消选择"), this.setSelectTarget(this.getCurrentInputHero().entityId));
                                 break
                             }
                             if (t.target === this.buttonAuto.node) {
-                                if (this.checkIsForbid(ft.type.battle.forbidAuto, "\u65e0\u6cd5\u4f7f\u7528\u603b\u653b")) break;
+                                if (this.checkIsForbid(ft.type.battle.forbidAuto, "无法使用总攻")) break;
                                 this.waitInputCallback ? this.switchSelectType(5) : ftc.send("battleAuto")
                             } else if (t.target === this.buttonSpeed.node) ftc.send("battleSpeed");
                             else if (t.target === this.buttonExit.node) {
-                                if (this.checkIsForbid(ft.type.battle.forbidExit, 8 === this.battle.pet1 ? "\u80cc\u6c34\u9635\u65e0\u6cd5\u64a4\u9000" : "\u5f53\u524d\u6218\u6597\u65e0\u6cd5\u64a4\u9000")) break;
+                                if (this.checkIsForbid(ft.type.battle.forbidExit, 8 === this.battle.pet1 ? "背水阵无法撤退" : "当前战斗无法撤退")) break;
                                 this.switchSelectType(4)
                             } else if (this.buttonRecordVideo && t.target === this.buttonRecordVideo.node) {
                                 if (ftc.recordVideoState) {
-                                    if (ft.getSysSecond() - this.recordVideoTime <= 3) return void ftc.showTip("\u5f55\u5c4f\u65f6\u957f\u9700\u5927\u4e8e3s")
+                                    if (ft.getSysSecond() - this.recordVideoTime <= 3) return void ftc.showTip("录屏时长需大于3s")
                                 } else ftc.recordVideoState = !0;
-                                this.labelRecordStatus.string = "\u5f55\u5c4f", this.spriteRecordRedPoint.node.active = !1, ftc.ManagerH5.stopRecordScreen(), ftc.ManagerH5.startRecordScreen(function (t) {
-                                    "start" == t ? (ftc.recordVideoTime = ft.getSysSecond(), this.labelRecordStatus.string = "\u5f55\u5c4f\u4e2d", this.spriteRecordRedPoint.node.active = !0) : "end" == t ? (ftc.recordVideoTime = 0, ftc.recordVideoState = !1, this.labelRecordStatus.string = "\u5f55\u5c4f", this.spriteRecordRedPoint.node.active = !1, ftc.ManagerH5.stopRecordScreen(), ftc.ManagerH5.shareVideo()) : "end" == t && (ftc.recordVideoTime = 0, ftc.recordVideoState = !1, this.labelRecordStatus.string = "\u5f55\u5c4f", this.spriteRecordRedPoint.node.active = !1, ftc.ManagerH5.stopRecordScreen())
+                                this.labelRecordStatus.string = "录屏", this.spriteRecordRedPoint.node.active = !1, ftc.ManagerH5.stopRecordScreen(), ftc.ManagerH5.startRecordScreen(function (t) {
+                                    "start" == t ? (ftc.recordVideoTime = ft.getSysSecond(), this.labelRecordStatus.string = "录屏中", this.spriteRecordRedPoint.node.active = !0) : "end" == t ? (ftc.recordVideoTime = 0, ftc.recordVideoState = !1, this.labelRecordStatus.string = "录屏", this.spriteRecordRedPoint.node.active = !1, ftc.ManagerH5.stopRecordScreen(), ftc.ManagerH5.shareVideo()) : "end" == t && (ftc.recordVideoTime = 0, ftc.recordVideoState = !1, this.labelRecordStatus.string = "录屏", this.spriteRecordRedPoint.node.active = !1, ftc.ManagerH5.stopRecordScreen())
                                 }.bind(this))
                             } else if (t.target === this.buttonAttack.node) {
-                                if (this.checkIsForbid(ft.type.battle.forbidAttack, "\u65e0\u6cd5\u4f7f\u7528\u666e\u901a\u653b\u51fb")) break;
+                                if (this.checkIsForbid(ft.type.battle.forbidAttack, "无法使用普通攻击")) break;
                                 this.switchSelectType(0, ft.ExtHero.getNormalAttack(this.getCurrentInputHero().id))
                             } else {
                                 if (t.target === this.buttonBag.node) {
-                                    if (this.checkIsForbid(ft.type.battle.forbidItem, "\u65e0\u6cd5\u4f7f\u7528\u9053\u5177")) break;
+                                    if (this.checkIsForbid(ft.type.battle.forbidItem, "无法使用道具")) break;
                                     return void this.setListVisible(!this.nodeBagList.active, 1)
                                 }
                                 if (t.target === this.buttonOrder.node) {
-                                    if (this.checkIsForbid(ft.type.battle.forbidOrder, "\u65e0\u6cd5\u4f7f\u7528\u9635\u6cd5")) break;
+                                    if (this.checkIsForbid(ft.type.battle.forbidOrder, "无法使用阵法")) break;
                                     return void this.setListVisible(!this.nodeBagList.active, 2)
                                 }
                                 if (t.target === this.buttonSkill.node) {
-                                    if (this.checkIsForbid(ft.type.battle.forbidSkill, "\u65e0\u6cd5\u4f7f\u7528\u6280\u80fd")) break;
+                                    if (this.checkIsForbid(ft.type.battle.forbidSkill, "无法使用技能")) break;
                                     var e = this.getBattleShowSkill(this.getCurrentInputHero()),
                                         i = e[0],
                                         a = e[1];
-                                    i && (ft.ExtSkill.getSkillType(i) == ft.type.skill.zd ? a ? this.switchSelectType(0, i) : ftc.showTip("\u6280\u80fd\u672a\u5f00\u653e") : ftc.showTip("\u88ab\u52a8\u6280\u80fd"))
+                                    i && (ft.ExtSkill.getSkillType(i) == ft.type.skill.zd ? a ? this.switchSelectType(0, i) : ftc.showTip("技能未开放") : ftc.showTip("被动技能"))
                                 } else if (t.target === this.buttonImprint.node) ftc.loadLayout("LayoutCopySkill");
                                 else if (this.waitInputCallback) {
                                     for (var n in this.packHeros)
                                         if (t.target == this.packHeros[n].button.node) {
-                                            if (this.selectType > -1) this.packHeros[n].part.nodeTarget.active ? this.switchSelectType(this.selectType, this.selectId, n) : ftc.showTip("\u8bf7\u9009\u62e9\u5f85\u9009\u6846\u4e2d\u7684\u6b66\u5c06");
+                                            if (this.selectType > -1) this.packHeros[n].part.nodeTarget.active ? this.switchSelectType(this.selectType, this.selectId, n) : ftc.showTip("请选择待选框中的武将");
                                             else {
-                                                if (1 == this.packHeros[n].hero.type) return void (this.acts[n] ? this.setSelectTarget(n) : ftc.showTip("\u8be5\u6b66\u5c06\u65e0\u6cd5\u884c\u52a8"));
+                                                if (1 == this.packHeros[n].hero.type) return void (this.acts[n] ? this.setSelectTarget(n) : ftc.showTip("该武将无法行动"));
                                                 if (this.selectTarget == n) {
-                                                    if (this.checkIsForbid(ft.type.battle.forbidAttack, "\u65e0\u6cd5\u4f7f\u7528\u666e\u901a\u653b\u51fb")) break;
+                                                    if (this.checkIsForbid(ft.type.battle.forbidAttack, "无法使用普通攻击")) break;
                                                     this.switchSelectType(0, ft.ExtHero.getNormalAttack(this.getCurrentInputHero().id))
                                                 } else this.updateSelectTarget(n)
                                             }
@@ -627,7 +627,7 @@
                                             s = n;
                                             break
                                         } if (s > -1) {
-                                            if (this.checkIsForbid(ft.type.battle.forbidStrategy, "\u65e0\u6cd5\u4f7f\u7528\u7b56\u7565")) break;
+                                            if (this.checkIsForbid(ft.type.battle.forbidStrategy, "无法使用策略")) break;
                                             var o = this.getCommonSkills()[s];
                                             this.switchSelectType(1, o)
                                         }
@@ -718,7 +718,7 @@
                         battleInputCmd: function (t, e) {
                             this.acts = t.acts, this.waitInput(function (t) {
                                 for (var e in this.waitInputCallback = void 0, this.nodeBottom.active = !1, this.buttonOrder.node.active = !1, this.buttonBag.node.active = !1, this.buttonExit.node.active = !1, this.buttonImprint.node.active = !1, this.packHeros) this.packHeros[e].part.cleanSelect(), this.packHeros[e].part.cleanTarget();
-                                ftc.isTv() && (this.buttonAuto.node.active = !1, this.buttonSpeed.node.active = !1, ftc.ManagerTV.updateSelect()), ftc.send("battleInputCmd", t), this.labelStage.string = ftc.language("\u6218\u6597\u6267\u884c\u9636\u6bb5")
+                                ftc.isTv() && (this.buttonAuto.node.active = !1, this.buttonSpeed.node.active = !1, ftc.ManagerTV.updateSelect()), ftc.send("battleInputCmd", t), this.labelStage.string = ftc.language("战斗执行阶段")
                             })
                         },
                         battleRoundStart: function (t, e) {
@@ -792,7 +792,7 @@
                                 var i, a = this.newPart("PartBattleBoom"),
                                     n = t.actor;
                                 a.setData(t.id, t.playId, t.from, t.targets, 2 == t.from.hero.type ? -1 : 1, !1, t.hitAct), 2 == t.pos ? (i = this.getBattleCenterPos(n.hero.type), a.node.x = i.x, a.node.y = i.y) : (a.node.x = n.button.node.x, a.node.y = n.button.node.y), a.node.angle = 0, this.nodeHeros.addChild(a.node), 1 == t.downLayer ? a.node.zIndex = 10 : a.node.zIndex = 103
-                            } else ftc.err("\u9519\u8bef\uff1ac_boom" + t.id + ",from=" + t.from + ",actor=" + t.actor)
+                            } else ftc.err("错误：c_boom" + t.id + ",from=" + t.from + ",actor=" + t.actor)
                         },
                         c_hp: function (t, e) {
                             var i = t.actor.newHpart(t.hurt, t.bj, t.type);

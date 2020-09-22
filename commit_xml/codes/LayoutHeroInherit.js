@@ -39,10 +39,10 @@
                 msg: function () {
                     this.msg = {
                         c_onSelectListHeroItem: function (t, e) {
-                            this.data.id === t.data.id ? ftc.showTip("\u4e0d\u53ef\u4ee5\u4f20\u627f\u81ea\u5df1") : (this.selectedHero = t.data, this.partInheritHeroes[0].setSelectedHero(t.data, this.rate), this.partInheritHeroes[1].setSelectedHero(t.data, this.rate))
+                            this.data.id === t.data.id ? ftc.showTip("不可以传承自己") : (this.selectedHero = t.data, this.partInheritHeroes[0].setSelectedHero(t.data, this.rate), this.partInheritHeroes[1].setSelectedHero(t.data, this.rate))
                         },
                         heroInherit: function (t, e) {
-                            0 === t ? (ftc.showTip("\u4f20\u627f\u6210\u529f"), ftc.playEffect(ftc.type.effect.heroUp), this.updateData()) : 1 === t ? this.inheritType === ft.type.inherit.all ? ftc.showTip("\u5143\u5b9d\u4e0d\u8db3") : this.inheritType === ft.type.inherit.all && ftc.showTip("\u94f6\u5e01\u4e0d\u8db3") : 2 === t && ftc.showTip("\u8bf7\u9009\u62e9\u4f20\u627f\u6b66\u5c06")
+                            0 === t ? (ftc.showTip("传承成功"), ftc.playEffect(ftc.type.effect.heroUp), this.updateData()) : 1 === t ? this.inheritType === ft.type.inherit.all ? ftc.showTip("元宝不足") : this.inheritType === ft.type.inherit.all && ftc.showTip("银币不足") : 2 === t && ftc.showTip("请选择传承武将")
                         }
                     }
                 },
@@ -51,7 +51,7 @@
                         id: this.data.id,
                         id2: this.selectedHero.id,
                         type: this.inheritType
-                    }) : ftc.showTip("\u6b66\u5c06\u65e0\u7ecf\u9a8c\uff0c\u65e0\u6cd5\u4f20\u627f") : ftc.showTip("\u8bf7\u9009\u62e9\u4f20\u627f\u6b66\u5c06") : ftc.showTip("\u82f1\u96c4\u5df2\u7ecf\u8fbe\u5230\u73a9\u5bb6\u4e0a\u9650") : t.target !== this.buttonClose.node && t.target !== this.buttonSelf.node || this.cancel()
+                    }) : ftc.showTip("武将无经验，无法传承") : ftc.showTip("请选择传承武将") : ftc.showTip("英雄已经达到玩家上限") : t.target !== this.buttonClose.node && t.target !== this.buttonSelf.node || this.cancel()
                 }
             })
         

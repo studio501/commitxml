@@ -10,7 +10,7 @@
                 return i
             }, ft.ExtJewel.getColorType = function (t) {
                 var e = this.getName(t);
-                return e.startsWith("\u7eff") ? ft.type.jewel.green : e.startsWith("\u84dd") ? ft.type.jewel.blue : e.startsWith("\u7d2b") ? ft.type.jewel.violet : e.startsWith("\u9ec4") ? ft.type.jewel.yellow : void 0
+                return e.startsWith("绿") ? ft.type.jewel.green : e.startsWith("蓝") ? ft.type.jewel.blue : e.startsWith("紫") ? ft.type.jewel.violet : e.startsWith("黄") ? ft.type.jewel.yellow : void 0
             }, ft.ExtJewel.getJewel = function (t, e) {
                 var i = ftc.ManagerData.get2("Jewel");
                 for (var a in i) {

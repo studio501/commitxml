@@ -1,7 +1,7 @@
 
 
 window.ftc = window.ftc || {}, ftc.firstViewName = "LayoutLoading", ftc.ActiveNative = !0, ftc.RestoreNodeTime = 18e4, ftc.PartItem = t("PartItem"), ftc.guideCache = [], ftc.mapDialogNoTip = {}, ftc.partWait = null, ftc.resURL = "https://cdn.ftaro.com/activity/0/", ftc.PartHeroWidth = 128, ftc.PartHeroHeight = 116, ftc.isOpenPayView = !1, ftc._nodeAchievementTipBuffers = [], ftc.StandardSpeed = 0, ftc.startShareKingWar = function (t) {
-    ftc.ManagerH5.isH5() ? ftc.ManagerH5.startShare(t) : ftc.startShare(ftc.language("\u5c0f\u9738\u738b\u300a\u541e\u98df\u5929\u5730\u300b\u590d\u523b\u7248\uff0c\u624b\u673a\u4e0a\u4e5f\u80fd\u73a9\u4e86"), ftc.language("\u8fd8\u8bb0\u5f97fc\u7ecf\u5178\u6e38\u620f\u300a\u541e\u98df\u5929\u5730\u300b\u5427\uff1f\u51fa\u624b\u673a\u91cd\u5236\u7248\u4e86\u5466\uff0c\u5267\u60c5\u3001\u73a9\u6cd5\u9ad8\u5ea6\u8fd8\u539f\uff0c\u8ba9\u4f60\u91cd\u65b0\u62fe\u8d77\u7ae5\u5e74\u7684\u8bb0\u5fc6\u3002")), ftc.ManagerRes.findLayout("LayoutActivity") && (ftc.delaySuccessShare = 3)
+    ftc.ManagerH5.isH5() ? ftc.ManagerH5.startShare(t) : ftc.startShare(ftc.language("小霸王《吞食天地》复刻版，手机上也能玩了"), ftc.language("还记得fc经典游戏《吞食天地》吧？出手机重制版了呦，剧情、玩法高度还原，让你重新拾起童年的记忆。")), ftc.ManagerRes.findLayout("LayoutActivity") && (ftc.delaySuccessShare = 3)
 }, ftc.showTip = function (t, e) {
     (t || 0 === t) && void 0 !== (t = ftc.language(t, e)) && null !== t && ftc.ManagerRes.newPart("PartTip", "PartTip", ftc.scene, function (e) {
         e.show({
@@ -11,7 +11,7 @@ window.ftc = window.ftc || {}, ftc.firstViewName = "LayoutLoading", ftc.ActiveNa
     }, "_ftaro")
 }, ftc.showErrorDialog = function () {
     ftc.showDialog({
-        text: "\u5f88\u62b1\u6b49\uff0c\u7a0b\u5e8f\u4e0d\u5c0f\u5fc3\u51fa\u9519\u4e86!",
+        text: "很抱歉，程序不小心出错了!",
         clickOk: function () {
             ftc.sysEnd()
         }
@@ -87,13 +87,13 @@ window.ftc = window.ftc || {}, ftc.firstViewName = "LayoutLoading", ftc.ActiveNa
 }, ftc.openBuyGem = function () {
     if (ftc.ManagerH5.isH5() && 1 != ftc.ManagerH5.openPay()) {
         if (807 !== ftc.getSourceId() || 809 !== ftc.getSourceId()) {
-            var t = "\u8be5\u6e20\u9053\u6682\u4e0d\u652f\u6301\u5145\u503c\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\n\u5fae\u4fe1\u53f7:18067965129";
-            810 === ftc.getSourceId() && (t = "\u8be5\u6e20\u9053\u6682\u4e0d\u652f\u6301\u5145\u503c\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d"), ftc.showDialog({
+            var t = "该渠道暂不支持充值，请联系客服\n微信号:18067965129";
+            810 === ftc.getSourceId() && (t = "该渠道暂不支持充值，请联系客服"), ftc.showDialog({
                 text: t,
                 click1: function () { }
             })
         }
-    } else 1 == ftc.callNativeFunction("getProductPrices") ? ftc.showTip("\u672a\u83b7\u53d6\u5230\u5546\u54c1\u5217\u8868\uff0c\u8bf7\u7a0d\u540e\u518d\u8bd5") : ftc.loadLayout("LayoutBuyGem", void 0, {
+    } else 1 == ftc.callNativeFunction("getProductPrices") ? ftc.showTip("未获取到商品列表，请稍后再试") : ftc.loadLayout("LayoutBuyGem", void 0, {
         hide: !0
     })
 }, ftc.startLoading = function () {
@@ -148,7 +148,7 @@ window.ftc = window.ftc || {}, ftc.firstViewName = "LayoutLoading", ftc.ActiveNa
         s = Math.floor(n / 36e5),
         o = n % 36e5,
         r = Math.floor(o / 6e4);
-    return a > 0 ? a + "\u5929" + s + "\u5c0f\u65f6" : s > 0 ? s + "\u5c0f\u65f6" + r + "\u5206\u949f" : r > 0 ? r + "\u5206\u949f" : "0\u5206\u949f"
+    return a > 0 ? a + "天" + s + "小时" : s > 0 ? s + "小时" + r + "分钟" : r > 0 ? r + "分钟" : "0\u5206\u949f"
 }, ftc.calcSecondDelta = function (t, e) {
     return t || (t = new Date(1e3 * ftc.getLocalTime())), e = new Date(e), Math.floor((e.getTime() - t.getTime()) / 1e3)
 }, ftc.convertTime2Tip = function (t) { }, ftc.replaceDigitColor = function (t, e) {

@@ -40,7 +40,7 @@
                 },
                 updateTip: function () { },
                 onClick: function (t, e) {
-                    t.target === this.buttonConfirm.node ? (this.callback && this.callback(this.selectedItemIndex), this.cancel()) : t.target === this.buttonClose.node && ftc.showTip("\u8bf7\u9009\u62e9\u5956\u52b1")
+                    t.target === this.buttonConfirm.node ? (this.callback && this.callback(this.selectedItemIndex), this.cancel()) : t.target === this.buttonClose.node && ftc.showTip("请选择奖励")
                 }
             })
         

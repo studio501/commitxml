@@ -76,7 +76,7 @@
                                     else 1 === ft.rand(2) && (this.openAdBox = ftc.haveFullAd);
                                 else this.buttonAd1.node.active = ftc.haveFullAd
                     }
-                    this.labelLv.string = this.data.newLvl + ftc.language("\u7ea7"), this.progressLv.progress = this.data.newExp / ft.ExtPlayer.getNextExp(this.data.newLvl);
+                    this.labelLv.string = this.data.newLvl + ftc.language("级"), this.progressLv.progress = this.data.newExp / ft.ExtPlayer.getNextExp(this.data.newLvl);
                     var r = 0;
                     for (o = this.data.oldLvl; o < this.data.newLvl; o++) r += ft.ExtPlayer.getNextExp(o);
                     r = r - this.data.oldExp + this.data.newExp, this.labelExp.string = "+0", this.addExp = r, this.addedExp = 0, this.expAdd = Math.ceil(r / 60)
@@ -90,7 +90,7 @@
                         if (a[n]) this.heroItems[n].node.active = !0, this.data.heros && (o = this.data.heros[a[n].id]), s = a[n].id == this.data.maxHurtHero, this.heroItems[n].setData(a[n], this.data.win, o, s, e);
                         else this.heroItems[n].node.active = !1
                     }
-                    this.data.teamSize > 1 && ft.ExtHero.getIsOpenTeam(1) ? (this.buttonLeft.node.active = this.teamIndex > 0, this.buttonRight.node.active = this.teamIndex < this.data.teamSize - 1, ftc.setTvTip(this.node, "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u663e\u793a\u961f\u4f0d")) : (this.buttonLeft.node.active = !1, this.buttonRight.node.active = !1, ftc.setTvTip(this.node))
+                    this.data.teamSize > 1 && ft.ExtHero.getIsOpenTeam(1) ? (this.buttonLeft.node.active = this.teamIndex > 0, this.buttonRight.node.active = this.teamIndex < this.data.teamSize - 1, ftc.setTvTip(this.node, "【返回键】关闭界面，【菜单键】切换显示队伍")) : (this.buttonLeft.node.active = !1, this.buttonRight.node.active = !1, ftc.setTvTip(this.node))
                 },
                 setAwardInfo: function () {
                     for (var t = [], e = [], i = 0; i < this.data.items.length; i++) ft.ExtItem.getType(this.data.items[i][0]) !== ft.type.item.base && this.data.items[i][0] !== ft.value.item.exp && (t.push(this.data.items[i][0]), e.push(this.data.items[i][1]));
@@ -115,7 +115,7 @@
                 msg: function () {
                     this.msg = {
                         heroRefreshStatus: function (t, e) {
-                            0 === t ? this.updateData() : -1 === t && ftc.showTip("\u9ad8\u7ea7\u91ce\u8425\u5e10\u6570\u91cf\u4e0d\u8db3")
+                            0 === t ? this.updateData() : -1 === t && ftc.showTip("高级野营帐数量不足")
                         },
                         heroAdRefreshStatus: function (t, e) {
                             this.buttonAd1.node.active = !1, this.updateData()
@@ -133,10 +133,10 @@
                     else if (t.target === this.buttonRight.node) this.teamIndex < this.data.teamSize - 1 && (this.teamIndex++, this.setTeamInfo(this.teamIndex));
                     else if (t.target === this.buttonRefresh.node) ft.ExtItem.getNum(ft.value.item.yeYingZhang1) + ft.ExtItem.getNum(ft.value.item.yeYingZhang2) ? ftc.loadLayout("LayoutDialogTip2", function (t) {
                         t.setData(2)
-                    }) : ftc.showTip("\u91ce\u8425\u5e10\u6570\u91cf\u4e0d\u8db3");
+                    }) : ftc.showTip("野营帐数量不足");
                     else if (t.target === this.buttonAd1.node) {
                         var i;
-                        i = ftc.ManagerH5.isH5() ? ftc.ManagerH5.showFull(1) : ftc.callNativeFunction("showFull", ft.type.fullAd.battleResult), ftc.ManagerH5.countEvent("9_1"), "1" != i ? ftc.showTip("\u6682\u65e0\u5e7f\u544a\uff0c\u8bf7\u7a0d\u540e\u518d\u8bd5") : ftc.watchingAd = !0
+                        i = ftc.ManagerH5.isH5() ? ftc.ManagerH5.showFull(1) : ftc.callNativeFunction("showFull", ft.type.fullAd.battleResult), ftc.ManagerH5.countEvent("9_1"), "1" != i ? ftc.showTip("暂无广告，请稍后再试") : ftc.watchingAd = !0
                     }
                 },
                 onKeyMenu: function (t) {

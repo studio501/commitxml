@@ -37,7 +37,7 @@
                         } else {
                             var h;
                             (h = this.newPart("PartItem")).node.scale = .8, h.setData(o[e], r[e], !0), h.setNameColor(cc.Color.WHITE), this.layoutItems.addChild(h.node, e)
-                        } this.buttonLeft.node.active = this.index > this.startIndex, this.buttonRight.node.active = this.index < i.length - 1, this.progressBar.progress < 1 ? this.buttonRecharge.node.getChildByName("Label").getComponent(cc.Label).string = ftc.language("\u524d\u5f80\u5145\u503c") : (this.buttonRecharge.node.getChildByName("Label").getComponent(cc.Label).string = ftc.language("\u9886\u53d6"), this.buttonRecharge.interactable = this.data.ext == this.index)
+                        } this.buttonLeft.node.active = this.index > this.startIndex, this.buttonRight.node.active = this.index < i.length - 1, this.progressBar.progress < 1 ? this.buttonRecharge.node.getChildByName("Label").getComponent(cc.Label).string = ftc.language("前往充值") : (this.buttonRecharge.node.getChildByName("Label").getComponent(cc.Label).string = ftc.language("领取"), this.buttonRecharge.interactable = this.data.ext == this.index)
                 },
                 cleanup: function () { },
                 updateData: function () {

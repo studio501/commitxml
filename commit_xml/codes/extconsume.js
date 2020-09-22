@@ -43,7 +43,7 @@
             }, ft.ExtConsume.getCondition = function (t) {
                 if (this.getType(t) === ft.type.consume.equip) {
                     var e = this.getItems(t, 1);
-                    return "\u62e5\u6709" + ft.ExtItem.getName(e.ids[0]) + "\u540e\u89e3\u9501"
+                    return "拥有" + ft.ExtItem.getName(e.ids[0]) + "后解锁"
                 }
                 return ""
             })

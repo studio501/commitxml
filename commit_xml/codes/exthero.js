@@ -41,17 +41,17 @@
                 return t > 5 && (t = 5), ftc.ManagerRes.getSpriteFrame("program", "common_icon_xing" + t)
             }, ft.ExtHero.getStarInfo = function (t, e) {
                 var i = "";
-                if (1 === e) i = "\u3010\u4e00\u661f\u3011 \u89e3\u9501\u6b66\u5c06\u6280\u80fd";
-                else if (2 === e) i = "\u3010\u4e8c\u661f\u3011 \u6280\u80fd\u4e00\u63d0\u53471\u7ea7";
+                if (1 === e) i = "【一星】 解锁武将技能";
+                else if (2 === e) i = "【二星】 技能一提升1级";
                 else if (3 === e) {
                     var a = ft.ExtHero.getGrowth(t),
                         n = ftd.Growth.get(a, "type");
-                    i = 1 == n ? "\u3010\u4e09\u661f\u3011 \u6b66\u529b\u4e0a\u534715%" : 2 == n ? "\u3010\u4e09\u661f\u3011 \u667a\u529b\u4e0a\u534715%" : "\u3010\u4e09\u661f\u3011 \u5175\u529b\u4e0a\u534715%"
-                } else 4 === e ? i = "\u3010\u56db\u661f\u3011 \u6280\u80fd\u4e00\u63d0\u53471\u7ea7" : 5 === e && (i = "\u3010\u4e94\u661f\u3011 \u6b66\u5c06\u5175\u529b\u4e0a\u534715%");
+                    i = 1 == n ? "【三星】 武力上升15%" : 2 == n ? "【三星】 智力上升15%" : "【三星】 兵力上升15%"
+                } else 4 === e ? i = "【四星】 技能一提升1级" : 5 === e && (i = "【五星】 武将兵力上升15%");
                 return i
             }, ft.ExtHero.getBiographyInfo = function (t) {
                 var e = "";
-                return 1 === t ? e = "+50\u70b9\u7b56\u7565" : 2 === t ? e = "+10%\u5175\u529b" : 3 === t ? e = "+5%\u6b66\u529b\u548c\u667a\u529b" : 4 === t ? e = "\u8dd1\u56fe\u5f62\u8c61\u548c\u8b66\u6212\u8ba1+1s" : 5 === t ? e = "\u6b66\u5c06\u5934\u50cf" : 6 === t && (e = "+5%\u66b4\u51fb\u4f24\u5bb3"), e
+                return 1 === t ? e = "+50\u70b9\u7b56\u7565" : 2 === t ? e = "+10%\u5175\u529b" : 3 === t ? e = "+5%\u6b66\u529b\u548c\u667a\u529b" : 4 === t ? e = "跑图形象和警戒计+1s" : 5 === t ? e = "武将头像" : 6 === t && (e = "+5%\u66b4\u51fb\u4f24\u5bb3"), e
             }, ft.ExtHero.getPos = function (t) {
                 return ftc.ManagerData.get1("ManagerHero").teamIds.split(",").indexOf(t.toString())
             }, ft.ExtHero.getFight = function (t) {
@@ -172,7 +172,7 @@
                                 for (var c = 0; c < r.length; c++) o && e >= r[c] ? a += "<color=#63ff3f>" + ft.replaceAll(ft.ExtSkill.getInfo(r[c]), "|", "\n") + "</c>\n" : a += "<color=#FFE9D1>" + ft.replaceAll(ft.ExtSkill.getInfo(r[c]), "|", "\n") + "</c>\n";
                             if (1 === ft.ExtSkill.getSkillType(e)) {
                                 var h = ft.ExtSkill.getCD(e);
-                                if (h > 0) n += "\u51b7\u5374:" + h + "\u56de\u5408", n += "\n\u6218\u524d\u51b7\u5374:" + ft.ExtSkill.getPreCD(e) + "\u56de\u5408"
+                                if (h > 0) n += "冷却:" + h + "回合", n += "\n\u6218\u524d\u51b7\u5374:" + ft.ExtSkill.getPreCD(e) + "回合"
                             }
                         }
                         break

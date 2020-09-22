@@ -28,7 +28,7 @@
                             n = i.nums;
                         if (a[0] && n[0]) {
                             var s = ft.ExtItem.getNum(a[0]);
-                            this.progressBar.node.active = !0, this.progressBar.progress = s / n[0], this.labelProgress.string = s + "/" + n[0], this.labelName.string = ft.ExtHero.getName(this.data.id) + ftc.language("\u788e\u7247")
+                            this.progressBar.node.active = !0, this.progressBar.progress = s / n[0], this.labelProgress.string = s + "/" + n[0], this.labelName.string = ft.ExtHero.getName(this.data.id) + ftc.language("碎片")
                         }
                     } else this.progressBar.node.active = !1, this.labelProgress.string = ""
                 },
@@ -36,7 +36,7 @@
                 updateData: function () { },
                 tick: function (t) { },
                 onClick: function (t, e) {
-                    t.target === this.buttonStarUp.node && (this.data.star == ft.value.com.maxHeroStar ? ftc.showTip("\u5df2\u5347\u81f3\u6700\u9ad8") : this.progressBar.progress < 1 ? ftc.showTip("\u788e\u7247\u4e0d\u8db3") : ftc.send("heroStar", {
+                    t.target === this.buttonStarUp.node && (this.data.star == ft.value.com.maxHeroStar ? ftc.showTip("已升至最高") : this.progressBar.progress < 1 ? ftc.showTip("碎片不足") : ftc.send("heroStar", {
                         id: this.data.id,
                         up: 1
                     }))

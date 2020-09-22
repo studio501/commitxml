@@ -46,10 +46,10 @@
                     for (var t = this.data.ste.split(","), e = this.data.ext.split(","), i = Number(e[0]), a = 0, n = 0; n < this.partItems.length; n++) {
                         this.partItems[n].setCallback(), 1 === Number(t[n]) ? this.partItems[n].setStatus(1) : i >= this.activity.points[n] ? (this.partItems[n].setStatus(2), this.partItems[n].setCallback(this.awardGet.bind(this), n)) : this.partItems[n].setStatus(0), this.spriteRedPoints[n].node.active = i > this.activity.points[n], this.spriteRedPoints[n].node.active && a++
                     }
-                    this.progressBar.progress = i / this.activity.points[this.activity.points.length - 1], this.labelInfo1.node.active = a < this.activity.points.length, this.labelInfo1.node.active && (this.labelInfo1.string = "\u8ddd\u79bb\u4e0b\u6b21\u5956\u52b1:" + (this.activity.points[a] - i)), this.labelInfo2.string = "\u4eca\u65e5\u6700\u9ad8\u79ef\u5206:" + e[1], this.labelInfo3.string = "\u5386\u53f2\u6700\u9ad8\u79ef\u5206:" + ftapp.getItem("game_2_highest_score", 0), this.labelInfo4.string = "\u6bcf\u65e5\u6700\u9ad8\u79ef\u5206\u7d2f\u8ba1:" + i, this.updateDate()
+                    this.progressBar.progress = i / this.activity.points[this.activity.points.length - 1], this.labelInfo1.node.active = a < this.activity.points.length, this.labelInfo1.node.active && (this.labelInfo1.string = "距离下次奖励:" + (this.activity.points[a] - i)), this.labelInfo2.string = "今日最高积分:" + e[1], this.labelInfo3.string = "历史最高积分:" + ftapp.getItem("game_2_highest_score", 0), this.labelInfo4.string = "每日最高积分累计:" + i, this.updateDate()
                 },
                 updateDate: function () {
-                    this.labelDate.string = ftc.language("\u5269\u4f59\u65f6\u95f4: ") + ftc.calcTimeDelta(void 0, this.data.date1)
+                    this.labelDate.string = ftc.language("剩余时间: ") + ftc.calcTimeDelta(void 0, this.data.date1)
                 },
                 awardGet: function (t) {
                     ftc.send("msgActivityGet", {

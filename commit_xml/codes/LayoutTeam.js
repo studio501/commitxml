@@ -38,7 +38,7 @@
                     this.panelHeroList.getComponent(cc.Widget).enabled = !1, ftc.isIphoneX() ? this.panelHeroList.x = 117 : this.panelHeroList.x = 67
                 },
                 load: function () {
-                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("\u7f16\u961f"), this.node.addChild(this.partTopStatus.node), this.selectTeamTab(0);
+                    this.partTopStatus = this.newPart("PartTopStatus"), this.partTopStatus.setTitle("编队"), this.node.addChild(this.partTopStatus.node), this.selectTeamTab(0);
                     for (var t = 0; t < this.teamEquips.length; t++) this.initPart(this.teamEquips[t]);
                     this.initPart(this.PartHeroDetail), this.initPart(this.partFight);
                     var e = ftc.ManagerData.get2Object("Item");
@@ -67,7 +67,7 @@
                     } else 1 === t && ftc.showTip("3\u5468\u76ee\u5f00\u653e\u961f\u4f0d\u4e8c")
                 },
                 updateTvTip: function () {
-                    var t = "\u3010\u8fd4\u56de\u952e\u3011\u5173\u95ed\u754c\u9762\uff0c\u3010\u83dc\u5355\u952e\u3011\u5207\u6362\u961f\u4f0d";
+                    var t = "【返回键】关闭界面，【菜单键】切换队伍";
                     0 == this.teamIndex ? t += "2" : t += "1", ftc.setTvTip(this.node, t)
                 },
                 setHeroList: function (t, e) {
@@ -86,7 +86,7 @@
                         a = e.lv,
                         n = e.up,
                         s = e.star;
-                    this.spriteCountry.spriteFrame = ft.ExtHero.getCountrySprite(i), this.spriteWeapon.spriteFrame = ft.ExtHero.getWeaponSprite(i), this.spriteName.spriteFrame = ft.ExtHero.getNameSprite(i), this.spriteName.node.color = ft.ExtHero.getNameColor(i), this.spritePlus.node.active = n > 0, n > 0 && (this.spritePlus.spriteFrame = ft.ExtHero.getUpSprite(n), this.spritePlus.node.active = !!this.spritePlus.spriteFrame, this.spritePlus.node.color = ft.ExtHero.getNameColor(i)), this.labelLv.string = a + ftc.language("\u7ea7"), this.progressLv.node.active = e.id, this.progressLv.progress = Math.round(e.exp) / ft.ExtHero.getNextExp(a), this.labelExp.string = ft.getNumShow(Math.round(e.exp)) + "/" + ft.getNumShow(ft.ExtHero.getNextExp(a)), this.buttonCommander.interactable = ftc.ManagerData.get1("ManagerHero")["commander" + this.teamIndex] != i;
+                    this.spriteCountry.spriteFrame = ft.ExtHero.getCountrySprite(i), this.spriteWeapon.spriteFrame = ft.ExtHero.getWeaponSprite(i), this.spriteName.spriteFrame = ft.ExtHero.getNameSprite(i), this.spriteName.node.color = ft.ExtHero.getNameColor(i), this.spritePlus.node.active = n > 0, n > 0 && (this.spritePlus.spriteFrame = ft.ExtHero.getUpSprite(n), this.spritePlus.node.active = !!this.spritePlus.spriteFrame, this.spritePlus.node.color = ft.ExtHero.getNameColor(i)), this.labelLv.string = a + ftc.language("级"), this.progressLv.node.active = e.id, this.progressLv.progress = Math.round(e.exp) / ft.ExtHero.getNextExp(a), this.labelExp.string = ft.getNumShow(Math.round(e.exp)) + "/" + ft.getNumShow(ft.ExtHero.getNextExp(a)), this.buttonCommander.interactable = ftc.ManagerData.get1("ManagerHero")["commander" + this.teamIndex] != i;
                     for (var o = 0; o < this.spriteStars.length; o++) this.spriteStars[o].spriteFrame = ftc.ManagerRes.getSpriteFrame("program", s > o ? "com_star" : "com_stargray");
                     this.loadResource(ft.ExtHero.getSpineRes(i), sp.SkeletonData, function (t) {
                         t && (this.spineHero.skeletonData = null, this.spineHero.skeletonData = t, this.spineHero.setAnimation(0, "w1", !0))
@@ -149,7 +149,7 @@
                                         datas: i,
                                         pos: this.selectedIndex + this.teamIndex * ft.value.com.maxHeroNum
                                     })
-                                }.bind(this)) : ftc.showTip("\u65e0\u9002\u7528\u88c5\u5907")
+                                }.bind(this)) : ftc.showTip("无适用装备")
                             }
                         },
                         c_onClickTeamEquip2: function (t, e) {
@@ -192,7 +192,7 @@
                 },
                 onClick: function (t, e) {
                     if (t.target === this.buttonTeam.node) this.setTeamTabVisible(this.spriteButtonTeamBg.node.y < 0);
-                    else if (t.target === this.buttonRecord.node) ftc.showTip("\u672a\u5f00\u653e"), this.setTeamTabVisible(!1);
+                    else if (t.target === this.buttonRecord.node) ftc.showTip("未开放"), this.setTeamTabVisible(!1);
                     else if (t.target === this.buttonCommander.node) ftc.send("heroCommander", {
                         id: this.selectedData.id,
                         team: this.teamIndex

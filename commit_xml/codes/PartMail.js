@@ -82,7 +82,7 @@
                         if (i > 0) {
                             for (var a = [], n = 0; n < i; n++) a.push(this.listView.getDatas()[n].entityId);
                             ftc.send("msgReceive", a)
-                        } else ftc.showTip("\u6ca1\u6709\u90ae\u4ef6")
+                        } else ftc.showTip("没有邮件")
                     } else if (t.target === this.buttonDelete.node) {
                         (s = this.listView.getDatas()[this._index]) && ftc.send("msgDelete", s.entityId)
                     } else if (t.target === this.buttonGet.node) {

@@ -36,13 +36,13 @@
                     if (i) {
                         var a = i.split(";")[0];
                         if (a && a.startsWith("[")) {
-                            for (var n = JSON.parse(a), s = ft.toArray(n[0]), o = ft.toArray(n[1]), r = "\u9700\u8981", c = 0; c < s.length; c++) r += ft.ExtItem.getName(s[c]) + "(" + ft.ExtItem.getNum(s[c]) + "/" + o[c] + ") ";
+                            for (var n = JSON.parse(a), s = ft.toArray(n[0]), o = ft.toArray(n[1]), r = "需要", c = 0; c < s.length; c++) r += ft.ExtItem.getName(s[c]) + "(" + ft.ExtItem.getNum(s[c]) + "/" + o[c] + ") ";
                             return r
                         }
                     }
                     var h = ft.ExtEvent.getNpc(e.eventId, e);
                     if (h) {
-                        var f, d = "\u524d\u5f80",
+                        var f, d = "前往",
                             l = ft.ExtNpc.npc2Map[h];
                         for (var c in l) {
                             for (var u = ft.ExtNpc.mapNpcIds[c], p = 0; p < u.length; p++)
