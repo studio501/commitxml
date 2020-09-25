@@ -11,19 +11,27 @@ def fix_one_file(file_path):
         return p1.group().decode('unicode_escape').replace(u'\n',u'\\n')
 
     contents = None
+    fix_ok = False
     with open(file_path,"r") as f:
         contents = f.read()
-        contents = uni_re.sub(replace_func,contents)
+        try:
+            contents = uni_re.sub(replace_func,contents)
+            fix_ok = True
+        except Exception as e:
+            pass
+    
+    if fix_ok:
+        try:
+            fp = codecs.open(file_path, 'w', 'utf-8')
+            fp.write(contents)
+            fp.close()
 
-    try:
-        fp = codecs.open(file_path, 'w', 'utf-8')
-        fp.write(contents)
-        fp.close()
-
-        print('fix {} successful'.format(os.path.basename(file_path)))
-    except Exception as e:
-        print('fix {} failed: {}'.format(os.path.basename(file_path),e))
-        pass
+            print('fix {} successful'.format(os.path.basename(file_path)))
+        except Exception as e:
+            print('fix {} failed: {}'.format(os.path.basename(file_path),e))
+            pass
+    else:
+        print('fix {} failed pls fix it manual'.format(os.path.basename(file_path)))
 
 def fix_dir(sourceDir):
     for f in os.listdir(sourceDir):
