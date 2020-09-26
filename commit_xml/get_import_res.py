@@ -2,6 +2,7 @@ import subprocess
 import os,sys,shutil,re
 import imghdr,json,zipfile,plistlib,biplist
 from PIL import Image
+import diag_code
 
 size_re = re.compile(r'size:\s* (\d+)\s*,\s*(\d+)')
 md5_re = re.compile(r'MD5\s+.*? = (\w+)\n')
@@ -111,6 +112,14 @@ def get_json_map(json_dir,json_map,type_name="cc.SpriteAtlas"):
 
         elif os.path.isdir(sourceF):
             get_json_map(sourceF,json_map)
+
+def get_prefab_byfilename(file_name,dstDir):
+    json_name = "/Users/tangwen/Documents/my_projects/cplusplus_test/opengl_st1/Opengl_st1/commit_xml/settings.json"
+    tmp_file = "/Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/prefab_parse/tmp.json"
+    # file_name = "part/PartBattleBoom.prefab"
+    diag_code.get_oneres_byname(json_name,tmp_file,file_name)
+
+    get_prefab_byfile(tmp_file,dstDir)
 
 def get_prefab_byfile(sourceF,dstDir):
     bf = os.path.basename(sourceF)
@@ -222,7 +231,7 @@ def unzip_to(zf,dst_dir):
 
 def test():
     abcd = 100
-    get_prefab_byfile("/Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/prefab_parse/904eabe2-acc0-439a-b024-0fb2b87f146e.6bc50.json","/Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/prefab_res")
+    get_prefab_byfile("/Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/prefab_parse/a6b36e74-74d3-448a-80c7-4ca795e2f2e5.e5b86.json","/Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/prefab_res")
 
 def parse_jsfile(js_filename,output):
     with open(js_filename,"r") as f:
@@ -275,5 +284,6 @@ def main():
 
 
 if __name__ == "__main__":
+    # get_prefab_byfilename("part/PartBattleBoom.prefab","/Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/prefab_res")
     main()   
     # test()

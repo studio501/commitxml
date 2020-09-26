@@ -330,12 +330,12 @@ def convert_spine_bind(origin_prefab, settingsfile, new_lib_dir, dst_dir,
 # python convert_prefab.py /Users/mac/Downloads/_-1495149767_49.wxapkg_dir/prefab_res/LayoutLoading.prefab /Users/mac/Documents/my_projects/creator_proj/third_code/jsfilemap/map.json /Users/mac/Documents/my_projects/local_project/opengl_st/commit_xml/settings.json /Users/mac/Documents/my_projects/creator_proj/some_component/library /Users/mac/Downloads/_-1495149767_49.wxapkg_dir/prefab_convert /Users/mac/Downloads/_-1495149767_49.wxapkg_dir/allres
 def main():
     if len(sys.argv) == 7:
-        origin_prefab = sys.argv[1]
-        jsmapfile = sys.argv[2]
-        settingsfile = sys.argv[3]
-        new_lib_dir = sys.argv[4]
-        dst_dir = sys.argv[5]
-        all_res = sys.argv[6]
+        jsmapfile = sys.argv[1]
+        settingsfile = sys.argv[2]
+        new_lib_dir = sys.argv[3]
+        dst_dir = sys.argv[4]
+        all_res = sys.argv[5]
+        origin_prefab = sys.argv[6]
 
         if not os.path.exists(dst_dir):
             os.makedirs(dst_dir)
@@ -399,6 +399,7 @@ def find_spriteFrameInfo(json_path):
 
     return res
 
+# convert_sprite9("/Users/tangwen/Documents/my_projects/cplusplus_test/opengl_st1/Opengl_st1/commit_xml/settings.json","/Users/tangwen/Documents/my_projects/cocos_creator/some_comp/client/library","/Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/allres")
 def convert_sprite9( settingsfile, new_lib_dir, all_res):
     t_data = read_json_file(settingsfile)
     check_dir = ["import","jpgs"]
@@ -435,13 +436,4 @@ def convert_sprite9( settingsfile, new_lib_dir, all_res):
 
     a = 100
 if __name__ == "__main__":
-    # find_spriteFrameInfo("/Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/allres/import/0a184f1f0.json")
-
-    # all_sf_in_newlib = []
-    # find_spriteFrameInfo_newlib("/Users/tangwen/Documents/my_projects/cocos_creator/some_comp/client/library/imports",read_json_file("/Users/tangwen/Documents/my_projects/cocos_creator/some_comp/client/library/uuid-to-mtime.json"),all_sf_in_newlib)
-
-    convert_sprite9("/Users/tangwen/Documents/my_projects/cplusplus_test/opengl_st1/Opengl_st1/commit_xml/settings.json","/Users/tangwen/Documents/my_projects/cocos_creator/some_comp/client/library","/Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/allres")
-
-    a = 100
-
-    # main()
+    main()

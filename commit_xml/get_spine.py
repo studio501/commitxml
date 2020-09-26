@@ -113,7 +113,7 @@ def find_spine_withfilename(sourceDir,dstDir,originSrcDirLen):
         if os.path.isfile(sourceF):
             bf = os.path.basename(sourceF)
             if file_extension(sourceF) == ".json":
-                if not bf in ["scene_14.json","scene_16.json","scene_17.json"]:
+                if not bf in ["battle_lihui2.json"]:
                     continue
                 relative_dir = sourceDir[originSrcDirLen+1:]
                 json_data = is_json_file(sourceF)

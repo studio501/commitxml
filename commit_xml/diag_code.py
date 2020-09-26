@@ -349,6 +349,78 @@ def get_md5_suffix(val, tab):
 def get_first2char(in_str):
     return in_str[:2]
 
+def get_oneres_byname(js_file_name, tmp_file, res_name, base_url="https://cdn.ftaro.com/kingwar4_h5/43331/wx/res"):
+    gen_json_name = "settings.json"
+    scripyts_pwd = os.path.dirname(os.path.realpath(__file__))
+    gen_json_path = os.path.join(scripyts_pwd, gen_json_name)
+    json_data = None
+    if os.path.exists(gen_json_path):
+        json_data = get_json_data(gen_json_path)
+    else:
+        json_data = gen_res_json(js_file_name, gen_json_path)
+    assetTypes = json_data['assetTypes']
+
+    direct_get_res = [
+        "cc.Texture2D", "cc.AudioClip", "cc.JsonAsset", "sp.SkeletonData", "cc.TiledMapAsset","cc.Prefab"
+    ]
+    direct_get_res_suff = [".png", ".mp3", ".json", ".json", ".json",".json"]
+    file_mode_arr = ["wb", "wb", "w", "w", "w","w"]
+    file_mode_arr = ["wb", "wb", "w", "w", "w","w"]
+    searchModule = ["raw-assets", "raw-assets", "import", "import", "import","import"]
+    direct_get_res_idx = []
+    for i, v in enumerate(direct_get_res):
+        for i1, v1 in enumerate(assetTypes):
+            if v == v1:
+                direct_get_res_idx.append(i1)
+                break
+
+    uuids_arr = json_data['uuids']
+    md5AssetsMap = json_data['md5AssetsMap']
+    md5AssetsMap_import = md5AssetsMap["import"]
+    md5AssetsMap_raw = md5AssetsMap["raw-assets"]
+
+    raw_url = "raw-assets"
+    import_url = "import"
+    asset_url = None
+    asset_type = None
+    find_one = False
+    for k in json_data['rawAssets']:
+        asset_tmp = json_data['rawAssets'][k]
+        for k1 in asset_tmp:
+            asset_one = asset_tmp[k1]
+            asset_url = asset_one[0]
+            asset_type = asset_one[1]
+            if asset_url == res_name:
+                find_one = True
+                break
+        if find_one:
+            break
+        
+    if assetTypes[asset_type] == "cc.TiledMapAsset":
+        asset_url = file_without_extension(asset_url) + ".json"
+    if assetTypes[asset_type] == "cc.Prefab":
+        asset_url = file_without_extension(asset_url) + ".json"
+    if asset_type in direct_get_res_idx:
+        asset_idx = direct_get_res_idx.index(asset_type)
+        asset_suffix = file_extension(asset_url) if asset_url.count(
+            ".") > 0 else direct_get_res_suff[asset_idx]
+        file_mode = file_mode_arr[asset_idx]
+        searchMo = searchModule[asset_idx]
+        uuid_idx = int(k1)
+        uuid = uuids_arr[uuid_idx]
+        md5_suf = get_md5_suffix(uuid_idx, md5AssetsMap[searchMo])
+        if md5_suf:
+            dec_uuid = decode_uuid(uuid)
+            url_prefix = get_first2char(dec_uuid)
+            url_arr = [
+                base_url, searchMo, url_prefix,
+                dec_uuid + "." + md5_suf + asset_suffix
+            ]
+            final_url = '/'.join(url_arr)
+            dst_path = tmp_file
+            save_one_file(final_url, dst_path, file_mode)
+
+    pass
 
 def get_res(js_file_name, out_put_dir, base_url):
     if os.path.exists(out_put_dir):
@@ -393,7 +465,7 @@ def get_res(js_file_name, out_put_dir, base_url):
             asset_one = asset_tmp[k1]
             asset_url = asset_one[0]
             asset_type = asset_one[1]
-            if not asset_url in ["spine/npc/scene_14.json","spine/npc/scene_16.json","spine/npc/scene_17.json"]:
+            if not asset_url in ["spine/view/battle_lihui2.json"]:
                 continue
             if assetTypes[asset_type] == "cc.TiledMapAsset":
                 asset_url = file_without_extension(asset_url) + ".json"

@@ -23,8 +23,17 @@ def replace_numstr2key1(ck,ck_val,out):
 
         t3 = {}
         for y in t1:
-            t3[numstr2key(t2,y)] = "Number" if (type(t1[y]) == int or type(t1[y]) == float ) else "String"
-
+            ty = t1[y]
+            if type(ty) == int or type(ty) == float:
+                if ty == 0:
+                    t3[numstr2key(t2,y)] = {"type":"Number","default":0}
+                else:
+                    t3[numstr2key(t2,y)] = "Number"
+            else:
+                if ty == "":
+                    t3[numstr2key(t2,y)] = {"type":"String","default":""}
+                else:
+                    t3[numstr2key(t2,y)] = "String"
         out[x] = t3
 
 def replace_numstr2key2(ck,ck_val,out):
