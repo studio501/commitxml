@@ -131,7 +131,14 @@ class commit_cls():
                     modify_group = []
                     last_sig = None
                     for i, l in enumerate(body):
-                       if l[0] == '+' :
+                        if len(modify_group) == 0:
+                            modify_group.append({"sig":l[0],"lines":[]})
+                        
+                        last_group = modify_group[-1]
+                        if l[0] == last_group["sig"]:
+                            last_group["lines"].append(l[1:])
+                        else:
+                            modify_group.append({"sig":l[0],"lines":[l[1:]]})
 
                     
                     self.locate_trunk_infile(t,lines)
