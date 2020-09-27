@@ -97,7 +97,7 @@ def find_imgplist(sourceDir,dstDir,json_map):
         elif os.path.isdir(sourceF):
             find_imgplist(sourceF,dstDir,json_map)
 
-def get_json_map(json_dir,json_map,type_name="cc.SpriteAtlas"):
+def get_json_map(json_dir,json_map,type_name="cc.SpriteAtlas",output=None):
     for f in os.listdir(json_dir):
         sourceF = os.path.join(json_dir,f)
         if os.path.isfile(sourceF):
@@ -108,10 +108,12 @@ def get_json_map(json_dir,json_map,type_name="cc.SpriteAtlas"):
                     for x in json_data:
                         if type(x) is dict and x.get("__type__") and x["__type__"] == type_name:
                             json_map[x["_name"]] = sourceF
+                            if output != None:
+                                output.append(x)
                             break
 
         elif os.path.isdir(sourceF):
-            get_json_map(sourceF,json_map)
+            get_json_map(sourceF,json_map,type_name,output)
 
 def get_prefab_byfilename(file_name,dstDir):
     json_name = "/Users/tangwen/Documents/my_projects/cplusplus_test/opengl_st1/Opengl_st1/commit_xml/settings.json"
@@ -219,6 +221,33 @@ def get_bmfont(sourceDir,dstDir,json_map):
         elif os.path.isdir(sourceF):
             get_bmfont(sourceF,dstDir,json_map)
 
+def get_animaclip(sourceDir,dstDir,json_map):
+    for f in os.listdir(sourceDir):
+        sourceF = os.path.join(sourceDir,f)
+        if os.path.isfile(sourceF):
+            bf = os.path.basename(sourceF)
+            if file_extension(sourceF) == ".png":
+                file_base_name = file_without_extension(f)
+                json_key = file_base_name
+                plist_filename = json_map.get(json_key)
+                if plist_filename and os.path.exists(plist_filename):
+                    png_size = get_png_size(sourceF)
+                    json_data = is_json_file(plist_filename)
+                    if json_data and type(json_data) is list:
+                        for x in json_data:
+                            if type(x) is dict and x.get("__type__") and x["__type__"] == "cc.BitmapFont":
+                                contents = convetBmfont2fnt(x,png_size)
+                                fnt_filename = os.path.join(dstDir,file_base_name+".fnt")
+                                with open(fnt_filename,"w") as f:
+                                    f.write(contents.encode("utf-8"))
+                                    shutil.copy(sourceF, os.path.join(dstDir,bf))
+                                    print('save {0} successful'.format(fnt_filename))
+                                break
+                    
+
+        elif os.path.isdir(sourceF):
+            get_bmfont(sourceF,dstDir,json_map)
+
 def try_create_dir(dst):
 	pass
 	if not os.path.exists(dst):
@@ -281,9 +310,15 @@ def main():
         elif res_type == "jsmap":
             jsfile_name = sys.argv[2]
             parse_jsfile(jsfile_name,os.path.join(sys.argv[3],"map.json"))
+        elif res_type == "anima":
+            json_map = {}
+            out_arr = []
+            get_json_map(json_dir,json_map,"cc.AnimationClip",out_arr)
+            for x in out_arr:
+                with open(os.path.join(dst_dir,x["_name"]+".anim"),"w") as f:
+                    f.write(json.dumps(x,"utf-8"))
 
 
 if __name__ == "__main__":
-    # get_prefab_byfilename("part/PartBattleBoom.prefab","/Users/tangwen/Documents/my_projects/wxlittlegame/pkg1/_-1495149767_49.wxapkg_dir/prefab_res")
     main()   
     # test()
