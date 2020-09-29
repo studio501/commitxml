@@ -163,6 +163,10 @@ def pull_all_sheets(service,spreadsheet_id=SAMPLE_SPREADSHEET_ID,dst_dir="/Users
     for x in all_sheets:
         pull_json_from_sheet(service,x,spreadsheet_id,dst_dir)
 
+    is_merge = my_input.my_input(u"是否合并所有表?(y/n)") == 'y'
+    if is_merge:
+        merge_all_json.merge_all_json(dst_dir)
+
 def pull_json_from_sheet(service,table_name="Map",spreadsheet_id=SAMPLE_SPREADSHEET_ID,dst_dir="/Users/tangwen/Documents/my_projects/cocos_creator/some_comp/dbs/c_dbs"):
     sheets = get_all_sheets(service)
     result = service.spreadsheets().values().get(spreadsheetId=spreadsheet_id,range=table_name).execute()
@@ -194,18 +198,19 @@ def pull_json_from_sheet(service,table_name="Map",spreadsheet_id=SAMPLE_SPREADSH
             data[id0] = {}
             for iy,y in enumerate(x[1:]):
                 if y != None and y != u"":
-                    if types[iy+1] == "INT":
-                        data[id0][number2char(iy)] = int(y)
-                    elif types[iy+1] == "FLOAT":
-                        data[id0][number2char(iy)] = float(y)
-                    elif types[iy+1] == "JSON":
+                    t_iy = iy + 1
+                    if types[t_iy] == "INT":
+                        data[id0][number2char(t_iy)] = int(y)
+                    elif types[t_iy] == "FLOAT":
+                        data[id0][number2char(t_iy)] = float(y)
+                    elif types[t_iy] == "JSON":
                         try:
                             jy = json.loads(y,"utf-8")
-                            data[id0][number2char(iy)] = jy
+                            data[id0][number2char(t_iy)] = jy
                         except Exception as e:
-                            data[id0][number2char(iy)] = y
+                            data[id0][number2char(t_iy)] = y
                     else:
-                        data[id0][number2char(iy)] = y
+                        data[id0][number2char(t_iy)] = y
         od = OrderedDict(sorted(data.items(), key=lambda t: int(t[0])))
         res["data"] = od
     else:
@@ -220,9 +225,6 @@ def pull_json_from_sheet(service,table_name="Map",spreadsheet_id=SAMPLE_SPREADSH
     fp.write(json.dumps(res,ensure_ascii=False))
     fp.close()
     print("save {} successful".format(table_name+".json"))
-    is_merge = my_input.my_input(u"是否合并所有表?(y/n)") == 'y'
-    if is_merge:
-        merge_all_json.merge_all_json(dst_dir)
 
 def main():
     """Shows basic usage of the Sheets API.
@@ -257,8 +259,8 @@ def main():
     # init_set_sheet(service)
     # 
     # pull_json_from_sheet(service)
-    # pull_all_sheets(service)
-    merge_all_json.merge_all_json("/Users/tangwen/Documents/my_projects/cocos_creator/some_comp/dbs/c_dbs")
+    pull_all_sheets(service,SAMPLE_SPREADSHEET_ID,"/Users/mac/Documents/my_projects/creator_proj/some_component/server/game-server/s_dbs")
+    # merge_all_json.merge_all_json("/Users/tangwen/Documents/my_projects/cocos_creator/some_comp/dbs/c_dbs")
 
 def test():
     # la = [[1,3],[5,5],[2,3]]
