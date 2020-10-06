@@ -49,16 +49,16 @@ def get_req_event(company_id,company_name,tab_name):
 
     return s1
 
-def get_company_startTime(company_id,company_name):
-    url = get_req_event(company_id,company_name,"基本信息")
-    print(url)
-    req = requests.get(url,cookies=get_cookie(),headers=headers)
-    req_text = req.content
-    print(req_text)
-    soup = BeautifulSoup(req_text, 'lxml', from_encoding="utf-8")
-    ss = soup.select("#Cominfo > table")[0].select('tr')
-    res = ss[0].select('td')[5].text.strip()
-    return res
+# def get_company_startTime(company_id,company_name):
+#     url = get_req_event(company_id,company_name,"基本信息")
+#     print(url)
+#     req = requests.get(url,cookies=get_cookie(),headers=headers)
+#     req_text = req.content
+#     print(req_text)
+#     soup = BeautifulSoup(req_text, 'lxml', from_encoding="utf-8")
+#     ss = soup.select("#Cominfo > table")[0].select('tr')
+#     res = ss[0].select('td')[5].text.strip()
+#     return res
 
 
 def get_id(url):
@@ -245,11 +245,22 @@ def get_zhuanli_xingxi(soup):
     return res
 
 def merge_col(worksheet,merge_format,cur_row,zhuanli_len,val,col_num):
-    worksheet.merge_range(data=val,first_row=cur_row,last_row=cur_row+zhuanli_len-1,first_col=col_num,last_col=col_num)
-    # worksheet.write(val,row=cur_row,col=col_num)
+    if cur_row == cur_row+zhuanli_len-1:
+        worksheet.write(cur_row,col_num,val)
+        return col_num+1
+    
+    worksheet.merge_range(data=val,first_row=cur_row,last_row=cur_row+zhuanli_len-1,first_col=col_num,last_col=col_num,cell_format=merge_format)
     return col_num+1
 
 # https://www.qcc.com/brandDetail/8f2e5323ffffa59b7f2700e045332764.html
+
+def write_tmp_xlsx():
+    workbook = xlsxwriter.Workbook("company_name.xlsx")
+    worksheet = workbook.add_worksheet()
+    worksheet.write('A1','湖南浏阳河饲料有限公司')
+    worksheet.write('A2','长沙兴嘉生物工程股份有限公司')
+    worksheet.write('A3','湖南华纳大药厂股份有限公司')
+    workbook.close()
 
 def write_xlsx(company_data,dst_file):
     xl_file = pd.ExcelFile("template.xlsx")
@@ -263,15 +274,12 @@ def write_xlsx(company_data,dst_file):
     worksheet = workbook.add_worksheet()
 
     merge_format = workbook.add_format({
-    'bold': 1,
-    'border': 1,
     'align': 'center',
-    'valign': 'vcenter',
-    'fg_color': 'yellow'})
+    'valign': 'vcenter'
+    })
 
     cur_row = 0
-    worksheet.merge_range('A1:O1', 'Merged Range', merge_format)
-    worksheet.write('A1', title)
+    worksheet.merge_range(0,0,0,14, data=title, cell_format=merge_format)
 
     cur_row += 1
     for i in range(len(head)):
@@ -280,10 +288,27 @@ def write_xlsx(company_data,dst_file):
     cur_row += 1
     for ic,c in enumerate(company_data):
         zhuanli = c["zhuanli"][1:]
+        zhuanli_ori_len = len(zhuanli)
         zhuanli_len = len(zhuanli)
 
         logo = c["logo"][1:]
-        logo_len = len(logo)
+        logo_len = min(len(logo),15)
+
+        zhuanli_len = max( max(zhuanli_len,logo_len),1)
+
+        col_num = 7
+        st_row = cur_row
+        for j in range(zhuanli_len):
+            if j < zhuanli_ori_len:
+                worksheet.write(st_row, col_num, zhuanli[j][4] + zhuanli[j][1])
+                worksheet.write(st_row, col_num+1, zhuanli[j][3])
+                worksheet.write(st_row, col_num+2, zhuanli[j][7])
+            if j < logo_len:
+                worksheet.write(st_row, col_num+3, logo[j][2]) 
+                worksheet.write(st_row, col_num+4, logo[j][6])
+                worksheet.write(st_row, col_num+5, logo[j][3])
+                worksheet.write(st_row, col_num+6, logo[j][7])
+            st_row += 1
 
         col_num = 0
         col_num = merge_col(worksheet,merge_format,cur_row,zhuanli_len,ic+1,col_num)
@@ -296,25 +321,44 @@ def write_xlsx(company_data,dst_file):
         col_num = merge_col(worksheet,merge_format,cur_row,zhuanli_len,'2020年',col_num)
         col_num = merge_col(worksheet,merge_format,cur_row,zhuanli_len,'发明专利',col_num)
 
-        for j in range(zhuanli_len):
-            worksheet.write(cur_row, col_num, zhuanli[j][4] + zhuanli[j][1])
-            worksheet.write(cur_row, col_num+1, zhuanli[j][3])
-            worksheet.write(cur_row, col_num+2, zhuanli[j][7])
-            if j < logo_len:
-                worksheet.write(cur_row, col_num+3, logo[j][2]) 
-                worksheet.write(cur_row, col_num+4, logo[j][6])
-                worksheet.write(cur_row, col_num+5, logo[j][3])
-                worksheet.write(cur_row, col_num+6, logo[j][7])
-            cur_row += 1
+        cur_row += zhuanli_len
+
+        # for j in range(zhuanli_len):
+        #     worksheet.write(cur_row, col_num, zhuanli[j][4] + zhuanli[j][1])
+        #     worksheet.write(cur_row, col_num+1, zhuanli[j][3])
+        #     worksheet.write(cur_row, col_num+2, zhuanli[j][7])
+        #     if j < logo_len:
+        #         worksheet.write(cur_row, col_num+3, logo[j][2]) 
+        #         worksheet.write(cur_row, col_num+4, logo[j][6])
+        #         worksheet.write(cur_row, col_num+5, logo[j][3])
+        #         worksheet.write(cur_row, col_num+6, logo[j][7])
+        #     cur_row += 1
 
     workbook.close()
 
     a = 100
 
 def read_json_file(f):
-    with open(f, 'r') as load_f:
-        load_dict = json.load(load_f, "utf-8")
-        return load_dict
+    xl_file = pd.ExcelFile(f)
+    sheets = xl_file.sheet_names
+    sheet_name = sheets[0]
+    data = pd.read_excel(f, sheet_name=sheet_name, usecol=[0, 1], header=None)
+    
+    title = data[0][0]
+    companies = []
+    for i in range(data.shape[0]):
+        if data.iloc[i][0] != '':
+            companies.append(data.iloc[i][0])
+    
+    res = []
+    for c in companies:
+        c_url = search_company(c)
+        if c_url:
+            res.append([c,c_url])
+
+    return res
+    pass
+
 
 def get_web_data(json_path,dst_file):
     company_data = read_json_file(json_path)
@@ -334,8 +378,8 @@ def get_web_data(json_path,dst_file):
         t_info["title"] = company
 
         # basic_soup = get_soup("jibenxingxi.html")
-        # start_time = get_start_time(basic_soup)
-        t_info["start_time"] = ''
+        start_time = get_company_startTime(url)
+        t_info["start_time"] = start_time
         res.append(t_info)
         print(u'获取',company,u'成功!')
     
@@ -353,6 +397,44 @@ def get_registed_date(url):
     res = soup.select('#searchlist > table:nth-child(4) > tbody > tr:nth-child(8) > td:nth-child(4)')
     res = res[0].text.strip()
     return res
+
+def search_company(company_name):
+    print(u'获取公司网址',company_name)
+    url = base_url + '/search?key=' + company_name
+    req = requests.get(url,cookies=get_cookie(),headers=headers)
+    req_text = req.content
+    soup = BeautifulSoup(req_text, 'html.parser', from_encoding="utf-8")
+    a_url = None
+    try:
+        href = soup.select("#search-result > tr.frtrt > td:nth-child(3) > a")[0]
+        a_url = base_url + href['href']
+    except Exception as e:
+        print(u'找不到',company_name,u'请核实公司名字')
+
+    return a_url
+
+def get_company_startTime(url):
+    req = requests.get(url,cookies=get_cookie(),headers=headers)
+    req_text = req.content
+    soup = BeautifulSoup(req_text, 'html.parser', from_encoding="utf-8")
+    # #Cominfo > table > tbody > tr:nth-child(1) > td:nth-child(6)
+    # #kcbBase > table > tbody > tr:nth-child(2) > td:nth-child(2)
+    res = soup.select("#Cominfo > table")
+    if len(res) > 0:
+        res = res[0]
+        tr = res.select('tr')[0]
+        td = tr.select('td')[5].text.strip()
+        return td
+    
+    res = soup.select("#kcbBase > table")
+    if len(res) > 0:
+        res = res[0]
+        tr = res.select('tr')[1]
+        td = tr.select('td')[1].text.strip()
+        return td
+
+    return '未找到成立时间'
+
 
 def main(json_path,dst_file):
     ss = sys.getdefaultencoding()
