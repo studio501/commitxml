@@ -17,6 +17,8 @@ del_line_re = re.compile(r'$\-\s+.*')
 
 wd_re = re.compile(r'\w')
 
+Only_Error_Log = False
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -87,10 +89,16 @@ def tell_subarray_pos(sub,src,off_index=0):
             for j in range(sub_len):
                 try:
                     do_find = do_find and sub2[j] in src[min( i+j ,  src_len - 1)]
+                    if do_find:
+                        pass
                 except Exception as e:
                     print(e)
                     pass
                 if not do_find:
+                    if j > 0:
+                        # print(u'' + bcolors.WARNING + u'line {} modify by other'.format(sub2[j]))
+                        if j > 5:
+                            i += j
                     break
             if do_find:
                 return i
@@ -112,8 +120,9 @@ def tell_trunk_modify_latest(file_path,trunk,sec,startsha=StartSha):
     for commit in reversed(all_commits):
         for x in commit.m_files:
             for y in x['trunk']:
-                if tell_subarray_pos(sec,y['body']) != None:
-                    print(u'' + bcolors.WARNING + u'latest modify by {} sha: {}'.format(commit.m_author ,commit.m_sha))
+                revert_body = commit.revert_body_(y['body'])
+                if tell_subarray_pos(revert_body,sec) != None:
+                    print(u'' + bcolors.WARNING + u'latest modify by {} sha: {} trunk: {}'.format(commit.m_author ,commit.m_sha, y["trunk_name"]))
                     return
         pass
     pass
@@ -172,8 +181,8 @@ class commit_cls():
                 file_lines_len = len(file_lines)
                 for i,line in enumerate(file_lines):
                     if len(trunk_re.findall(line)) > 0:
-                        if '@@ -558,6 +581,8 @@' in trunk_re2.sub(r'\1',line):
-                            pass
+                        # if '@@ -85,4 +85,102 @@' in trunk_re2.sub(r'\1',line):
+                        #     pass
                         mod_line = int( trunk_re.sub(r'\1',line).rstrip())
                         if len(x["trunk"]) > 0:
                             x["trunk"][-1]["tail"] = [file_lines[i-3],file_lines[i-2],file_lines[i-1]]
@@ -194,8 +203,15 @@ class commit_cls():
                         x["trunk"].append(t)
                     if i == file_lines_len - 1:
                         if len(x["trunk"]) > 0:
-                            x["trunk"][-1]["tail"] = [file_lines[i-2],file_lines[i-1],file_lines[i]]
-                            x["trunk"][-1]["body"] = file_lines[x["trunk"][-1]["body_st"]+1:i-2]
+                            tail = []
+                            for tail_i in range(3):
+                                if file_lines[i- tail_i][0] == '+' or file_lines[i- tail_i][0] == '-':
+                                    break
+                                else:
+                                    tail.insert(0, file_lines[i- tail_i])
+
+                            x["trunk"][-1]["tail"] = tail
+                            x["trunk"][-1]["body"] = file_lines[x["trunk"][-1]["body_st"]+1:i-len(tail) + 1]
                         else:
                             a = 100
 
@@ -216,21 +232,22 @@ class commit_cls():
         trunk_origin.extend(body_origin)
         trunk_origin.extend(tail)
 
+        # make_new_line =  'No newline at end of file' in body[1]
+
         body_start = tell_subarray_pos(trunk_origin,file_lines)
         if body_start != None:
             body_start = body_start + len(head)
             return [[body_start,body_start+len(body_origin)],None]
-        else:
-            return [None,body_origin]
 
         too_simple = True
-        if len(body_origin) < 4:
+        if len(body_origin) < 3:
             for bl in body_origin:
-                if count_wd(bl) >5:
+                if count_wd(bl) > 5:
                     too_simple = False
                     break
         else:
             too_simple = False
+        
         if too_simple:
             pass
         else:
@@ -280,15 +297,17 @@ class commit_cls():
             return
         for file in self.m_files:
             dst_file = client_dir + "/" + file["file_name"]
-            if file["file_name"] != "cocos2d/cocos/renderer/CCGLProgramState.h":
-                continue
+            # if file["file_name"] != "cocos2d/cocos/renderer/ccShader_3D_PositionTex.vert":
+            #     continue
             if self.file_not_modify_directly(file):
                 if (file.has_key("newfile") and file["newfile"]):
                     if os.path.exists(dst_file):
                         os.remove(dst_file)
-                        print(u'' + bcolors.OKGREEN + u'delete file {} commit by {} sha: {} successful!'.format(file["file_name"],self.m_author,self.m_sha))
+                        if not Only_Error_Log:
+                            print(u'' + bcolors.OKGREEN + u'delete file {} commit by {} sha: {} successful!'.format(file["file_name"],self.m_author,self.m_sha))
                     else:
-                        print(u'' + bcolors.WARNING + u'try delete file {} commit by {} sha: {} but it already gone'.format(file["file_name"],self.m_author,self.m_sha))
+                        if not Only_Error_Log:
+                            print(u'' + bcolors.WARNING + u'try delete file {} commit by {} sha: {} but it already gone'.format(file["file_name"],self.m_author,self.m_sha))
                 elif (file.has_key("deletedfile") and file["deletedfile"]):
                     base_dir = os.path.dirname(dst_file)
                     if not os.path.exists(base_dir):
@@ -296,10 +315,12 @@ class commit_cls():
                         f = codecs.open(dst_file, 'w', 'utf-8')
                         f.writelines(file["deletedfile"]["content"])
                         f.close()
-                        print(u'' + bcolors.OKGREEN + u'restore file {} commit by {} sha: {} successful!'.format(file["file_name"],self.m_author,self.m_sha))
+                        if not Only_Error_Log:
+                            print(u'' + bcolors.OKGREEN + u'restore file {} commit by {} sha: {} successful!'.format(file["file_name"],self.m_author,self.m_sha))
                 elif (file.has_key("renameFlag") and file["renameFlag"]):
                     shutil.move(client_dir + "/" + file["renameFlag"]["to"],client_dir + "/" + file["renameFlag"]["from"])
-                    print(u'' + bcolors.OKGREEN + u'rename file {} commit by {} sha: {} successful!'.format(file["file_name"],self.m_author,self.m_sha))
+                    if not Only_Error_Log:
+                        print(u'' + bcolors.OKGREEN + u'rename file {} commit by {} sha: {} successful!'.format(file["file_name"],self.m_author,self.m_sha))
             else:
                 lines = None
                 if os.path.exists(dst_file):
@@ -317,8 +338,8 @@ class commit_cls():
                                 sig_ct = sig_ct + (0 if l[0]=='-' else 1)
                             t["body_len"] = sig_ct
 
-                            if '@@ -558,6 +581,8 @@' in t['trunk_name']:
-                                pass
+                            # if '@@ -85,4 +85,102 @@' in t['trunk_name']:
+                            #     pass
 
                             locate_info = self.locate_trunk_infile(t,lines)
                             body_range = locate_info[0]
@@ -329,7 +350,8 @@ class commit_cls():
                             else:
                                 revert_body = self.revert_body_(body)
                                 lines[body_range[0]:body_range[1]] = revert_body
-                                print(u'' + bcolors.OKGREEN + u'revert trunk {} in {} by sha: {} successful!'.format(t["trunk_name"],file["file_name"],self.m_sha))
+                                if not Only_Error_Log:
+                                    print(u'' + bcolors.OKGREEN + u'revert trunk {} in {} by sha: {} successful!'.format(t["trunk_name"],file["file_name"],self.m_sha))
                         
                         f = codecs.open(dst_file, 'w', 'utf-8')
                         lines = f.writelines(lines)
@@ -364,12 +386,12 @@ def main():
 
     all_commits = get_allcommits(lines)
     
-    # for i in range(20):
-    #     commit = all_commits[i]
-    for commit in all_commits:
+    for commit in all_commits[:40]:
         # if check_is_can_revert(commit) and commit.m_sha == "62ff3c279cf7f0cff36447ab7c76f25744c356c8":
+        # if True or check_is_can_revert(commit):
         if check_is_can_revert(commit):
-            print(u''+bcolors.HEADER+u'======= Start Revert =======')
+            if not Only_Error_Log:
+                print(u''+bcolors.HEADER+u'======= Start Revert =======')
             commit.revert(client_dir)
 
 if __name__ == "__main__":
