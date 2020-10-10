@@ -172,10 +172,12 @@ class commit_cls():
                 file_lines_len = len(file_lines)
                 for i,line in enumerate(file_lines):
                     if len(trunk_re.findall(line)) > 0:
+                        if '@@ -558,6 +581,8 @@' in trunk_re2.sub(r'\1',line):
+                            pass
                         mod_line = int( trunk_re.sub(r'\1',line).rstrip())
                         if len(x["trunk"]) > 0:
                             x["trunk"][-1]["tail"] = [file_lines[i-3],file_lines[i-2],file_lines[i-1]]
-                            x["trunk"][-1]["body"] = file_lines[x["trunk"][-1]["body_st"]+1:i-2]
+                            x["trunk"][-1]["body"] = file_lines[x["trunk"][-1]["body_st"]+1:i-len(x["trunk"][-1]["tail"])]
                         t_head = []
 
                         if mod_line > 1:
@@ -209,12 +211,27 @@ class commit_cls():
         body = trunk["body"]
 
         body_origin = self.origin_body_(body)
+        trunk_origin = []
+        trunk_origin.extend(head)
+        trunk_origin.extend(body_origin)
+        trunk_origin.extend(tail)
+
+        body_start = tell_subarray_pos(trunk_origin,file_lines)
+        if body_start != None:
+            body_start = body_start + len(head)
+            return [[body_start,body_start+len(body_origin)],None]
+        else:
+            return [None,body_origin]
+
         too_simple = True
-        for bl in body_origin:
-            if count_wd(bl) >5:
-                too_simple = False
-                break
-        if not too_simple:
+        if len(body_origin) < 4:
+            for bl in body_origin:
+                if count_wd(bl) >5:
+                    too_simple = False
+                    break
+        else:
+            too_simple = False
+        if too_simple:
             pass
         else:
             body_start = tell_subarray_pos(body_origin,file_lines)
@@ -263,7 +280,7 @@ class commit_cls():
             return
         for file in self.m_files:
             dst_file = client_dir + "/" + file["file_name"]
-            if file["file_name"] != "cocos2d/cocos/2d/CCNode.h":
+            if file["file_name"] != "cocos2d/cocos/renderer/CCGLProgramState.h":
                 continue
             if self.file_not_modify_directly(file):
                 if (file.has_key("newfile") and file["newfile"]):
@@ -299,6 +316,9 @@ class commit_cls():
                             for i, l in enumerate(body):
                                 sig_ct = sig_ct + (0 if l[0]=='-' else 1)
                             t["body_len"] = sig_ct
+
+                            if '@@ -558,6 +581,8 @@' in t['trunk_name']:
+                                pass
 
                             locate_info = self.locate_trunk_infile(t,lines)
                             body_range = locate_info[0]
@@ -347,7 +367,8 @@ def main():
     # for i in range(20):
     #     commit = all_commits[i]
     for commit in all_commits:
-        if check_is_can_revert(commit) and commit.m_sha == "62ff3c279cf7f0cff36447ab7c76f25744c356c8":
+        # if check_is_can_revert(commit) and commit.m_sha == "62ff3c279cf7f0cff36447ab7c76f25744c356c8":
+        if check_is_can_revert(commit):
             print(u''+bcolors.HEADER+u'======= Start Revert =======')
             commit.revert(client_dir)
 
