@@ -1,0 +1,11 @@
+ #else
+     m_batch->flush();
+ #endif
+    
+}
+
+const Texture2D* IFFieldMonsterBatchLayer::getTexture()
+{
+    return m_batch->getTxture();
+ }
+ 
