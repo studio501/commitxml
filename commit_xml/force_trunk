@@ -1,11 +1,346 @@
- #else
-     m_batch->flush();
- #endif
-    
+ 
+ void ApplicationPreCrash(const std::string& crashInfo)
+ {
+    CCLOG("Crash:%s", crashInfo.c_str());
+    CCASSERT(0, crashInfo.c_str());
 }
 
-const Texture2D* IFFieldMonsterBatchLayer::getTexture()
+void  if_function_base::removeFormNode()
 {
-    return m_batch->getTxture();
- }
- 
+    if (m_target && !m_target->isDelete())
+    {
+        if (m_target->isNode())
+        {
+            ((Node*)m_target)->RemoveFunction(this);
+        }
+        m_target->systemRelease();
+        m_target = nullptr;
+    }
+}
+void  if_function_base::addToNode()
+{
+    if (m_target && !m_target->isDelete())
+    {
+        if (m_target->isNode())
+        {
+            ((Node*)m_target)->AddFunction(this);
+        }
+        m_target->systemRetain();
+    }
+    
+}
+namespace spine {
+    
+    static const int quadTriangles[6] = { 0, 1, 2, 2, 3, 0 };
+    
+    unsigned long SkeletonRenderer::skeScreenCount = 0;
+    
+    SkeletonRenderer* SkeletonRenderer::createWithData(spSkeletonData* skeletonData, bool ownsSkeletonData) {
+        SkeletonRenderer* node = new SkeletonRenderer(skeletonData, ownsSkeletonData);
+        node->autorelease();
+        return node;
+    }
+    
+    SkeletonRenderer* SkeletonRenderer::createWithFile(const std::string& skeletonDataFile, spAtlas* atlas, float scale) {
+        SkeletonRenderer* node = new SkeletonRenderer(skeletonDataFile, atlas, scale);
+        node->autorelease();
+        return node;
+    }
+    
+    SkeletonRenderer* SkeletonRenderer::createWithFile(const std::string& skeletonDataFile, const std::string& atlasFile, float scale) {
+        SkeletonRenderer* node = new SkeletonRenderer(skeletonDataFile, atlasFile, scale);
+        node->autorelease();
+        return node;
+    }
+    
+    void SkeletonRenderer::initialize() {
+        _worldVertices = MALLOC(float, 1000); // Max number of vertices per mesh.
+        _nVertices = 1000;
+        _batch = PolygonBatch::createWithCapacity(2000); // Max number of vertices and triangles per batch.
+        _batch->retain();
+        _bUploadError = false;
+        
+#ifdef NewRender
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        /**
+         _blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
+         setOpacityModifyRGB(false);
+         */
+        //目前android的骨骼动画图片都是经过alpha预乘处理的，程序必须要对应打开预乘渲染状态,否则半透明部分会比美术出的图略暗
+        //如果发现android平台骨骼动画半透明通道处颜色过亮，请检查那个骨骼动画的tps文件，确认alpha 预乘开关是打开的
+        //by sxy
+        _blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
+        setOpacityModifyRGB(false);
+        setProgram(cocos2d::ProgramCache::getInstance()->getProgram(GLProgram::SHADER_NAME_POSITION_ETC1_A));
+#else
+        _blendFunc = BlendFunc::ALPHA_PREMULTIPLIED;
+        setOpacityModifyRGB(true);
+        setProgram(cocos2d::ProgramCache::getInstance()->getProgram(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR));
+#endif
+#else
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        /**
+         _blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
+         setOpacityModifyRGB(false);
+         */
+        //目前android的骨骼动画图片都是经过alpha预乘处理的，程序必须要对应打开预乘渲染状态,否则半透明部分会比美术出的图略暗
+        //如果发现android平台骨骼动画半透明通道处颜色过亮，请检查那个骨骼动画的tps文件，确认alpha 预乘开关是打开的
+        //by sxy
+        _blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
+        setOpacityModifyRGB(false);
+        setGLProgram(cocos2d::GLProgramCache::getInstance()->getGLProgram(GLProgram::SHADER_NAME_POSITION_ETC1_A));
+#else
+        _blendFunc = BlendFunc::ALPHA_PREMULTIPLIED;
+        setOpacityModifyRGB(true);
+        setGLProgram(cocos2d::GLProgramCache::getInstance()->getGLProgram(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR));
+#endif
+#endif
+        
+    }
+    
+    void SkeletonRenderer::rellocateVertexBuffer(size_t nCount)
+    {
+        if (nCount > _nVertices)
+        {
+            FREE(_worldVertices);
+            _worldVertices = MALLOC(float, nCount);
+            _nVertices = nCount;
+        }
+    }
+        
+        
+    void SkeletonRenderer::setSkeletonData(spSkeletonData *skeletonData, bool ownsSkeletonData) {
+        _skeleton = spSkeleton_create(skeletonData);
+        _ownsSkeletonData = ownsSkeletonData;
+        //zym 2015.12.30 骨骼资源添加计数管理
+        if (_skeleton && !ownsSkeletonData)
+            ++skeletonData->nRef;
+    }
+    
+    SkeletonRenderer::SkeletonRenderer()
+    : _debugSlots(false), _debugBones(false), _timeScale(1) {
+    }
+    
+    SkeletonRenderer::SkeletonRenderer(spSkeletonData *skeletonData, bool ownsSkeletonData)
+    : _debugSlots(false), _debugBones(false), _timeScale(1) {
+        initWithData(skeletonData, ownsSkeletonData);
+    }
+    
+    SkeletonRenderer::SkeletonRenderer(const std::string& skeletonDataFile, spAtlas* atlas, float scale)
+    : _debugSlots(false), _debugBones(false), _timeScale(1) {
+        initWithFile(skeletonDataFile, atlas, scale);
+    }
+    
+    SkeletonRenderer::SkeletonRenderer(const std::string& skeletonDataFile, const std::string& atlasFile, float scale)
+    : _debugSlots(false), _debugBones(false), _timeScale(1) {
+        initWithFile(skeletonDataFile, atlasFile, scale);
+    }
+    
+    SkeletonRenderer::~SkeletonRenderer() {
+        if (_ownsSkeletonData) spSkeletonData_dispose(_skeleton->data);
+        else if (_skeleton&&_skeleton->data)
+        {
+            // zym 2015.12.30
+            --_skeleton->data->nRef;
+            if (_skeleton->data->nRef <= 0)//需要在迁城后，清空缓存，改为引用计数为0（nRef初始值改为1）即释放 by sxy
+            {
+                spSkeletonData_dispose(_skeleton->data);
+            }
+        }
+        //if (_atlas) spAtlas_dispose(_atlas);
+        spSkeleton_dispose(_skeleton);
+        _batch->release();
+        FREE(_worldVertices);
+    }
+    
+    void SkeletonRenderer::initWithData(spSkeletonData* skeletonData, bool ownsSkeletonData) {
+        setSkeletonData(skeletonData, ownsSkeletonData);
+        
+        initialize();
+    }
+    
+    void SkeletonRenderer::initWithFile(const std::string& skeletonDataFile, spAtlas* atlas, float scale) {
+        spSkeletonJson* json = spSkeletonJson_create(atlas);
+        json->scale = scale;
+        spSkeletonData* skeletonData = spSkeletonJson_readSkeletonDataFile(json, skeletonDataFile.c_str());
+        CCASSERT(skeletonData, json->error ? json->error : "Error reading skeleton data.");
+        spSkeletonJson_dispose(json);
+        
+        setSkeletonData(skeletonData, true);
+        
+        initialize();
+    }
+    
+    void SkeletonRenderer::initWithFile(const std::string& skeletonDataFile, const std::string& atlasFile, float scale) {
+        spAtlas* _atlas = spAtlas_createFromFile(atlasFile.c_str(), 0);
+        CCASSERT(_atlas, "Error reading atlas file.");
+        
+        string skeletonFile = skeletonDataFile;
+        if (_atlas == NULL)
+        {
+            _atlas = spAtlas_createFromFile("World/World_3.atlas", 0);
+            skeletonFile = "Spine/World/rm.json";
+        }
+        
+        spSkeletonJson* json = spSkeletonJson_create(_atlas);
+        if (json == NULL)
+        {
+            CCLOGERROR("SkeletonRenderer::initWithFile%s", atlasFile.c_str());
+            
+        }
+        
+        json->scale = scale == 0 ? (1 / CCDirector::sharedDirector()->getContentScaleFactor()) : scale;
+        spSkeletonData* skeletonData = spSkeletonJson_readSkeletonDataFile(json, skeletonFile.c_str());
+        CCAssert(skeletonData, json->error ? json->error : "Error reading skeleton data file.");
+        if (skeletonData == nullptr)
+        {
+            if (_atlas) spAtlas_dispose(_atlas);
+            spSkeletonJson_dispose(json);
+            _atlas = spAtlas_createFromFile("World/World_3.atlas", 0);
+            json = spSkeletonJson_create(_atlas);
+            skeletonData = spSkeletonJson_readSkeletonDataFile(json, "Spine/World/rm.json");
+            skeletonData->if_atlas = _atlas;
+            if (!skeletonData)
+                CCLOGERROR("SkeletonRenderer::initWithFile skeletonData：%s", skeletonDataFile.c_str());
+            
+        }
+        else
+            skeletonData->if_atlas = _atlas;
+        spSkeletonJson_dispose(json);
+        
+        setSkeletonData(skeletonData, true);
+        
+        initialize();
+    }
+    
+    
+    void SkeletonRenderer::update(float deltaTime) {
+        skeScreenCount = 0;
+        spSkeleton_update(_skeleton, deltaTime * _timeScale);
+    }
+    
+    void SkeletonRenderer::draw(Renderer* renderer, const Mat4& transform, uint32_t transformFlags) {
+        _drawCommand.init(_globalZOrder);
+        _drawCommand.func = CC_CALLBACK_RenderCommand(SkeletonRenderer::drawSkeleton, this, transform, transformFlags);
+        renderer->addCommand(&_drawCommand);
+    }
+
+    typedef enum {
+        BLX = 0, BLY, ULX, ULY, URX, URY, BRX, BRY
+    } spVertexIndex;
+    
+    void SkeletonRenderer::updateInBatchAdvance(const Mat4& transform, PolygonBatch *polyBatch, const CCPoint &pt, int &additive)
+    {
+        int count0 = 0;
+        int count1 = 0;
+        
+#ifdef NewRender
+        getProgramState()->apply(transform);
+#else
+        getGLProgramState()->apply(transform);
+#endif
+        
+        Color3B nodeColor = getColor();
+        GLubyte alpha = getDisplayedOpacity();
+        
+        //int additive = -1;
+        Color4B color;
+        const float* uvs = nullptr;
+        int verticesCount = 0;
+        const int* triangles = nullptr;
+        int trianglesCount = 0;
+        float r = 0, g = 0, b = 0, a = 0;
+        auto transformToBatch = getNodeToParentAffineTransform();
+        float batchx = transformToBatch.tx + pt.x;
+        float batchy = transformToBatch.ty + pt.y;
+        float cr = transformToBatch.a;
+        float sr = transformToBatch.b;
+        float cr2 = transformToBatch.d;
+        float sr2 = -transformToBatch.c;
+        
+        _skeleton->r = nodeColor.r / (float)255;
+        _skeleton->g = nodeColor.g / (float)255;
+        _skeleton->b = nodeColor.b / (float)255;
+        _skeleton->a = getDisplayedOpacity() / (float)255;
+        int slotsCount = _skeleton->slotsCount;
+        
+        
+        std::vector<short> indexs;
+        indexs.reserve(100);
+ /*
+        if (_skeleton->bHasMapping)
+        {
+            for (int i = 0, n = slotsCount; i < n; i++)
+            {
+                short index = _skeleton->indexMapping[i];
+                if (_skeleton->visibles[index] != 0)
+                {
+                    indexs.push_back(index);
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0, n = slotsCount; i < n; i++)
+            {
+                if (_skeleton->visibles[i] != 0)
+                {
+                    indexs.push_back(i);
+                }
+            }
+        }
+        */
+        
+        
+        for (int i = 0, n = slotsCount; i < n; i++)
+        {
+            if (_skeleton->bHasMapping)
+            {
+                short index = _skeleton->indexMapping[i];
+                if (_skeleton->visibles[index] == 0)
+                {
+                    continue;
+                }
+            }
+            else if (_skeleton->visibles[i] == 0)
+            {
+                continue;
+            }
+            
+            indexs.push_back(i);
+        }
+        
+     /*
+        for (int i = 0, n = slotsCount; i < n; i++)
+        {
+            
+            if (_skeleton->bHasMapping)
+            {
+                short index = _skeleton->indexMapping[i];
+                if (_skeleton->visibles[index] == 0)
+                {
+                    continue;
+                }
+            }
+            else if (_skeleton->visibles[i] == 0)
+            {
+                continue;
+            }
+      */
+            
+        std::vector<short>::iterator iter = indexs.begin();
+        for ( ; iter != indexs.end(); iter++)
+        {
+            spSlot* slot = _skeleton->drawOrder[*iter];
+   //       spSlot* slot = _skeleton->drawOrder[i];
+            
+       /*    if (!slot->attachment)
+           {
+             continue;
+           }
+        */
+            
+            Texture2D *texture = nullptr;
+ #ifdef NewRender
+ 			BlendFactor srcFactor = _blendFunc.src;
+ 			BlendFactor dstFactor = slot->data->additiveBlending ? eBFONE : _blendFunc.dst;

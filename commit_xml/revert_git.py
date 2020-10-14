@@ -240,7 +240,7 @@ class commit_cls():
             trim_end = 0
             # print('cp1',body_origin[-1])
             # print('cp2',file_lines[body_start+len(body_origin)-1])
-            if body_origin[-1] != file_lines[body_start+len(body_origin)-1]:
+            if len(body_origin) > 0 and body_origin[-1] != file_lines[body_start+len(body_origin)-1]:
                 trim_end = -1
             return [[body_start,body_start+len(body_origin) + trim_end],None]
 
@@ -377,7 +377,7 @@ def check_is_can_revert(commit):
     return False
 
 def get_prev_rec():
-    file_path = "/Users/mac/Documents/my_projects/local_project/opengl_st/commit_xml/revert_git_rec__"
+    file_path = "revert_git_rec__"
     with open(file_path,'r') as f:
         try:
             number = f.readlines()[0].rstrip()
@@ -386,7 +386,7 @@ def get_prev_rec():
             return 0
 
 def save_rec(number):
-    file_path = "/Users/mac/Documents/my_projects/local_project/opengl_st/commit_xml/revert_git_rec__"
+    file_path = "revert_git_rec__"
     with open(file_path,'w') as f:
         f.write(str( number))
 
@@ -397,7 +397,8 @@ def get_idex_ofcommit(all_commits,sha):
     return None
 
 def force_revert(sha,trunk_name):
-    file_path = "/Users/mac/Documents/my_projects/cok/client/5_1.txt"
+    client_dir = os.getenv('ClientDir')
+    file_path = os.path.join(client_dir,'5_1.txt')
     f = codecs.open(file_path, 'r', 'utf-8')
     lines = f.readlines()
     f.close()
@@ -435,8 +436,8 @@ def force_revert(sha,trunk_name):
         if do_revert:
             break
 def main():
-    file_path = "/Users/mac/Documents/my_projects/cok/client/5_1.txt"
     client_dir = os.getenv('ClientDir')
+    file_path = os.path.join(client_dir,'5_1.txt')
     f = codecs.open(file_path, 'r', 'utf-8')
 
     prev_revert_rec = get_prev_rec()
@@ -461,7 +462,7 @@ def main():
 
     revert_step = 10
     # revert_to_sha = "49bb41bd50cabdad97524ff7dfbfa17844d408cc"
-    revert_to_sha = "1d9a4f0779e7a12553dedb31af4e4fc5f384605e"
+    revert_to_sha = "62ff3c279cf7f0cff36447ab7c76f25744c356c8"
     revert_to_idx = get_idex_ofcommit(all_commits,revert_to_sha)
     if revert_to_idx:
         revert_step = revert_to_idx - start_revert_index
