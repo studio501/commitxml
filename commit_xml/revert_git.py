@@ -305,8 +305,8 @@ class commit_cls():
             return
         for file in self.m_files:
             dst_file = client_dir + "/" + file["file_name"]
-            # if file["file_name"] != "IF/Classes/view/Widget/IFFieldMonsterNode.cpp":
-            #     continue
+            if file["file_name"] != "cocos2d/cocos/2d/CCGrid.cpp":
+                continue
             if self.file_not_modify_directly(file):
                 if (file.has_key("newfile") and file["newfile"]):
                     if os.path.exists(dst_file):
@@ -396,9 +396,9 @@ def get_idex_ofcommit(all_commits,sha):
             return i
     return None
 
-def force_revert(sha,trunk_name):
+def force_revert(sha,trunk_name,file_name='5_1.txt'):
     client_dir = os.getenv('ClientDir')
-    file_path = os.path.join(client_dir,'5_1.txt')
+    file_path = os.path.join(client_dir,file_name)
     f = codecs.open(file_path, 'r', 'utf-8')
     lines = f.readlines()
     f.close()
@@ -422,10 +422,12 @@ def force_revert(sha,trunk_name):
             if trunk_name in t['trunk_name']:
                 body = t["body"]
                 result = []
-                result.extend(t['head'])
+                for x in t['head']:
+                    result.append(x[1:])
                 r_body = commit.revert_body_(body)
                 result.extend(r_body)
-                result.extend(t['tail'])
+                for x in t['tail']:
+                    result.append(x[1:])
                 dst_file = "force_trunk"
                 f = codecs.open(dst_file,"w","utf-8")
                 f.writelines(result)
@@ -435,6 +437,43 @@ def force_revert(sha,trunk_name):
                 break
         if do_revert:
             break
+
+def specify_revert(file_name,sha_arr):
+    print('start revert',sha_arr)
+    client_dir = os.getenv('ClientDir')
+    file_path = os.path.join(client_dir,file_name)
+    f = codecs.open(file_path, 'r', 'utf-8')
+
+
+    content = f.read()
+    res = FileName_re.findall(content)
+    r = []
+    for x in res:
+        if not x in r:
+            r.append(x)
+
+    f.seek(0)
+    lines = f.readlines()
+    f.close()
+
+    all_commits = get_allcommits(lines)
+    all_commits_len = len(all_commits)
+
+    sha_ictr = 0
+    sha_len = len(sha_arr)
+    for commit in all_commits:
+        if sha_ictr > sha_len - 1:
+            break
+        # if check_is_can_revert(commit) and commit.m_sha == "62ff3c279cf7f0cff36447ab7c76f25744c356c8":
+        # if True or check_is_can_revert(commit):
+        if commit.m_sha == sha_arr[sha_ictr]:
+            if not Only_Error_Log:
+                print(u''+bcolors.HEADER+u'======= Start Revert =======')
+            commit.revert(client_dir)
+            sha_ictr += 1
+
+    print('revert successful')
+
 def main():
     client_dir = os.getenv('ClientDir')
     file_path = os.path.join(client_dir,'5_1.txt')
@@ -462,14 +501,14 @@ def main():
 
     revert_step = 10
     # revert_to_sha = "49bb41bd50cabdad97524ff7dfbfa17844d408cc"
-    revert_to_sha = "69e25bf884cb3ca489fc3525f541de1ba4bd0066"
+    revert_to_sha = "62ff3c279cf7f0cff36447ab7c76f25744c356c8"
     revert_to_idx = get_idex_ofcommit(all_commits,revert_to_sha)
     if revert_to_idx:
         revert_step = revert_to_idx - start_revert_index
 
     assert(revert_to_sha == all_commits[start_revert_index+revert_step].m_sha)
     
-    for commit in all_commits[start_revert_index:start_revert_index+revert_step]:
+    for commit in all_commits[start_revert_index:start_revert_index+revert_step+1]:
         # if check_is_can_revert(commit) and commit.m_sha == "62ff3c279cf7f0cff36447ab7c76f25744c356c8":
         # if True or check_is_can_revert(commit):
         if check_is_can_revert(commit):
@@ -480,8 +519,25 @@ def main():
     print('end revert till',all_commits[start_revert_index+revert_step].m_sha)
     save_rec(revert_to_sha)
 
+def need_revert_diff(diff_name):
+    pass
+    client_dir = os.getenv('ClientDir')
+    file_path = os.path.join(client_dir,diff_name)
+    f = codecs.open(file_path, 'r', 'utf-8')
+    lines = f.readlines()
+    f.close()
+
+    for i,x in enumerate(lines):
+        lines[i] = x[1:]
+
+    f = codecs.open(file_path+'revert_', 'w', 'utf-8')
+    f.writelines(lines)
+    f.close
+
 if __name__ == "__main__":
-    if len(sys.argv) == 3:
-        force_revert(sys.argv[1],sys.argv[2])
+    if len(sys.argv) >= 3:
+        force_revert(sys.argv[1],sys.argv[2], None if len(sys.argv) == 3 else sys.argv[3])
     else:
         main()
+        # specify_revert("ss.txt",["6b8bf6fc4e938f73d533df51fdcc878b985610ea","5943db7da8b76d58aa4e4c6fe6840c22d1324ec2"])
+        # need_revert_diff("need_revert.diff")
