@@ -265,16 +265,16 @@ class commit_cls():
             else:
                 return [None,body_origin]
 
-        # head_start = tell_subarray_pos(head,file_lines)
-        # if head_start == None:
-        #     return [None,head]
+        head_start = tell_subarray_pos(head,file_lines)
+        if head_start == None:
+            return [None,head]
 
-        # off_index = head_start + len(head) + max(0,trunk["body_len"]) - 1
-        # tail_start = tell_subarray_pos(tail,file_lines,off_index)
-        # if tail_start == None:
-        #     return [None,tail]
+        off_index = head_start + len(head) + max(0,trunk["body_len"]) - 1
+        tail_start = tell_subarray_pos(tail,file_lines,off_index)
+        if tail_start == None:
+            return [None,tail]
         
-        # return [[head_start+len(head),tail_start],None]
+        return [[head_start+len(head),tail_start],None]
 
     def revert_body_(self,body):
         res = []
@@ -346,7 +346,7 @@ class commit_cls():
                                 sig_ct = sig_ct + (0 if l[0]=='-' else 1)
                             t["body_len"] = sig_ct
 
-                            # if '@@ -142,7 +142,12 @@' in t['trunk_name']:
+                            # if '@@ -52,11 +52,6 @@' in t['trunk_name']:
                             #     pass
 
                             locate_info = self.locate_trunk_infile(t,lines)
@@ -462,7 +462,7 @@ def main():
 
     revert_step = 10
     # revert_to_sha = "49bb41bd50cabdad97524ff7dfbfa17844d408cc"
-    revert_to_sha = "62ff3c279cf7f0cff36447ab7c76f25744c356c8"
+    revert_to_sha = "69e25bf884cb3ca489fc3525f541de1ba4bd0066"
     revert_to_idx = get_idex_ofcommit(all_commits,revert_to_sha)
     if revert_to_idx:
         revert_step = revert_to_idx - start_revert_index
