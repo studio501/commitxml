@@ -1,106 +1,50 @@
-    _active = active;
-    if (! active)
-    {
-        Director *pDirector = Director::getInstance();
-        Director::Projection proj = pDirector->getProjection();
-        pDirector->setProjection(proj);
-    }
-}
 
-void GridBase::setTextureFlipped(bool flipped)
+void RenderQueue::saveRenderState()
 {
-    if (_isTextureFlipped != flipped)
-    {
-        _isTextureFlipped = flipped;
-        calculateVertexPoints();
-    }
-}
-
-void GridBase::set2DProjection()
-{
-    Director *director = Director::getInstance();
-    Size    size = director->getWinSizeInPixels();
+    _isDepthEnabled = glIsEnabled(GL_DEPTH_TEST) != GL_FALSE;
+    _isCullEnabled = glIsEnabled(GL_CULL_FACE) != GL_FALSE;
+    glGetBooleanv(GL_DEPTH_WRITEMASK, &_isDepthWrite);
     
-    director->loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-
-    Mat4 orthoMatrix;
-    Mat4::createOrthographicOffCenter(0, size.width, 0, size.height, -1, 1, &orthoMatrix);
-    director->multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, orthoMatrix);
-
-    director->loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
-
-    GL::setProjectionMatrixDirty();
+    CHECK_GL_ERROR_DEBUG();
 }
 
-void GridBase::beforeDraw(void)
+void RenderQueue::restoreRenderState()
 {
-    // save projection
-    Director *director = Director::getInstance();
-    _directorProjection = director->getProjection();
-
-    // 2d projection
-    //    [director setProjection:Director::Projection::_2D];
-    set2DProjection();
+    if (_isCullEnabled)
+    {
+        glEnable(GL_CULL_FACE);
+        RenderState::StateBlock::_defaultState->setCullFace(true);
+    }
+    else
+    {
+        glDisable(GL_CULL_FACE);
+        RenderState::StateBlock::_defaultState->setCullFace(false);
+    }
     
-    Size    size = director->getWinSizeInPixels();
-    glViewport(0, 0, (GLsizei)(size.width), (GLsizei)(size.height) );
-    _grabber->beforeRender(_texture);
+    /*
+    if (_isDepthEnabled)
+    {
+        glEnable(GL_DEPTH_TEST);
+        RenderState::StateBlock::_defaultState->setDepthTest(true);
+    }
+    else
+    {
+        glDisable(GL_DEPTH_TEST);
+        RenderState::StateBlock::_defaultState->setDepthTest(false);
+    }
+    */
+    
+    GL::setDepthTest(_isDepthEnabled);
+    
+    glDepthMask(_isDepthWrite);
+    RenderState::StateBlock::_defaultState->setDepthWrite(_isDepthEnabled);
+
+    CHECK_GL_ERROR_DEBUG();
 }
 
-void GridBase::afterDraw(cocos2d::Node *target)
-{
-    _grabber->afterRender(_texture);
-
-    // restore projection
-    Director *director = Director::getInstance();
-    director->setProjection(_directorProjection);
-
-    director->setViewport();
-    const auto& vp = Camera::getDefaultViewport();
-    glViewport(vp._left, vp._bottom, vp._width, vp._height);
-//    if (target->getCamera()->isDirty())
-//    {
-//        Vec2 offset = target->getAnchorPointInPoints();
 //
-//        //
-//        // FIXME: Camera should be applied in the AnchorPoint
-//        //
-//        kmGLTranslatef(offset.x, offset.y, 0);
-//        target->getCamera()->locate();
-//        kmGLTranslatef(-offset.x, -offset.y, 0);
-//    }
+//
+//
+static const int DEFAULT_RENDER_QUEUE = 0;
 
-    GL::bindTexture2D(_texture->getName());
-
-    // restore projection for default FBO .fixed bug #543 #544
-    //TODO:         Director::getInstance()->setProjection(Director::getInstance()->getProjection());
-    //TODO:         Director::getInstance()->applyOrientation();
-    beforeBlit();
-    blit();
-    afterBlit();
-}
-
-void GridBase::blit(void)
-{
-    CCASSERT(0, "");
-}
-
-void GridBase::reuse(void)
-{
-    CCASSERT(0, "");
-}
-
-void GridBase::calculateVertexPoints(void)
-{
-    CCASSERT(0, "");
-}
-
-// implementation of Grid3D
-
-Grid3D* Grid3D::create(const Size& gridSize, Texture2D *texture, bool flipped)
-{
-    Grid3D *ret= new (std::nothrow) Grid3D();
-
-    if (ret)
-    {
-        if (ret->initWithSize(gridSize, texture, flipped))
+//

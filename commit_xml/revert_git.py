@@ -305,7 +305,7 @@ class commit_cls():
             return
         for file in self.m_files:
             dst_file = client_dir + "/" + file["file_name"]
-            if file["file_name"] != "cocos2d/cocos/2d/CCGrid.cpp":
+            if file["file_name"] != "cocos2d/cocos/renderer/CCRenderer.cpp":
                 continue
             if self.file_not_modify_directly(file):
                 if (file.has_key("newfile") and file["newfile"]):
