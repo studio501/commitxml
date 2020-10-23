@@ -10,6 +10,28 @@ from collections import Mapping, Set, Sequence
 string_types = (str, unicode) if str is bytes else (str, bytes)
 iteritems = lambda mapping: getattr(mapping, 'iteritems', mapping.items)()
 
+comment1_re = re.compile(r'^\s*/\*\*')
+comment2_re = re.compile(r'^\s*\*')
+comment3_re = re.compile(r'^\s*\*/')
+comment4_re = re.compile(r'^\s*//')
+
+function_declare_re = re.compile(r'.*?(\w+)\((.*?)\).*?;')
+
+def is_comment_line(line):
+    if len( comment1_re.findall(line)) == 1:
+        return True
+
+    if len( comment2_re.findall(line)) == 1:
+        return True
+
+    if len( comment3_re.findall(line)) == 1:
+        return True
+
+    if len( comment4_re.findall(line)) == 1:
+        return True
+
+    return False
+
 def file_extension(path): 
 	return os.path.splitext(path)[1]
 
@@ -27,6 +49,38 @@ def objwalk(obj, cb):
         for path_component, value in iterator(obj):
             if objwalk(value,cb):
                 return
+
+class ClassHeader():
+    def __init__(self,lines,start_p=0):
+        self.m_lines = lines
+
+        self.m_start = -1
+        self.m_end = -1
+        self.m_name = ''
+        bracket = []
+        # start
+        for i,line in enumerate(lines):
+            if i < start_p:
+                continue
+            if line[:len('class')] == 'class' and line.count(';') == 0 and lines[i+1][0] == '{':
+                self.m_start = i
+                self.m_name = find_class_name(line)
+            
+            if self.m_start > -1:
+                if not is_comment_line(line):
+                    for ch in line:
+                        if ch == '{':
+                            bracket.append(ch)
+                        elif ch == '}':
+                            if len(bracket) == 0:
+                                a = 100
+                            bracket.pop()
+                            if len(bracket) == 0:
+                                self.m_end = i
+
+        a = 100
+
+
 
 def get_xcode_proj_(project,group,now_key,res):
     if not res.get( now_key):
@@ -157,7 +211,25 @@ def main():
 def compare_file(file_left,file_right):
     subprocess.call(['bcomp',file_left,file_right])
 
+def find_class_name(line):
+    cl = line.split(':')[0]
+    cl_a = cl.split(' ')
+    for l in reversed(cl_a):
+        if l != ' ' and l != '':
+            return l
+
+def parse_headerfile(file_path):
+    with open(file_path,'r') as f:
+        lines = f.readlines()
+
+        class1 = ClassHeader(lines,0)
+    # f = codecs.open(dst_file, 'w', 'utf-8')
+    # f.writelines(file["deletedfile"]["content"])
+    # f.close()
 
 if __name__ == "__main__":
+    # s = '    static Sprite* create();'
+    # a = is_comment_line(s)
+    parse_headerfile('/Users/mac/Downloads/cocos2d-x-4.0/cocos/2d/CCSprite.h')
     # compare_file("/Users/mac/Downloads/cocos2d-x-4.0/cocos/2d/CCSprite.cpp","/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/2d/CCSprite.cpp")
     main()
