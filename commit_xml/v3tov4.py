@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 from __future__ import print_function
-import sys,os,shutil,re,codecs,subprocess
+import sys,os,shutil,re,codecs,subprocess,json
 from pbxproj import XcodeProject
 from pbxproj.pbxextensions import FileOptions
 
@@ -15,24 +15,57 @@ comment2_re = re.compile(r'^\s*\*')
 comment3_re = re.compile(r'^\s*\*/')
 comment4_re = re.compile(r'^\s*//')
 
+comment5_re = re.compile(r'^\s*/\*+')
+comment6_re = re.compile(r'^\s*\*+/')
+
 function_declare_re = re.compile(r'.*?(\w+)\((.*?)\).*?;\s*}?\n?')
 propvalue_declare_re = re.compile(r'\s*((?:\w*:?:?)?\w+)\s*([*&])?\s*(\w+)\s*=?\s*(.*?)?\s*;.*\n?')
 fp_type_re = re.compile(r'\s*(?:const)?\s*(\w*:?:?\w+\s*[&*]?)\s*(\w+)')
 
+function_define_re = re.compile(r'.*?(\w+\s*[&*]?)\s+((?:\w+::)?\w+)\(((?:.*?\s*,?\s*)*)\)\s*\n?')
+
+RecUpgrade_Diff_File = "_rec_upgrade_diff"
+
+def read_json_file(f):
+    if not os.path.exists(f):
+        return json.loads('{}')
+    with open(f, 'r') as load_f:
+        try:
+            load_dict = json.load(load_f, encoding="utf-8")
+            return load_dict
+        except Exception as e:
+            pass
+
+        return json.loads('{}')
+
+def insert_before_idx(spec_idx, origin_arr, inserted_arr):
+    if spec_idx == 0:
+        for x in reversed(inserted_arr):
+            origin_arr.insert(0,x)
+    elif spec_idx > len(origin_arr) - 1:
+        origin_arr.extend(inserted_arr)
+    else:
+        pass
+        new_arr = [origin_arr[spec_idx-1]]
+        new_arr.extend(inserted_arr)
+        new_arr.append(origin_arr[spec_idx])
+        origin_arr[spec_idx-1:spec_idx+1] = new_arr
+
 def is_comment_line(line):
-    if len( comment1_re.findall(line)) == 1:
-        return True
-
-    if len( comment2_re.findall(line)) == 1:
-        return True
-
-    if len( comment3_re.findall(line)) == 1:
-        return True
-
-    if len( comment4_re.findall(line)) == 1:
-        return True
+    re_arr = [comment1_re,comment2_re,comment3_re,comment4_re,comment5_re,comment6_re]
+    for x in re_arr:
+        if len( x.findall(line)) == 1:
+            return True
 
     return False
+
+def is_blank_line(line):
+    tl = line.split()
+    return tl == 0
+
+def is_unfinished_line(line):
+    tl = line.rstrip()
+    return len(tl) > 0 and tl[-1] == ','
 
 def file_extension(path): 
 	return os.path.splitext(path)[1]
@@ -80,6 +113,193 @@ def parse_prop(prop_str):
     prop_arr = prop_str.split(' ')
     return [prop_arr[-1],' '.join(prop_arr[0:-1]),default]
 
+def find_last_closebracket_line(lines):
+    for i,x in reversed(list(enumerate(lines))):
+        tl = x.rstrip()
+        if len(tl) > 0 and tl[-1] == '}':
+            return i
+
+class CppFile():
+    def __init__(self,file_path):
+        self.m_file_path = file_path
+        f = codecs.open(self.m_file_path, 'r', 'utf-8')
+        self.m_lines = f.readlines()
+        f.close()
+
+        self.m_fh_comment_st = -1
+        self.m_fh_comment_ed = -1
+        for i,line in enumerate(self.m_lines):
+            if is_comment_line(line):
+                if self.m_fh_comment_st == -1:
+                    self.m_fh_comment_st = i
+                else:
+                    self.m_fh_comment_ed = i + 1
+                    break
+
+        for i,line in enumerate(self.m_lines):
+            if len(function_define_re.findall(line)) == 1:
+                self.m_start = i
+                break
+        
+        self.m_func_map = {}
+
+        i = -1
+        while i < len(self.m_lines):
+            i += 1
+            line = self.m_lines[i]
+            # for i,line in enumerate(self.m_lines):
+            if line.count('Sprite::initWithFile(const std::string& filename)') == 1:
+                a = 100
+            if i < self.m_start:
+                continue
+            if is_blank_line(line):
+                continue
+            if is_unfinished_line(line):
+                continue
+            if len(function_define_re.findall(line)) == 1 and self.m_lines[i+1].count('{') == 1:
+                bracket_stack = []
+                func_st = i
+                func_ed = i
+                finded_func = False
+                for j,line_j in enumerate(self.m_lines[i:-1]):
+                    for k in line_j:
+                        if k == '{':
+                            bracket_stack.append(k)
+                        elif k == '}':
+                            bracket_stack.pop()
+                            if len(bracket_stack) == 0:
+                                func_ed = i + j
+                                i += j
+                                finded_func = True
+                                break
+                    if finded_func:
+                        break
+                
+                func_arr = function_define_re.sub(r'\1|\2|\3',line).split('|')
+                fp = parse_func_param(func_arr[2])
+                
+                func_res_arr = [func_arr[1]]
+                func_res_arr.extend(fp)
+                name_key = '-'.join(func_res_arr)
+
+                self.m_func_map[name_key] = {
+                    'fp': fp,
+                    'start': func_st,
+                    'end': func_ed,
+                    'name_key':name_key
+                }
+                a = 112
+            i += 1
+        a = 100
+
+    def update_function_define(self,other_class):
+
+        self_func_map = self.m_func_map
+        other_func_map = other_class.m_func_map
+
+        replaced_ = {}
+        replaced_arr = []
+        for x in self_func_map:
+            if x in other_func_map:
+                sfunc = self_func_map[x]
+                ofunc = other_func_map[x]
+                replaced_arr.append([sfunc,ofunc])
+                replaced_[x] = True
+        
+        replaced_arr.sort(key=lambda x: x[0]['start'])
+        replaced_arr_len = len(replaced_arr)
+        new_lines = []
+        rp_cter = 0
+        ti = 0
+        while ti < len(self.m_lines):
+            line = self.m_lines[ti]
+            if rp_cter < replaced_arr_len and ti == replaced_arr[rp_cter][0]['start']:
+                sfunc = replaced_arr[rp_cter][0]
+                ofunc = replaced_arr[rp_cter][1]
+                s_line_dt = sfunc['end'] - sfunc['start']
+                o_line_dt = ofunc['end'] - ofunc['start']
+
+                if abs(s_line_dt - o_line_dt) > 10:
+                    rec_json = read_json_file(RecUpgrade_Diff_File)
+                    tlines = None
+                    if sfunc['name_key'] in rec_json:
+                        tlines = rec_json[sfunc['name_key']]
+                    else:
+                        tlines = compare_lines(other_class.m_lines[ofunc['start']:ofunc['end']+1],self.m_lines[sfunc['start']:sfunc['end']+1])
+                        rec_json[sfunc['name_key']] = tlines
+                        with open(RecUpgrade_Diff_File,'w') as f:
+                            f.write(json.dumps(rec_json))
+                    new_lines.extend(tlines)
+                else:
+                    new_lines.extend(other_class.m_lines[ofunc['start']:ofunc['end']+1])
+                ti += s_line_dt
+                rp_cter += 1
+            else:
+                new_lines.append(line)
+            ti += 1
+
+        added_arr = []
+        for x in other_func_map:
+            if not x in replaced_:
+                added_arr.append(other_func_map[x])
+
+        added_arr.sort(key=lambda x: x['start'])
+
+        last_closed_bracket_idx = find_last_closebracket_line(new_lines)
+
+        added_lines = []
+        for x in added_arr:
+            st = x['start']
+            ed = x['end']
+            t_a = other_class.m_lines[st:ed + 1]
+            added_lines.extend(t_a)
+            added_lines.append('\n')
+
+        insert_before_idx(last_closed_bracket_idx + 2,new_lines,added_lines)
+
+        self.m_lines = new_lines
+        self.save()
+
+        a = 100
+
+    def save(self):
+        f = codecs.open(self.m_file_path, 'w', 'utf-8')
+        f.writelines(self.m_lines)
+        f.close()
+
+    def just_replace_fileheader_comment(self,other_class):
+        self.m_lines[0:self.m_fh_comment_ed] = other_class.m_lines[0:other_class.m_fh_comment_ed]
+        self.save()
+
+    def find_fileheader(self):
+        fh_lines = self.m_lines[:self.m_start]
+        res = {}
+        for i,line in enumerate(fh_lines):
+            if not is_comment_line(line):
+                res[line.lstrip().rstrip()] = [i,line]
+        return res
+
+    def update_fileheader(self,other_class):
+        other_fh = other_class.find_fileheader()
+        self_fh = self.find_fileheader()
+        head_lines = {}
+        for x in self_fh:
+            if x in other_fh:
+                head_lines[x] = True
+        
+        added_lines = []
+        for x in other_fh:
+            if not x in head_lines:
+                added_lines.append(other_fh[x])
+        
+        added_lines.sort(key=lambda x:x[0])
+        res_lines = []
+        for x in added_lines:
+            res_lines.append(x[1])
+
+        class_start = self.m_start
+        insert_before_idx(class_start,self.m_lines,res_lines)
+        self.save()
 
 class ClassHeader():
     def __init__(self,lines,file_path,start_p=0):
@@ -184,8 +404,8 @@ class ClassHeader():
         self_fh = self.find_fileheader()
         head_lines = {}
         for x in self_fh:
-            if y in other_fh:
-                head_lines[y] = True
+            if x in other_fh:
+                head_lines[x] = True
         
         added_lines = []
         for x in other_fh:
@@ -196,6 +416,10 @@ class ClassHeader():
         res_lines = []
         for x in added_lines:
             res_lines.append(x[1])
+
+        class_start = self.m_start
+        insert_before_idx(class_start,self.m_lines,res_lines)
+        
         
 
 
@@ -328,6 +552,24 @@ def main():
 def compare_file(file_left,file_right):
     subprocess.call(['bcomp',file_left,file_right])
 
+def compare_lines(lines_left,lines_right):
+    file_left = 'v4_left_'
+    file_right = 'v3_right_'
+    f = codecs.open(file_left, 'w', 'utf-8')
+    f.writelines(lines_left)
+    f.close()
+
+    f = codecs.open(file_right, 'w', 'utf-8')
+    f.writelines(lines_right)
+    f.close()
+
+    compare_file(file_left,file_right)
+
+    f = codecs.open(file_right, 'r', 'utf-8')
+    new_lines = f.readlines()
+    f.close()
+    return new_lines
+
 def find_class_name(line):
     cl = line.split(':')[0]
     cl_a = cl.split(' ')
@@ -369,7 +611,7 @@ def compare_class(class1,class2):
         if not x in prop_cpd:
             # update_cp[x] = class2.m_prop_map[x]
             line2 = class2.m_prop_map[x]['line']
-            print(class2.m_lines[line2])
+            # print(class2.m_lines[line2])
             prop_lines.append(class2.m_lines[line2])
 
     end_of_class_idx = class1.m_end
@@ -428,14 +670,64 @@ def compare_class(class1,class2):
     
     a = 100
 
-if __name__ == "__main__":
-    # s = '    static Sprite* create();'
-    # a = is_comment_line(s)
-    ta = parse_prop('    bool _isFixedPS; //在修改本Sprite所指向的SpriteFrame之后，是否保持当前Sprite的ProgramState。默认false。')
-    class_arr1 = parse_headerfile('/Users/mac/Downloads/cocos2d-x-4.0/cocos/2d/CCSprite.h')
-    class_arr1[0].find_fileheader()
-    class_arr2 = parse_headerfile('/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/2d/CCSprite.h')
+def compare_fileheader(class1,class2):
+    class1.update_fileheader(class2.find_fileheader())
+    class1.save()
+
+def reget_header_class(file_path,class_name):
+    class_arr = parse_headerfile(file_path)
+    for x in class_arr:
+        if x.m_name == class_name:
+            return x
+
+def upgrade_file_header(v4_h,v3_h):
+    class_arr1 = parse_headerfile(v4_h)
+    
+    class_arr2 = parse_headerfile(v3_h)
+    compare_fileheader(class_arr2[0],class_arr1[0])
+
+    for x in class_arr2:
+        for y in class_arr1:
+            if y.m_name == x.m_name:
+                tc = reget_header_class(v3_h,x.m_name)
+                compare_class(tc,y)
+                break
+
+    class_arr2 = parse_headerfile(v3_h)
     compare_class(class_arr2[0],class_arr1[0])
+
+def upgrade_file_cpp(v4_cpp,v3_cpp):
+    pass
+
+
+if __name__ == "__main__":
+    # compare_file("/Users/mac/Downloads/cocos2d-x-4.0/cocos/2d/CCSprite.cpp","/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/2d/CCSprite.cpp")
+    s1 = "/****************************************************************************"
+    s2 = "****************************************************************************/"
+
+    t1 = comment5_re.findall(s1)
+    t2 = comment6_re.findall(s2)
+
+    arr1 = [1,2,3,4,5,6,7,8]
+    for i,x in enumerate(arr1):
+        print(i)
+        if i == 2:
+            i += 4
+
+    cpp1 = CppFile("/Users/mac/Downloads/cocos2d-x-4.0/cocos/2d/CCSprite.cpp")
+
+    # replace file funciton define
+    cpp2 = CppFile("/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/2d/CCSprite.cpp")
+    cpp2.update_function_define(cpp1)
+
+    # repace file comment header
+    cpp2 = CppFile("/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/2d/CCSprite.cpp")
+    cpp2.just_replace_fileheader_comment(cpp1)
+
+    # repace file includes
+    cpp2 = CppFile("/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/2d/CCSprite.cpp")
+    cpp2.update_fileheader(cpp1)
+
     a = 100
     # compare_file("/Users/mac/Downloads/cocos2d-x-4.0/cocos/2d/CCSprite.cpp","/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/2d/CCSprite.cpp")
     # main()
