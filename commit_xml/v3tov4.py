@@ -10,13 +10,14 @@ from collections import Mapping, Set, Sequence
 string_types = (str, unicode) if str is bytes else (str, bytes)
 iteritems = lambda mapping: getattr(mapping, 'iteritems', mapping.items)()
 
-comment1_re = re.compile(r'^\s*/\*\*')
-comment2_re = re.compile(r'^\s*\*')
-comment3_re = re.compile(r'^\s*\*/')
-comment4_re = re.compile(r'^\s*//')
+comment1_re = re.compile(r'^\s*/\*\*') # /**
+comment2_re = re.compile(r'^\s*\*') # *
+comment3_re = re.compile(r'^\s*\*/') # */
+comment4_re = re.compile(r'^\s*//') # //
 
-comment5_re = re.compile(r'^\s*/\*+')
-comment6_re = re.compile(r'^\s*\*+/')
+comment5_re = re.compile(r'^\s*/\*+') # /*********
+comment6_re = re.compile(r'\s*\*+/') # *********/
+comment7_re = re.compile(r'/\*.*?\*/') # /* abcd */
 
 function_declare_re = re.compile(r'.*?(\w+)\((.*?)\).*?;\s*}?\n?')
 propvalue_declare_re = re.compile(r'\s*((?:\w*:?:?)?\w+)\s*([*&])?\s*(\w+)\s*=?\s*(.*?)?\s*;.*\n?')
@@ -24,7 +25,10 @@ fp_type_re = re.compile(r'\s*(?:const)?\s*(\w*:?:?\w+\s*[&*]?)\s*(\w+)')
 
 function_define_re = re.compile(r'.*?(\w+\s*[&*]?)\s+((?:\w+::)?\w+)\(((?:.*?\s*,?\s*)*)\)\s*\n?')
 
+Shader_re = re.compile(r'.*\*\s*((?:cc)?.*?)\s*;')
+
 RecUpgrade_Diff_File = "_rec_upgrade_diff"
+V3toV4_error_dir = 'v3tov4_error'
 
 def read_json_file(f):
     if not os.path.exists(f):
@@ -53,6 +57,22 @@ def insert_before_idx(spec_idx, origin_arr, inserted_arr):
 
 def is_comment_line(line):
     re_arr = [comment1_re,comment2_re,comment3_re,comment4_re,comment5_re,comment6_re]
+    for x in re_arr:
+        if len( x.findall(line)) == 1:
+            return True
+
+    return False
+
+def is_comment_line_start(line):
+    re_arr = [comment5_re]
+    for x in re_arr:
+        if len( x.findall(line)) == 1:
+            return True
+
+    return False
+
+def is_comment_line_end(line):
+    re_arr = [comment6_re]
     for x in re_arr:
         if len( x.findall(line)) == 1:
             return True
@@ -119,15 +139,71 @@ def find_last_closebracket_line(lines):
         if len(tl) > 0 and tl[-1] == '}':
             return i
 
+def trim_right_comment_in_line(line):
+    if line.count('//') > 0:
+        ti = line.rindex('//')
+        return line[:ti]
+    elif len(comment7_re.findall(line)) == 1:
+        ti = line.rindex('/*')
+        return line[:ti]
+
+    return line
+
+def fix_multiline(lines):
+    line_in_comment = False
+    has_multi_line = False
+    res = []
+    temp = []
+    for i,line in enumerate(lines):
+        if line_in_comment:
+            if is_comment_line_end(line):
+                line_in_comment = False
+            res.append(line)
+            continue
+        if is_comment_line_start(line):
+            line_in_comment = True
+            if line.rstrip()[-2:] == '*/':
+                line_in_comment = False
+            res.append(line)
+            continue
+        if is_comment_line(line):
+            res.append(line)
+            continue
+        
+        tline = trim_right_comment_in_line(line)
+        tl = line.rstrip()
+        if len(tl) and tl[-1] == ',':
+            temp.append(tline.lstrip().rstrip())
+        else:
+            if len(temp) > 0:
+                temp.append(tline.lstrip().rstrip())
+                res.append(''.join(temp))
+                temp = []
+                has_multi_line = True
+            else:
+                res.append(line)
+
+    return [has_multi_line,res]
+
 class CppFile():
+    def fix_multline(self):
+        pass
+        res = fix_multiline(self.m_lines)
+        if res[0]:
+            self.m_lines = res[1]
+            self.save()
+
     def __init__(self,file_path):
         self.m_file_path = file_path
         f = codecs.open(self.m_file_path, 'r', 'utf-8')
         self.m_lines = f.readlines()
         f.close()
 
+        self.fix_multline()
+
         self.m_fh_comment_st = -1
         self.m_fh_comment_ed = -1
+        self.m_start = -1
         for i,line in enumerate(self.m_lines):
             if is_comment_line(line):
                 if self.m_fh_comment_st == -1:
@@ -137,59 +213,68 @@ class CppFile():
                     break
 
         for i,line in enumerate(self.m_lines):
-            if len(function_define_re.findall(line)) == 1:
-                self.m_start = i
-                break
+            try:
+                if len(function_define_re.findall(line)) == 1:
+                    self.m_start = i
+                    break
+            except Exception as e:
+                print(e)
         
         self.m_func_map = {}
 
         i = -1
-        while i < len(self.m_lines):
-            i += 1
-            line = self.m_lines[i]
-            # for i,line in enumerate(self.m_lines):
-            if line.count('Sprite::initWithFile(const std::string& filename)') == 1:
-                a = 100
-            if i < self.m_start:
-                continue
-            if is_blank_line(line):
-                continue
-            if is_unfinished_line(line):
-                continue
-            if len(function_define_re.findall(line)) == 1 and self.m_lines[i+1].count('{') == 1:
-                bracket_stack = []
-                func_st = i
-                func_ed = i
-                finded_func = False
-                for j,line_j in enumerate(self.m_lines[i:-1]):
-                    for k in line_j:
-                        if k == '{':
-                            bracket_stack.append(k)
-                        elif k == '}':
-                            bracket_stack.pop()
-                            if len(bracket_stack) == 0:
-                                func_ed = i + j
-                                i += j
-                                finded_func = True
-                                break
-                    if finded_func:
-                        break
-                
-                func_arr = function_define_re.sub(r'\1|\2|\3',line).split('|')
-                fp = parse_func_param(func_arr[2])
-                
-                func_res_arr = [func_arr[1]]
-                func_res_arr.extend(fp)
-                name_key = '-'.join(func_res_arr)
+        lines_len = len(self.m_lines)
+        try:
+            while i < len(self.m_lines):
+                i += 1
+                if i > lines_len - 1:
+                    break
+                line = self.m_lines[i]
+                # for i,line in enumerate(self.m_lines):
+                if line.count('Sprite::initWithFile(const std::string& filename)') == 1:
+                    a = 100
+                if i < self.m_start:
+                    continue
+                if is_blank_line(line):
+                    continue
+                if is_unfinished_line(line):
+                    continue
+                if len(function_define_re.findall(line)) == 1 and self.m_lines[i+1].count('{') == 1:
+                    bracket_stack = []
+                    func_st = i
+                    func_ed = i
+                    finded_func = False
+                    for j,line_j in enumerate(self.m_lines[i:-1]):
+                        for k in line_j:
+                            if k == '{':
+                                bracket_stack.append(k)
+                            elif k == '}':
+                                bracket_stack.pop()
+                                if len(bracket_stack) == 0:
+                                    func_ed = i + j
+                                    i += j
+                                    finded_func = True
+                                    break
+                        if finded_func:
+                            break
+                    
+                    func_arr = function_define_re.sub(r'\1|\2|\3',line).split('|')
+                    fp = parse_func_param(func_arr[2])
+                    
+                    func_res_arr = [func_arr[1]]
+                    func_res_arr.extend(fp)
+                    name_key = '-'.join(func_res_arr)
 
-                self.m_func_map[name_key] = {
-                    'fp': fp,
-                    'start': func_st,
-                    'end': func_ed,
-                    'name_key':name_key
-                }
-                a = 112
-            i += 1
+                    self.m_func_map[name_key] = {
+                        'fp': fp,
+                        'start': func_st,
+                        'end': func_ed,
+                        'name_key':name_key
+                    }
+                    a = 112
+                i += 1
+        except Exception as e:
+            print('parse failed',e)
         a = 100
 
     def update_function_define(self,other_class):
@@ -219,7 +304,7 @@ class CppFile():
                 s_line_dt = sfunc['end'] - sfunc['start']
                 o_line_dt = ofunc['end'] - ofunc['start']
 
-                if abs(s_line_dt - o_line_dt) > 10:
+                if abs(s_line_dt - o_line_dt) > 15:
                     rec_json = read_json_file(RecUpgrade_Diff_File)
                     tlines = None
                     if sfunc['name_key'] in rec_json:
@@ -234,6 +319,7 @@ class CppFile():
                     new_lines.extend(other_class.m_lines[ofunc['start']:ofunc['end']+1])
                 ti += s_line_dt
                 rp_cter += 1
+                print('replace {} successful'.format(sfunc['name_key']))
             else:
                 new_lines.append(line)
             ti += 1
@@ -255,7 +341,8 @@ class CppFile():
             added_lines.extend(t_a)
             added_lines.append('\n')
 
-        insert_before_idx(last_closed_bracket_idx + 2,new_lines,added_lines)
+        if last_closed_bracket_idx and len(added_lines) > 0:
+            insert_before_idx(last_closed_bracket_idx + 2,new_lines,added_lines)
 
         self.m_lines = new_lines
         self.save()
@@ -314,10 +401,21 @@ class ClassHeader():
 
         bracket = []
 
+        line_in_comment = False
         # start
         for i,line in enumerate(lines):
             if i < start_p:
                 continue
+            if line_in_comment:
+                if is_comment_line_end(line):
+                    line_in_comment = False
+                continue
+            if is_comment_line_start(line):
+                line_in_comment = True
+                if line.rstrip()[-2:] == '*/':
+                    line_in_comment = False
+                continue
+
             if line[:len('class')] == 'class' and line.count(';') == 0 and lines[i+1][0] == '{':
                 self.m_start = i
                 self.m_name = find_class_name(line)
@@ -326,6 +424,7 @@ class ClassHeader():
                 if not is_comment_line(line):
                     for ch in line:
                         if ch == '{':
+                            print('push { ',i,':',line)
                             bracket.append(ch)
                         elif ch == '}':
                             if len(bracket) == 0:
@@ -333,6 +432,7 @@ class ClassHeader():
                             bracket.pop()
                             if len(bracket) == 0:
                                 self.m_end = i
+                                break
 
         self.m_prop_map = {}
         self.m_func_map = {}
@@ -373,7 +473,7 @@ class ClassHeader():
         b = 100
 
     def is_valid_class(self):
-        return self.m_start != self.m_end
+        return self.m_start != self.m_end and self.m_end != -1
 
     def update_withother(self,class2):
         pass
@@ -502,7 +602,26 @@ def handle_added_files(pbx_project,file_arr):
 
     pbx_project.save()
 
-def main():
+def upgrade_one_file(file_arr,v3_root,v4_root):
+    v3_file = file_arr[0]
+    v4_file = file_arr[1]
+    v3_path = os.path.join(v3_root,v3_file[1])
+    v4_path = os.path.join(v4_root,v4_file[1])
+    ext = file_extension(v3_file[2])
+    if ext == '.h':
+        upgrade_file_header(v4_path,v3_path)
+    elif ext == '.cpp':
+        upgrade_file_cpp(v4_path,v3_path)
+
+def recreate_error_dir():
+    dst_dir = V3toV4_error_dir
+    if os.path.exists(dst_dir):
+        subprocess.call(["rm","-rf",dst_dir])
+    os.makedirs(os.path.join(dst_dir,'v3'))
+    os.makedirs(os.path.join(dst_dir,'v4'))
+
+def upgrade_pbx_proj():
+    recreate_error_dir()
     file_path = "/Users/mac/Documents/my_projects/cok/client/cocos2d/build/cocos2d_libs.xcodeproj/project.pbxproj"
     pbx_res = get_xcode_proj(file_path)
     pbx1 = pbx_res[0]
@@ -512,6 +631,9 @@ def main():
     pbx_res2 = get_xcode_proj(file_path2)
     pbx2 = pbx_res2[0]
     pbx2_project = pbx_res2[1]
+
+    v3_root = "/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer"
+    v4_root = "/Users/mac/Downloads/cocos2d-x-4.0/cocos"
 
     replace_ = []
     reserve_ = []
@@ -540,6 +662,7 @@ def main():
 
     for x in replace_:
         print('replace file: {} ===> {}'.format(x[0][1],x[1][1]))
+        upgrade_one_file(x,v3_root,v4_root)
 
     for x in reserve_2:
         print('reserved file:',x[1])
@@ -547,6 +670,10 @@ def main():
     # handle_added_files(pbx1_project,added_)
     for x in pbx1:
         print(x)
+    pass
+
+def main():
+    upgrade_pbx_proj()
     pass
 
 def compare_file(file_left,file_right):
@@ -682,8 +809,18 @@ def reget_header_class(file_path,class_name):
 
 def upgrade_file_header(v4_h,v3_h):
     class_arr1 = parse_headerfile(v4_h)
-    
     class_arr2 = parse_headerfile(v3_h)
+    if len(class_arr1) == 0 or len(class_arr2) == 0:
+        dst_dir = V3toV4_error_dir
+
+        # v3_error_dir = os.path.join(dst_dir,'v3')
+        # v4_error_dir = os.path.join(dst_dir,'v4')
+        # bf3 = os.path.basename(v3_h)
+        # bf4 = os.path.basename(v4_h)
+        # shutil.copy(v3_h, os.path.join(v3_error_dir,bf3))
+        # shutil.copy(v4_h, os.path.join(v4_error_dir,bf4))
+        return
+
     compare_fileheader(class_arr2[0],class_arr1[0])
 
     for x in class_arr2:
@@ -698,36 +835,44 @@ def upgrade_file_header(v4_h,v3_h):
 
 def upgrade_file_cpp(v4_cpp,v3_cpp):
     pass
-
-
-if __name__ == "__main__":
-    # compare_file("/Users/mac/Downloads/cocos2d-x-4.0/cocos/2d/CCSprite.cpp","/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/2d/CCSprite.cpp")
-    s1 = "/****************************************************************************"
-    s2 = "****************************************************************************/"
-
-    t1 = comment5_re.findall(s1)
-    t2 = comment6_re.findall(s2)
-
-    arr1 = [1,2,3,4,5,6,7,8]
-    for i,x in enumerate(arr1):
-        print(i)
-        if i == 2:
-            i += 4
-
-    cpp1 = CppFile("/Users/mac/Downloads/cocos2d-x-4.0/cocos/2d/CCSprite.cpp")
-
-    # replace file funciton define
-    cpp2 = CppFile("/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/2d/CCSprite.cpp")
-    cpp2.update_function_define(cpp1)
+    cpp1 = CppFile(v4_cpp)
 
     # repace file comment header
-    cpp2 = CppFile("/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/2d/CCSprite.cpp")
+    cpp2 = CppFile(v3_cpp)
     cpp2.just_replace_fileheader_comment(cpp1)
 
     # repace file includes
-    cpp2 = CppFile("/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/2d/CCSprite.cpp")
+    cpp2 = CppFile(v3_cpp)
     cpp2.update_fileheader(cpp1)
 
-    a = 100
-    # compare_file("/Users/mac/Downloads/cocos2d-x-4.0/cocos/2d/CCSprite.cpp","/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/2d/CCSprite.cpp")
-    # main()
+    # replace file funciton define
+    cpp2 = CppFile(v3_cpp)
+    cpp2.update_function_define(cpp1)
+
+# [v4_h,v4_cpp,v3_h,v3_cpp]
+def upgrade_module(module_files):
+    if(len(module_files) != 4):
+        return
+    upgrade_file_header(module_files[0],module_files[2])
+    upgrade_file_cpp(module_files[1],module_files[3])
+
+
+def get_file_lines(file_path):
+    f = codecs.open(file_path, 'r', 'utf-8')
+    lines = f.readlines()
+    f.close()
+    return lines
+
+def replace_shader_line(line_v4,line_v3):
+    pass
+
+def upgrade_shader_file(file_v4,file_v3):
+    lines_v3 = get_file_lines(file_v3)
+    lines_v4 = get_file_lines(file_v4)
+
+
+if __name__ == "__main__":
+    # class_arr2 = parse_headerfile('/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCCustomCommand.h')
+    class_arr1 = parse_headerfile('/Users/mac/Documents/my_projects/local_project/opengl_st/commit_xml/v3tov4_error/v3/CCPass.h')
+    upgrade_file_header('/Users/mac/Documents/my_projects/local_project/opengl_st/commit_xml/v3tov4_error/v4/CCTexture2D.h','/Users/mac/Documents/my_projects/local_project/opengl_st/commit_xml/v3tov4_error/v3/CCTexture2D.h')
+    main()
