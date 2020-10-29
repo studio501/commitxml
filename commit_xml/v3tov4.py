@@ -4,7 +4,7 @@ import sys,os,shutil,re,codecs,subprocess,json
 from pbxproj import XcodeProject
 from pbxproj.pbxextensions import FileOptions
 
-from collections import Mapping, Set, Sequence 
+from collections import Mapping, Set, Sequence
 
 # dual python 2/3 compatability, inspired by the "six" library
 string_types = (str, unicode) if str is bytes else (str, bytes)
@@ -15,7 +15,7 @@ comment2_re = re.compile(r'^\s*\*') # *
 comment3_re = re.compile(r'^\s*\*/') # */
 comment4_re = re.compile(r'^\s*//') # //
 
-comment5_re = re.compile(r'^\s*/\*+') # /*********
+comment5_re = re.compile(r'^\W?\s*/\*+') # /*********
 comment6_re = re.compile(r'\s*\*+/') # *********/
 comment7_re = re.compile(r'/\*.*?\*/') # /* abcd */
 
@@ -24,11 +24,16 @@ propvalue_declare_re = re.compile(r'\s*((?:\w*:?:?)?\w+)\s*([*&])?\s*(\w+)\s*=?\
 fp_type_re = re.compile(r'\s*(?:const)?\s*(\w*:?:?\w+\s*[&*]?)\s*(\w+)')
 
 function_define_re = re.compile(r'.*?(\w+\s*[&*]?)\s+((?:\w+::)?\w+)\(((?:.*?\s*,?\s*)*)\)\s*\n?')
+ctor_function_define_re = re.compile(r'(\w+)::\1\(.*?\).*?\n?')
+incomplete_func_define_re = re.compile(r'.*?(\w+\s*[&*]?)\s+((?:\w+::)?\w+)\(((?:.*,?)*)')
+# (\w+)::\1\(.*?\)
 
-Shader_re = re.compile(r'.*\*\s*((?:cc)?.*?)\s*;')
+Shader_re = re.compile(r'.*\*\s*(?:cc)?(.*?)\s*;')
 
 RecUpgrade_Diff_File = "_rec_upgrade_diff"
 V3toV4_error_dir = 'v3tov4_error'
+
+Access_tags = ['private:','protected:','public:']
 
 def read_json_file(f):
     if not os.path.exists(f):
@@ -90,6 +95,9 @@ def is_unfinished_line(line):
 def file_extension(path): 
 	return os.path.splitext(path)[1]
 
+def file_without_extension(path):
+    return os.path.splitext(os.path.basename(path))[0]
+
 def objwalk(obj, cb):
     iterator = None
     if isinstance(obj, Mapping):
@@ -149,6 +157,13 @@ def trim_right_comment_in_line(line):
 
     return line
 
+def fix_multiline_of_file(file_path):
+    lines = get_file_lines(file_path)
+    res = fix_multiline(lines)
+    if res[0]:
+        lines = res[1]
+        write_file_lines(file_path,lines)
+
 def fix_multiline(lines):
     line_in_comment = False
     has_multi_line = False
@@ -173,11 +188,17 @@ def fix_multiline(lines):
         tline = trim_right_comment_in_line(line)
         tl = line.rstrip()
         if len(tl) and tl[-1] == ',':
-            temp.append(tline.lstrip().rstrip())
+            if len(temp) == 0:
+                if len(incomplete_func_define_re.findall(tl)) == 1:
+                    temp.append(tline.rstrip())
+                else:
+                    res.append(line)
+            else:
+                temp.append(tline.lstrip().rstrip())
         else:
             if len(temp) > 0:
                 temp.append(tline.lstrip().rstrip())
-                res.append(''.join(temp))
+                res.append(' '.join(temp))
                 temp = []
                 has_multi_line = True
             else:
@@ -214,7 +235,7 @@ class CppFile():
 
         for i,line in enumerate(self.m_lines):
             try:
-                if len(function_define_re.findall(line)) == 1:
+                if len(function_define_re.findall(line)) == 1 or len(ctor_function_define_re.findall(line)) == 1:
                     self.m_start = i
                     break
             except Exception as e:
@@ -239,7 +260,7 @@ class CppFile():
                     continue
                 if is_unfinished_line(line):
                     continue
-                if len(function_define_re.findall(line)) == 1 and self.m_lines[i+1].count('{') == 1:
+                if len(function_define_re.findall(line)) == 1 and (self.m_lines[i+1].count('{') == 1 or self.m_lines[i+1].count(':') == 1):
                     bracket_stack = []
                     func_st = i
                     func_ed = i
@@ -284,12 +305,15 @@ class CppFile():
 
         replaced_ = {}
         replaced_arr = []
+        reserved_ = {}
         for x in self_func_map:
             if x in other_func_map:
                 sfunc = self_func_map[x]
                 ofunc = other_func_map[x]
                 replaced_arr.append([sfunc,ofunc])
                 replaced_[x] = True
+            else:
+                reserved_[x] = self_func_map[x]
         
         replaced_arr.sort(key=lambda x: x[0]['start'])
         replaced_arr_len = len(replaced_arr)
@@ -335,6 +359,7 @@ class CppFile():
 
         added_lines = []
         for x in added_arr:
+            print('add function:',x['name_key'])
             st = x['start']
             ed = x['end']
             t_a = other_class.m_lines[st:ed + 1]
@@ -343,6 +368,11 @@ class CppFile():
 
         if last_closed_bracket_idx and len(added_lines) > 0:
             insert_before_idx(last_closed_bracket_idx + 2,new_lines,added_lines)
+
+        bf = os.path.basename(self.m_file_path)
+        access_reserved_map(bf,{
+            'func_impl': reserved_
+        })
 
         self.m_lines = new_lines
         self.save()
@@ -361,10 +391,26 @@ class CppFile():
     def find_fileheader(self):
         fh_lines = self.m_lines[:self.m_start]
         res = {}
+        line_in_comment = False
         for i,line in enumerate(fh_lines):
+            if line_in_comment:
+                if is_comment_line_end(line):
+                    line_in_comment = False
+                continue
+            if is_comment_line_start(line):
+                line_in_comment = True
+                if line.rstrip()[-2:] == '*/':
+                    line_in_comment = False
+                continue
             if not is_comment_line(line):
                 res[line.lstrip().rstrip()] = [i,line]
         return res
+
+    def get_ns_ccbegin(self):
+        for i,line in enumerate(self.m_lines):
+            if line.count('NS_CC_BEGIN') == 1:
+                return i
+        return None
 
     def update_fileheader(self,other_class):
         other_fh = other_class.find_fileheader()
@@ -384,9 +430,17 @@ class CppFile():
         for x in added_lines:
             res_lines.append(x[1])
 
-        class_start = self.m_start
+        ns_ccbgin = self.get_ns_ccbegin()
+        class_start = ns_ccbgin if ns_ccbgin else self.m_start
         insert_before_idx(class_start,self.m_lines,res_lines)
         self.save()
+
+def get_tag(line):
+    for x in Access_tags:
+        if x in line:
+            return x
+    return None
+
 
 class ClassHeader():
     def __init__(self,lines,file_path,start_p=0):
@@ -424,7 +478,7 @@ class ClassHeader():
                 if not is_comment_line(line):
                     for ch in line:
                         if ch == '{':
-                            print('push { ',i,':',line)
+                            # print('push { ',i,':',line)
                             bracket.append(ch)
                         elif ch == '}':
                             if len(bracket) == 0:
@@ -436,9 +490,14 @@ class ClassHeader():
 
         self.m_prop_map = {}
         self.m_func_map = {}
+        access_tag = 'private:'
         for i,line in enumerate(self.m_lines[self.m_start:self.m_end]):
             if is_comment_line(line):
                 continue
+
+            at = get_tag(line)
+            if at:
+                access_tag = at
 
             if len( function_declare_re.findall(line)) > 0:
                 try:
@@ -453,7 +512,7 @@ class ClassHeader():
                         fp = parse_func_param(tmp2_arr[1])
                         r = [tmp2_arr[0]]
                         r.extend(fp)
-                        self.m_func_map['-'.join(r)] = {'params':fp, 'line': self.m_start + i}
+                        self.m_func_map['-'.join(r)] = {'params':fp, 'line': self.m_start + i,'tag':access_tag}
                 except Exception as e:
                     print(e)
                 a =100
@@ -467,6 +526,7 @@ class ClassHeader():
                         'type': tmp[0],
                         'default': tmp[2],
                         'line': self.m_start + i,
+                        'tag':access_tag
                     }
 
         a = 100
@@ -494,11 +554,27 @@ class ClassHeader():
         
         fh_lines = self.m_lines[self.m_fh_start:self.m_fh_end]
         res = {}
+        line_in_comment = False
         for i,line in enumerate(fh_lines):
+            if line_in_comment:
+                if is_comment_line_end(line):
+                    line_in_comment = False
+                continue
+            if is_comment_line_start(line):
+                line_in_comment = True
+                if line.rstrip()[-2:] == '*/':
+                    line_in_comment = False
+                continue
             if not is_comment_line(line):
                 res[line.lstrip().rstrip()] = [self.m_fh_start + i,line]
                 # res.append([line.lstrip().rstrip(),self.m_fh_start + i])
         return res
+
+    def get_ns_ccbegin(self):
+        for i,line in enumerate(self.m_lines):
+            if line.count('NS_CC_BEGIN') == 1:
+                return i
+        return None
 
     def update_fileheader(self,other_fh):
         self_fh = self.find_fileheader()
@@ -517,7 +593,8 @@ class ClassHeader():
         for x in added_lines:
             res_lines.append(x[1])
 
-        class_start = self.m_start
+        ns_ccbgin = self.get_ns_ccbegin()
+        class_start = ns_ccbgin if ns_ccbgin else self.m_start
         insert_before_idx(class_start,self.m_lines,res_lines)
         
         
@@ -602,12 +679,31 @@ def handle_added_files(pbx_project,file_arr):
 
     pbx_project.save()
 
+def pre_handle_file(file_path):
+    rp = [
+        ['Program*','backend::Program*'],
+        ['Program&','backend::Program&'],
+        ['Program ','backend::Program '],
+        
+        ['GLProgramState*','backend::ProgramState*'],
+        ['GLProgramState&','backend::ProgramState&'],
+        ['GLProgramState ','backend::ProgramState ']
+    ]
+    file_replace_words_arr(file_path,rp)
+
 def upgrade_one_file(file_arr,v3_root,v4_root):
     v3_file = file_arr[0]
     v4_file = file_arr[1]
     v3_path = os.path.join(v3_root,v3_file[1])
     v4_path = os.path.join(v4_root,v4_file[1])
-    ext = file_extension(v3_file[2])
+    upgrade_one_file_(v3_path,v4_path)
+
+def upgrade_one_file_(v3_path,v4_path):
+    ext = file_extension(v3_path)
+    if ext == '.h' and ext == '.cpp':
+        return
+    
+    pre_handle_file(v3_path)
     if ext == '.h':
         upgrade_file_header(v4_path,v3_path)
     elif ext == '.cpp':
@@ -619,6 +715,93 @@ def recreate_error_dir():
         subprocess.call(["rm","-rf",dst_dir])
     os.makedirs(os.path.join(dst_dir,'v3'))
     os.makedirs(os.path.join(dst_dir,'v4'))
+
+def fix_new_render_one_file(file_path):
+    lines = get_file_lines(file_path)
+    if not lines:
+        return
+    new_lines = []
+    precode_stack = []
+    is_in_newr_block = False
+    out_newr_block = False
+    had_changed = False
+    for i,line in enumerate(lines):
+        if not is_comment_line(line) and line.count('#ifdef NewRender') == 1:
+            is_in_newr_block = True
+            precode_stack.append('#if')
+            had_changed = True
+        else:
+            if is_in_newr_block:
+                if line.count('#if') > 0:
+                    precode_stack.append('#if')
+                elif line.count('#else') > 0 or line.count('#endif') > 0:
+                    precode_stack.pop()
+                    if len(precode_stack) == 0:
+                        is_in_newr_block = False
+                        out_newr_block = True
+            else:
+                if out_newr_block:
+                    if line.count('#if') > 0:
+                        precode_stack.append('#if')
+                        new_lines.append(line)
+                    elif line.count('#endif') > 0:
+                        if len(precode_stack) == 0:
+                            out_newr_block = False
+                        else:
+                            precode_stack.pop()
+                            new_lines.append(line)
+                    else:
+                        new_lines.append(line)
+                else:
+                    new_lines.append(line)
+
+    if had_changed:
+        write_file_lines(file_path,new_lines)
+        print("fix newrender of ", os.path.basename(file_path), 'ok')
+
+def fix_new_render(dst_dir):
+    for f in os.listdir(dst_dir):
+        sourceF = os.path.join(dst_dir,f)
+        if os.path.isfile(sourceF):
+            # bf = os.path.basename(sourceF)
+            ext = file_extension(sourceF)
+            if ext == '.h' or ext == '.cpp':
+                fix_new_render_one_file(sourceF)
+        elif os.path.isdir(sourceF):
+            fix_new_render(sourceF)
+
+def find_group_(arr,x):
+    for i,v in enumerate(arr):
+        bf = file_without_extension(v[0][0][1])
+        if bf == x:
+            return v
+    return None
+
+def divide_group(arr):
+    pass
+    res = []
+    for i,v in enumerate(arr):
+        bf = file_without_extension(v[0][1])
+        find_one = find_group_(res,bf)
+        if not find_one:
+            res.append([v])
+        else:
+            find_one.append(v)
+    return res
+
+def access_rec_module_handle(key=None,val=None,rec_file = '_v3_access_rec_module_'):
+    res = read_json_file(rec_file)
+    if not key:
+        return res
+    if not val:
+        return res.get(key)
+    else:
+        res[key] = val
+        with open(rec_file,'w') as f:
+            f.write(json.dumps(res))
+
+def access_reserved_map(key=None,val=None):
+    return access_rec_module_handle(key,val,'_v3_resereved_map_')
 
 def upgrade_pbx_proj():
     recreate_error_dir()
@@ -660,16 +843,25 @@ def upgrade_pbx_proj():
         if ext != '.vert' and ext != '.frag':
             reserve_2.append(x)
 
-    for x in replace_:
-        print('replace file: {} ===> {}'.format(x[0][1],x[1][1]))
-        upgrade_one_file(x,v3_root,v4_root)
+    replace_2 = divide_group(replace_)
+    for y in replace_2:
+        for x in y:
+            print('replace file: {} ===> {}'.format(x[0][1],x[1][1]))
+            upgrade_one_file(x,v3_root,v4_root)
+
+        bf = file_without_extension(y[0][0][1])
+        had_rec = access_rec_module_handle(bf)
+        if not had_rec:
+            # conti = input('is continue (y/n)?') == 'y'
+            conti = True
+            if not conti:
+                break
+            # access_rec_module_handle(bf,"true")
 
     for x in reserve_2:
         print('reserved file:',x[1])
 
     # handle_added_files(pbx1_project,added_)
-    for x in pbx1:
-        print(x)
     pass
 
 def main():
@@ -705,6 +897,7 @@ def find_class_name(line):
             return l
 
 def parse_headerfile(file_path):
+    fix_multiline_of_file(file_path)
     with open(file_path,'r') as f:
         lines = f.readlines()
         class_arr = []
@@ -720,18 +913,79 @@ def parse_headerfile(file_path):
     # f.writelines(file["deletedfile"]["content"])
     # f.close()
 
+def lower_first_ch(str1):
+    res = []
+    finded = False
+    for i,ch in enumerate(str1):
+        if not finded and ch.isalpha():
+            finded = True
+            res.append(ch.lower())
+        else:
+            res.append(ch)
+
+    return ''.join(res)
+
+def is_x_in_map(x,t_map):
+    if x in t_map:
+        return x
+    
+    x = x.replace('_gl','_')
+    x = lower_first_ch(x)
+    if x in t_map:
+        return x
+    return None
+
+def file_replace_words_arr(file_path,words_arr):
+    if len(words_arr) == 0:
+        return
+    try:
+        f = codecs.open(file_path, 'r', 'utf-8')
+        content = f.read()
+        f.close()
+
+        for x in words_arr:
+            content = content.replace(x[0],x[1])
+
+        f = codecs.open(file_path, 'w', 'utf-8')
+        f.write(content)
+        f.close()
+    except Exception as e:
+        print('can not open',file_path)
+        return None
+
+def toggle_h_cpp_ext(file_path):
+    ext = file_extension(file_path)
+    if ext != '.h' and ext != '.cpp':
+        return
+    
+    dir_name = os.path.dirname(file_path)
+    bf = os.path.basename(file_path)
+    fn = file_without_extension(bf)
+    new_ext = '.h' if ext == '.cpp' else '.cpp'
+    return os.path.join(dir_name,fn + new_ext)
+
+
 def compare_class(class1,class2):
     # prop compare
     prop_cpd = {}
     update_cp = {}
+    reserved_cp = {}
+    replaced_prop = []
     for x in class1.m_prop_map:
-        if x in class2.m_prop_map:
-            prop_cpd[x] = True
-            if class2.m_prop_map[x]['type'] != class1.m_prop_map[x]['type']:
-                # update_cp[x] = class2.m_prop_map[x]
+        y = is_x_in_map(x,class2.m_prop_map)
+        if y:
+            prop_cpd[y] = True
+            if class2.m_prop_map[y]['type'] != class1.m_prop_map[x]['type']:
                 line1 = class1.m_prop_map[x]['line']
-                line2 = class2.m_prop_map[x]['line']
+                line2 = class2.m_prop_map[y]['line']
                 class1.m_lines[line1] = class2.m_lines[line2]
+            if x != y:
+                replaced_prop.append([x,y])
+        else:
+            reserved_cp[x] = class1.m_prop_map[x]
+
+    if len(replaced_prop) > 0:
+        file_replace_words_arr(toggle_h_cpp_ext(class1.m_file_path),replaced_prop)
 
     prop_lines = []
     for x in class2.m_prop_map:
@@ -739,34 +993,43 @@ def compare_class(class1,class2):
             # update_cp[x] = class2.m_prop_map[x]
             line2 = class2.m_prop_map[x]['line']
             # print(class2.m_lines[line2])
-            prop_lines.append(class2.m_lines[line2])
+            prop_lines.append([line2, class2.m_lines[line2], class2.m_prop_map[x]['tag']])
+
+    prop_lines.sort(key=lambda x: x[0])
+    prop_lines_res = []
+    st_tag = None
+    for x in prop_lines:
+        if st_tag != x[2]:
+            st_tag = x[2]
+            prop_lines_res.append(x[2]+'\n')
+        prop_lines_res.append(x[1])
 
     end_of_class_idx = class1.m_end
-    tar_prop = []
-    tar_prop.append(class1.m_lines[end_of_class_idx-1])
-    tar_prop.extend(prop_lines)
-    tar_prop.extend(class1.m_lines[end_of_class_idx])
-    ta = class1.m_lines[end_of_class_idx-1:end_of_class_idx+1]
-    class1.m_lines[end_of_class_idx-1:end_of_class_idx+1] = tar_prop
-    class1.m_end += len(prop_lines)
+    insert_before_idx(end_of_class_idx,class1.m_lines,prop_lines_res)
+    class1.m_end += len(prop_lines_res)
 
     # function compare
     func_cpd = {}
+    func_reserved_cpd = {}
     for x in class1.m_func_map:
         x_trim = x.split('-')[0]
+        do_find_func = False
         for y in class2.m_func_map:
             y_trim = y.split('-')[0]
             if x_trim == y_trim and not y in func_cpd:
-                if x_trim == 'create':
-                    print(class1.m_lines[class1.m_func_map[x]['line']])
-                    print(class2.m_lines[class2.m_func_map[y]['line']])
-                    a = 100
+                do_find_func = True
+                # if x_trim == 'create':
+                #     print(class1.m_lines[class1.m_func_map[x]['line']])
+                #     print(class2.m_lines[class2.m_func_map[y]['line']])
+                #     a = 100
                 if len(class2.m_func_map[y]['params']) == len(class1.m_func_map[x]['params']):
                     func_cpd[y] = True
                     line1 = class1.m_func_map[x]['line']
                     line2 = class2.m_func_map[y]['line']
                     class1.m_lines[line1] = class2.m_lines[line2]
                     break
+        if not do_find_func:
+            func_reserved_cpd[x] = class1.m_func_map[x]
 
         # if x in class2.m_func_map:
         #     func_cpd[x] = True
@@ -781,17 +1044,26 @@ def compare_class(class1,class2):
         if not x in func_cpd:
             line2 = class2.m_func_map[x]['line']
             print(class2.m_lines[line2])
-            prop_lines.append(class2.m_lines[line2])
+            prop_lines.append([line2,class2.m_lines[line2],class2.m_func_map[x]['tag']])
+
+    prop_lines.sort(key=lambda x: x[0])
+    prop_lines_res = []
+    st_tag = None
+    for x in prop_lines:
+        if st_tag != x[2]:
+            st_tag = x[2]
+            prop_lines_res.append(x[2]+'\n')
+        prop_lines_res.append(x[1])
 
     end_of_class_idx = class1.m_end
-    tar_prop = []
-    tar_prop.append(class1.m_lines[end_of_class_idx-1])
-    tar_prop.extend(prop_lines)
-    tar_prop.extend(class1.m_lines[end_of_class_idx])
-    ta = class1.m_lines[end_of_class_idx-1:end_of_class_idx+1]
-    class1.m_lines[end_of_class_idx-1:end_of_class_idx+1] = tar_prop
-    class1.m_end += len(prop_lines)
+    insert_before_idx(end_of_class_idx,class1.m_lines,prop_lines_res)
+    class1.m_end += len(prop_lines_res)
 
+    bf = os.path.basename(class1.m_file_path)
+    access_reserved_map(bf,{
+        'prop': reserved_cp,
+        "func": func_reserved_cpd
+    })
 
     class1.save()
     
@@ -813,12 +1085,12 @@ def upgrade_file_header(v4_h,v3_h):
     if len(class_arr1) == 0 or len(class_arr2) == 0:
         dst_dir = V3toV4_error_dir
 
-        # v3_error_dir = os.path.join(dst_dir,'v3')
-        # v4_error_dir = os.path.join(dst_dir,'v4')
-        # bf3 = os.path.basename(v3_h)
-        # bf4 = os.path.basename(v4_h)
-        # shutil.copy(v3_h, os.path.join(v3_error_dir,bf3))
-        # shutil.copy(v4_h, os.path.join(v4_error_dir,bf4))
+        v3_error_dir = os.path.join(dst_dir,'v3')
+        v4_error_dir = os.path.join(dst_dir,'v4')
+        bf3 = os.path.basename(v3_h)
+        bf4 = os.path.basename(v4_h)
+        shutil.copy(v3_h, os.path.join(v3_error_dir,bf3))
+        shutil.copy(v4_h, os.path.join(v4_error_dir,bf4))
         return
 
     compare_fileheader(class_arr2[0],class_arr1[0])
@@ -858,21 +1130,67 @@ def upgrade_module(module_files):
 
 
 def get_file_lines(file_path):
-    f = codecs.open(file_path, 'r', 'utf-8')
-    lines = f.readlines()
-    f.close()
-    return lines
+    try:
+        f = codecs.open(file_path, 'r', 'utf-8')
+        lines = f.readlines()
+        f.close()
+        return lines
+    except Exception as e:
+        print('can not open',file_path)
+        return None
 
-def replace_shader_line(line_v4,line_v3):
+def write_file_lines(file_path, lines):
+    f = codecs.open(file_path, 'w', 'utf-8')
+    f.writelines(lines)
+    f.close()
+
+def get_shader_line_map(lines):
     pass
+    line_map = {}
+    for i,line in enumerate(lines):
+        if len(Shader_re.findall(line)) == 1:
+            line_key = Shader_re.match(line).group(1).lower()
+            line_map[line_key] = [i,line]
+    return line_map
 
 def upgrade_shader_file(file_v4,file_v3):
     lines_v3 = get_file_lines(file_v3)
+    if not lines_v3:
+        return
     lines_v4 = get_file_lines(file_v4)
+    if not lines_v4:
+        return
+    map_v3 = get_shader_line_map(lines_v3)
+    map_v4 = get_shader_line_map(lines_v4)
+    had_changed = False
+    for x in map_v3:
+        if x in map_v4:
+            lines_v3[map_v3[x][0]] = lines_v4[map_v4[x][0]]
+            had_changed = True
+            pass
 
+    if had_changed:
+        write_file_lines(file_v3,lines_v3)
+
+def fix_new_render_bydirs():
+    dirs = ['/Users/mac/Documents/my_projects/cok/client/IF','/Users/mac/Documents/my_projects/cok/client/cocos2d']
+    for x in dirs:
+        fix_new_render(x)
 
 if __name__ == "__main__":
+    upgrade_one_file_("/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCRenderer.cpp","/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer/CCRenderer.cpp")
+    # fix_multiline_of_file('/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer//CCMaterial.h')
+    # s = input('hahah')
+    # t = file_without_extension('/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCPass.h')
+    # s = toggle_h_cpp_ext('/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCPass.h')
+    # s1 = toggle_h_cpp_ext(s)
+
+    # ta = lower_first_ch('_GlProgramState')
+    # fix_new_render_bydirs()
+    # fix_new_render_one_file('/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCPass.h')
+    # upgrade_shader_file('/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer/ccShaders.h','/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/ccShaders.h')
     # class_arr2 = parse_headerfile('/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCCustomCommand.h')
-    class_arr1 = parse_headerfile('/Users/mac/Documents/my_projects/local_project/opengl_st/commit_xml/v3tov4_error/v3/CCPass.h')
-    upgrade_file_header('/Users/mac/Documents/my_projects/local_project/opengl_st/commit_xml/v3tov4_error/v4/CCTexture2D.h','/Users/mac/Documents/my_projects/local_project/opengl_st/commit_xml/v3tov4_error/v3/CCTexture2D.h')
-    main()
+    # class_arr1 = parse_headerfile('/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer/CCPass.h')
+    # upgrade_file_header('/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer/CCPass.h','/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCPass.h')
+    a = 100
+    # main()
