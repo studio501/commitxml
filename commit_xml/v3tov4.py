@@ -22,9 +22,10 @@ comment7_re = re.compile(r'/\*.*?\*/') # /* abcd */
 function_declare_re = re.compile(r'.*?(\w+)\((.*?)\).*?;\s*}?\n?')
 propvalue_declare_re = re.compile(r'\s*((?:\w*:?:?)?\w+)\s*([*&])?\s*(\w+)\s*=?\s*(.*?)?\s*;.*\n?')
 fp_type_re = re.compile(r'\s*(?:const)?\s*(\w*:?:?\w+\s*[&*]?)\s*(\w+)')
+using_grammaer_re = re.compile(r'using\s+(\w+)\s*=\s*(.*);')
 
-function_define_re = re.compile(r'.*?(\w+\s*[&*]?)\s+((?:\w+::)?\w+)\(((?:.*?\s*,?\s*)*)\)\s*\n?')
-ctor_function_define_re = re.compile(r'(\w+)::\1\(.*?\).*?\n?')
+function_define_re = re.compile(r'.*?(\w+\s*[&*]?)\s+((?:\w+::)*\w+)\(((?:.*?\s*,?\s*)*)\)\s*\n?')
+ctor_function_define_re = re.compile(r'(\w+)::~?\1\((.*?)\).*?\n?')
 incomplete_func_define_re = re.compile(r'.*?(\w+\s*[&*]?)\s+((?:\w+::)?\w+)\(((?:.*,?)*)')
 # (\w+)::\1\(.*?\)
 
@@ -114,6 +115,8 @@ def objwalk(obj, cb):
                 return
 
 def parse_func_param(param_str):
+    if param_str == '':
+        return []
     # const Rect& rect, V3F_C4B_T2F_Quad* outQuad
     res = param_str.split(',')
     r = []
@@ -220,7 +223,7 @@ class CppFile():
         self.m_lines = f.readlines()
         f.close()
 
-        self.fix_multline()
+        # self.fix_multline()
 
         self.m_fh_comment_st = -1
         self.m_fh_comment_ed = -1
@@ -252,15 +255,24 @@ class CppFile():
                     break
                 line = self.m_lines[i]
                 # for i,line in enumerate(self.m_lines):
-                if line.count('Sprite::initWithFile(const std::string& filename)') == 1:
-                    a = 100
+                # if line.count('Sprite::initWithFile(const std::string& filename)') == 1:
+                #     a = 100
                 if i < self.m_start:
                     continue
                 if is_blank_line(line):
                     continue
                 if is_unfinished_line(line):
                     continue
-                if len(function_define_re.findall(line)) == 1 and (self.m_lines[i+1].count('{') == 1 or self.m_lines[i+1].count(':') == 1):
+                # if i == 98:
+                #     a = 100
+                #     ta = function_define_re.findall(line)
+                #     ss = len(ta)
+                #     a = 100
+                # if 'Renderer::Renderer' in line:
+                #     a = 100
+                if (len(function_define_re.findall(line)) == 1 and \
+                    (self.m_lines[i+1].count('{') == 1 or self.m_lines[i+1].count(':') == 1 or line.rstrip()[-1] == '{')) or \
+                    (len(ctor_function_define_re.findall(line)) == 1):
                     bracket_stack = []
                     func_st = i
                     func_ed = i
@@ -279,7 +291,15 @@ class CppFile():
                         if finded_func:
                             break
                     
-                    func_arr = function_define_re.sub(r'\1|\2|\3',line).split('|')
+                    func_arr = None
+                    if len(function_define_re.findall(line)) == 1:
+                        func_arr = list(function_define_re.findall(line)[0])
+                        # function_define_re.sub(r'\1|\2|\3',line).split('|')
+                    else:
+                        func_arr = ctor_function_define_re.sub(r'\1|\2',line).split('|')
+                        func_arr.insert(0,'')
+                        if line.count('::~'):
+                            func_arr[1] = '~' +func_arr[1]
                     fp = parse_func_param(func_arr[2])
                     
                     func_res_arr = [func_arr[1]]
@@ -292,8 +312,8 @@ class CppFile():
                         'end': func_ed,
                         'name_key':name_key
                     }
+                    # print('{} start:{} end: {}'.format(name_key,func_st,func_ed))
                     a = 112
-                i += 1
         except Exception as e:
             print('parse failed',e)
         a = 100
@@ -389,22 +409,24 @@ class CppFile():
         self.save()
 
     def find_fileheader(self):
-        fh_lines = self.m_lines[:self.m_start]
-        res = {}
-        line_in_comment = False
-        for i,line in enumerate(fh_lines):
-            if line_in_comment:
-                if is_comment_line_end(line):
-                    line_in_comment = False
-                continue
-            if is_comment_line_start(line):
-                line_in_comment = True
-                if line.rstrip()[-2:] == '*/':
-                    line_in_comment = False
-                continue
-            if not is_comment_line(line):
-                res[line.lstrip().rstrip()] = [i,line]
-        return res
+        nx_idx = self.get_ns_ccbegin()
+        # fh_lines = self.m_lines[self.m_fh_comment_ed+1:self.m_start]
+        return [self.m_fh_comment_ed+1,nx_idx+1]
+        # res = {}
+        # line_in_comment = False
+        # for i,line in enumerate(fh_lines):
+        #     if line_in_comment:
+        #         if is_comment_line_end(line):
+        #             line_in_comment = False
+        #         continue
+        #     if is_comment_line_start(line):
+        #         line_in_comment = True
+        #         if line.rstrip()[-2:] == '*/':
+        #             line_in_comment = False
+        #         continue
+        #     if not is_comment_line(line):
+        #         res[line.lstrip().rstrip()] = [i,line]
+        # return res
 
     def get_ns_ccbegin(self):
         for i,line in enumerate(self.m_lines):
@@ -413,26 +435,42 @@ class CppFile():
         return None
 
     def update_fileheader(self,other_class):
-        other_fh = other_class.find_fileheader()
-        self_fh = self.find_fileheader()
-        head_lines = {}
-        for x in self_fh:
-            if x in other_fh:
-                head_lines[x] = True
-        
-        added_lines = []
-        for x in other_fh:
-            if not x in head_lines:
-                added_lines.append(other_fh[x])
-        
-        added_lines.sort(key=lambda x:x[0])
-        res_lines = []
-        for x in added_lines:
-            res_lines.append(x[1])
+        other_fh_res = other_class.find_fileheader()
+        self_fh_res = self.find_fileheader()
 
-        ns_ccbgin = self.get_ns_ccbegin()
-        class_start = ns_ccbgin if ns_ccbgin else self.m_start
-        insert_before_idx(class_start,self.m_lines,res_lines)
+        other_fh = other_class.m_lines[other_fh_res[0]:other_fh_res[1]]
+        self_fh = self.m_lines[self_fh_res[0]:self_fh_res[1]]
+
+        rec_json = read_json_file(RecUpgrade_Diff_File)
+        tlines = None
+        bf = os.path.basename(self.m_file_path)
+        name_key = bf + '_cpp'
+        if name_key in rec_json:
+            tlines = rec_json[name_key]
+        else:
+            tlines = compare_lines(other_fh,self_fh)
+            rec_json[name_key] = tlines
+            with open(RecUpgrade_Diff_File,'w') as f:
+                f.write(json.dumps(rec_json))
+        self.m_lines[self_fh_res[0]:self_fh_res[1]] = tlines
+        # head_lines = {}
+        # for x in self_fh:
+        #     if x in other_fh:
+        #         head_lines[x] = True
+        
+        # added_lines = []
+        # for x in other_fh:
+        #     if not x in head_lines:
+        #         added_lines.append(other_fh[x])
+        
+        # added_lines.sort(key=lambda x:x[0])
+        # res_lines = []
+        # for x in added_lines:
+        #     res_lines.append(x[1])
+
+        # ns_ccbgin = self.get_ns_ccbegin()
+        # class_start = ns_ccbgin if ns_ccbgin else self.m_start
+        # insert_before_idx(class_start,self.m_lines,res_lines)
         self.save()
 
 def get_tag(line):
@@ -443,6 +481,9 @@ def get_tag(line):
 
 
 class ClassHeader():
+    def just_replace_fileheader_comment(self,other_class):
+        self.m_lines[0:self.m_fh_comment_ed] = other_class.m_lines[0:other_class.m_fh_comment_ed]
+        self.save()
     def __init__(self,lines,file_path,start_p=0):
         self.m_lines = lines
         self.m_file_path = file_path
@@ -452,6 +493,17 @@ class ClassHeader():
         self.m_name = ''
         self.m_fh_start = None
         self.m_fh_end = None
+
+        self.m_fh_comment_st = -1
+        self.m_fh_comment_ed = -1
+        self.m_start = -1
+        for i,line in enumerate(self.m_lines):
+            if is_comment_line(line):
+                if self.m_fh_comment_st == -1:
+                    self.m_fh_comment_st = i
+                else:
+                    self.m_fh_comment_ed = i + 1
+                    break
 
         bracket = []
 
@@ -490,6 +542,7 @@ class ClassHeader():
 
         self.m_prop_map = {}
         self.m_func_map = {}
+        self.m_using_map = {}
         access_tag = 'private:'
         for i,line in enumerate(self.m_lines[self.m_start:self.m_end]):
             if is_comment_line(line):
@@ -498,6 +551,10 @@ class ClassHeader():
             at = get_tag(line)
             if at:
                 access_tag = at
+            
+            # if 'computeIndexSize' in line:
+            #     a = 100
+            #     t = function_declare_re.findall(line)
 
             if len( function_declare_re.findall(line)) > 0:
                 try:
@@ -508,7 +565,7 @@ class ClassHeader():
                     # if tmp2_arr[0] == 'setFlippedY':
                     #     a = 100
                     #     b = 200
-                    if len(tmp2_arr) == 2 and tmp2_arr[1] != '':
+                    if len(tmp2_arr) == 2:
                         fp = parse_func_param(tmp2_arr[1])
                         r = [tmp2_arr[0]]
                         r.extend(fp)
@@ -528,6 +585,15 @@ class ClassHeader():
                         'line': self.m_start + i,
                         'tag':access_tag
                     }
+            elif len(using_grammaer_re.findall(line)) > 0:
+                tmp = using_grammaer_re.findall(line)[0]
+                if len(tmp) == 2:
+                    self.m_using_map[tmp[0]] = {
+                        'key': tmp[0],
+                        'val': tmp[1],
+                        'line': self.m_start + i
+                    }
+
 
         a = 100
         b = 100
@@ -553,22 +619,22 @@ class ClassHeader():
                     break
         
         fh_lines = self.m_lines[self.m_fh_start:self.m_fh_end]
-        res = {}
-        line_in_comment = False
-        for i,line in enumerate(fh_lines):
-            if line_in_comment:
-                if is_comment_line_end(line):
-                    line_in_comment = False
-                continue
-            if is_comment_line_start(line):
-                line_in_comment = True
-                if line.rstrip()[-2:] == '*/':
-                    line_in_comment = False
-                continue
-            if not is_comment_line(line):
-                res[line.lstrip().rstrip()] = [self.m_fh_start + i,line]
-                # res.append([line.lstrip().rstrip(),self.m_fh_start + i])
-        return res
+        return fh_lines
+        # res = {}
+        # line_in_comment = False
+        # for i,line in enumerate(fh_lines):
+        #     if line_in_comment:
+        #         if is_comment_line_end(line):
+        #             line_in_comment = False
+        #         continue
+        #     if is_comment_line_start(line):
+        #         line_in_comment = True
+        #         if line.rstrip()[-2:] == '*/':
+        #             line_in_comment = False
+        #         continue
+        #     if not is_comment_line(line):
+        #         res[line.lstrip().rstrip()] = [self.m_fh_start + i,line]
+        # return res
 
     def get_ns_ccbegin(self):
         for i,line in enumerate(self.m_lines):
@@ -578,24 +644,38 @@ class ClassHeader():
 
     def update_fileheader(self,other_fh):
         self_fh = self.find_fileheader()
-        head_lines = {}
-        for x in self_fh:
-            if x in other_fh:
-                head_lines[x] = True
-        
-        added_lines = []
-        for x in other_fh:
-            if not x in head_lines:
-                added_lines.append(other_fh[x])
-        
-        added_lines.sort(key=lambda x:x[0])
-        res_lines = []
-        for x in added_lines:
-            res_lines.append(x[1])
 
-        ns_ccbgin = self.get_ns_ccbegin()
-        class_start = ns_ccbgin if ns_ccbgin else self.m_start
-        insert_before_idx(class_start,self.m_lines,res_lines)
+        rec_json = read_json_file(RecUpgrade_Diff_File)
+        tlines = None
+        bf = os.path.basename(self.m_file_path)
+        name_key = bf + '_header'
+        if name_key in rec_json:
+            tlines = rec_json[name_key]
+        else:
+            tlines = compare_lines(other_fh,self_fh)
+            rec_json[name_key] = tlines
+            with open(RecUpgrade_Diff_File,'w') as f:
+                f.write(json.dumps(rec_json))
+        self.m_lines[self.m_fh_start:self.m_fh_end] = tlines
+
+        # head_lines = {}
+        # for x in self_fh:
+        #     if x in other_fh:
+        #         head_lines[x] = True
+        
+        # added_lines = []
+        # for x in other_fh:
+        #     if not x in head_lines:
+        #         added_lines.append(other_fh[x])
+        
+        # added_lines.sort(key=lambda x:x[0])
+        # res_lines = []
+        # for x in added_lines:
+        #     res_lines.append(x[1])
+
+        # ns_ccbgin = self.get_ns_ccbegin()
+        # class_start = ns_ccbgin if ns_ccbgin else self.m_start
+        # insert_before_idx(class_start,self.m_lines,res_lines)
         
         
 
@@ -681,9 +761,9 @@ def handle_added_files(pbx_project,file_arr):
 
 def pre_handle_file(file_path):
     rp = [
-        ['Program*','backend::Program*'],
-        ['Program&','backend::Program&'],
-        ['Program ','backend::Program '],
+        ['GLProgram*','backend::Program*'],
+        ['GLProgram&','backend::Program&'],
+        ['GLProgram ','backend::Program '],
         
         ['GLProgramState*','backend::ProgramState*'],
         ['GLProgramState&','backend::ProgramState&'],
@@ -852,16 +932,16 @@ def upgrade_pbx_proj():
         bf = file_without_extension(y[0][0][1])
         had_rec = access_rec_module_handle(bf)
         if not had_rec:
-            # conti = input('is continue (y/n)?') == 'y'
-            conti = True
+            conti = input('is continue (y/n)?') == 'y'
+            # conti = True
             if not conti:
                 break
-            # access_rec_module_handle(bf,"true")
+            access_rec_module_handle(bf,"true")
 
     for x in reserve_2:
         print('reserved file:',x[1])
 
-    # handle_added_files(pbx1_project,added_)
+    handle_added_files(pbx1_project,added_)
     pass
 
 def main():
@@ -964,6 +1044,14 @@ def toggle_h_cpp_ext(file_path):
     new_ext = '.h' if ext == '.cpp' else '.cpp'
     return os.path.join(dir_name,fn + new_ext)
 
+def compare_two_map(map1,map2,comp_func):
+    update = {}
+    reserved = {}
+    added = {}
+
+    for x in map1:
+        pass
+
 
 def compare_class(class1,class2):
     # prop compare
@@ -1065,6 +1153,9 @@ def compare_class(class1,class2):
         "func": func_reserved_cpd
     })
 
+    # using compare
+    for x in class1.m_using_map
+
     class1.save()
     
     a = 100
@@ -1093,6 +1184,8 @@ def upgrade_file_header(v4_h,v3_h):
         shutil.copy(v4_h, os.path.join(v4_error_dir,bf4))
         return
 
+    class_arr2[0].just_replace_fileheader_comment(class_arr1[0])
+    class_arr2 = parse_headerfile(v3_h)
     compare_fileheader(class_arr2[0],class_arr1[0])
 
     for x in class_arr2:
@@ -1102,8 +1195,8 @@ def upgrade_file_header(v4_h,v3_h):
                 compare_class(tc,y)
                 break
 
-    class_arr2 = parse_headerfile(v3_h)
-    compare_class(class_arr2[0],class_arr1[0])
+    # class_arr2 = parse_headerfile(v3_h)
+    # compare_class(class_arr2[0],class_arr1[0])
 
 def upgrade_file_cpp(v4_cpp,v3_cpp):
     pass
@@ -1178,7 +1271,9 @@ def fix_new_render_bydirs():
         fix_new_render(x)
 
 if __name__ == "__main__":
-    upgrade_one_file_("/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCRenderer.cpp","/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer/CCRenderer.cpp")
+    # line = "Renderer::~Renderer()\n"
+    # func_arr = ctor_function_define_re.sub(r'\1|\2',line).split('|')
+    # upgrade_one_file_("/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCTexture2D.cpp","/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer/CCTexture2D.cpp")
     # fix_multiline_of_file('/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer//CCMaterial.h')
     # s = input('hahah')
     # t = file_without_extension('/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCPass.h')
@@ -1193,4 +1288,4 @@ if __name__ == "__main__":
     # class_arr1 = parse_headerfile('/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer/CCPass.h')
     # upgrade_file_header('/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer/CCPass.h','/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCPass.h')
     a = 100
-    # main()
+    main()

@@ -1,1 +1,1 @@
-{"good": "true", "CCCustomCommand": "true"}
+{"good": "true", "CCCustomCommand": "true", "CCGroupCommand": "true", "CCMeshCommand": "true", "CCTrianglesCommand": "true", "CCQuadCommand": "true", "CCRenderCommand": "true", "CCRenderCommandPool": "true", "CCRenderer": "true", "ccShaders": "true", "CCTexture2D": "true", "CCTextureAtlas": "true", "CCTextureCache": "true", "CCRenderState": "true", "CCPass": "true", "CCTechnique": "true", "CCMaterial": "true"}
