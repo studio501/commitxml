@@ -10,6 +10,10 @@ from collections import Mapping, Set, Sequence
 string_types = (str, unicode) if str is bytes else (str, bytes)
 iteritems = lambda mapping: getattr(mapping, 'iteritems', mapping.items)()
 
+# V4_path = "/Users/mac/Downloads/cocos2d-x-4.0"
+V4_path = "/Users/tangwen/Downloads/cocos2d-x-4.0"
+V3_path = os.path.join( os.getenv("ClientDir"),"cocos2d")
+
 comment1_re = re.compile(r'^\s*/\*\*') # /**
 comment2_re = re.compile(r'^\s*\*') # *
 comment3_re = re.compile(r'^\s*\*/') # */
@@ -30,6 +34,9 @@ incomplete_func_define_re = re.compile(r'.*?(\w+\s*[&*]?)\s+((?:\w+::)?\w+)\(((?
 # (\w+)::\1\(.*?\)
 
 Shader_re = re.compile(r'.*\*\s*(?:cc)?(.*?)\s*;')
+
+# Block_re = re.compile(r'(?:(\w+)\s+)?(\w+)\s+\w*?\s*(\w+)\s*(?::\s*\w+)?\s*\n{',re.MULTILINE)
+Block_re = re.compile(r'(?:(\w+)\s+)?(\w+)\s+\w*?\s*(\w+)\s*(?::\s*\w*?\s*\w+)?\s*{\s*\n',re.MULTILINE)
 
 RecUpgrade_Diff_File = "_rec_upgrade_diff"
 V3toV4_error_dir = 'v3tov4_error'
@@ -573,7 +580,7 @@ class ClassHeader():
                 except Exception as e:
                     print(e)
                 a =100
-            elif len(propvalue_declare_re.findall(line)) > 0:
+            elif len(propvalue_declare_re.findall(line)) > 0 and len(using_grammaer_re.findall(line)) == 0:
                 if line.count('using ') == 1 and line.lstrip()[0] == 'u':
                     pass
                 else:
@@ -591,7 +598,8 @@ class ClassHeader():
                     self.m_using_map[tmp[0]] = {
                         'key': tmp[0],
                         'val': tmp[1],
-                        'line': self.m_start + i
+                        'line': self.m_start + i,
+                        'line_str': line
                     }
 
 
@@ -641,6 +649,12 @@ class ClassHeader():
             if line.count('NS_CC_BEGIN') == 1:
                 return i
         return None
+
+    def get_first_tag(self):
+        for idx,line in enumerate(self.m_lines[self.m_start:-1]):
+            if not is_comment_line(line) and (line.count('public:') == 1 or line.count('protected:') == 1 or line.count('private:') == 1):
+                return idx + self.m_start
+
 
     def update_fileheader(self,other_fh):
         self_fh = self.find_fileheader()
@@ -730,10 +744,15 @@ def try_create_groups(group_path,pbx_project):
         tp = pbx_project.get_or_create_group(x,None,tp)
     return tp
 
+def get_relative_path(abs_path,rela_path):
+    # /Users/tangwen/Documents/my_projects/cok/client/cocos2d/cocos
+    # /Users/tangwen/Documents/my_projects/cok/client/cocos2d/cocos/base/LZMA/lz4.h
+    return abs_path.replace(rela_path,'..')
+
 def add_one_file(pbx_project,file_info):
     pass
-    dir_name = "/Users/mac/Downloads/cocos2d-x-4.0/cocos"
-    dist_dir = "/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos"
+    dir_name = os.path.join(V4_path,'cocos')
+    dist_dir = os.path.join(V3_path,'cocos')
 
     filePath = os.path.join(dir_name,file_info[1])
     dst_path = os.path.join(dist_dir,file_info[1])
@@ -749,6 +768,7 @@ def add_one_file(pbx_project,file_info):
     target_name = None
     file_options = FileOptions(weak=True)
     # t_group = pbx_project.get_groups_by_name('renderer')[0]
+    relative_path = get_relative_path(dst_path,dist_dir)
     pbx_project.add_file(path=dst_path,parent=last_parent,tree=None,target_name=target_name,force=False,file_options=file_options)
     # pbx_project.add_file(filePath, force=False)
     
@@ -885,18 +905,18 @@ def access_reserved_map(key=None,val=None):
 
 def upgrade_pbx_proj():
     recreate_error_dir()
-    file_path = "/Users/mac/Documents/my_projects/cok/client/cocos2d/build/cocos2d_libs.xcodeproj/project.pbxproj"
+    file_path = os.path.join(V3_path,'build/cocos2d_libs.xcodeproj/project.pbxproj')
     pbx_res = get_xcode_proj(file_path)
     pbx1 = pbx_res[0]
     pbx1_project = pbx_res[1]
 
-    file_path2 = "/Users/mac/Downloads/cocos2d-x-4.0/ios-build/engine/cocos/core/cocos2d_libs.xcodeproj/project.pbxproj"
+    file_path2 = os.path.join(V4_path,"ios-build/engine/cocos/core/cocos2d_libs.xcodeproj/project.pbxproj")
     pbx_res2 = get_xcode_proj(file_path2)
     pbx2 = pbx_res2[0]
     pbx2_project = pbx_res2[1]
 
-    v3_root = "/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer"
-    v4_root = "/Users/mac/Downloads/cocos2d-x-4.0/cocos"
+    v3_root = os.path.join(V3_path,'cocos/renderer')
+    v4_root = os.path.join(V4_path,'cocos')
 
     replace_ = []
     reserve_ = []
@@ -917,29 +937,31 @@ def upgrade_pbx_proj():
     objwalk(pbx1,pbx1_cb)
     objwalk(pbx2,pbx2_cb)
 
-    reserve_2 = []
-    for x in reserve_:
-        ext =file_extension(x[1])
-        if ext != '.vert' and ext != '.frag':
-            reserve_2.append(x)
+    handle_cppfile = False
+    if handle_cppfile:
+        reserve_2 = []
+        for x in reserve_:
+            ext =file_extension(x[1])
+            if ext != '.vert' and ext != '.frag':
+                reserve_2.append(x)
 
-    replace_2 = divide_group(replace_)
-    for y in replace_2:
-        for x in y:
-            print('replace file: {} ===> {}'.format(x[0][1],x[1][1]))
-            upgrade_one_file(x,v3_root,v4_root)
+        replace_2 = divide_group(replace_)
+        for y in replace_2:
+            for x in y:
+                print('replace file: {} ===> {}'.format(x[0][1],x[1][1]))
+                upgrade_one_file(x,v3_root,v4_root)
 
-        bf = file_without_extension(y[0][0][1])
-        had_rec = access_rec_module_handle(bf)
-        if not had_rec:
-            conti = input('is continue (y/n)?') == 'y'
-            # conti = True
-            if not conti:
-                break
-            access_rec_module_handle(bf,"true")
+            bf = file_without_extension(y[0][0][1])
+            had_rec = access_rec_module_handle(bf)
+            if not had_rec:
+                conti = input('is continue (y/n)?') == 'y'
+                # conti = True
+                if not conti:
+                    break
+                access_rec_module_handle(bf,"true")
 
-    for x in reserve_2:
-        print('reserved file:',x[1])
+        for x in reserve_2:
+            print('reserved file:',x[1])
 
     handle_added_files(pbx1_project,added_)
     pass
@@ -1044,13 +1066,40 @@ def toggle_h_cpp_ext(file_path):
     new_ext = '.h' if ext == '.cpp' else '.cpp'
     return os.path.join(dir_name,fn + new_ext)
 
-def compare_two_map(map1,map2,comp_func):
+def compare_two_map(map1,map2):
     update = {}
     reserved = {}
     added = {}
 
+    haded = {}
     for x in map1:
         pass
+        if x in map2:
+            update[x] = [x,map1[x],map2[x]]
+            haded[x] = True
+        else:
+            reserved[x] = map1[x]
+
+    for x in map2:
+        if not x in haded:
+            added[x] = map2[x]
+    
+    return {
+        'update': update,
+        'reserved': reserved,
+        'added': added
+    }
+
+def sort_map(map1,sKey="line"):
+    res = []
+    for x in map1:
+        res.append(map1[x])
+
+    res.sort(key=lambda x: x[sKey])
+    tr = []
+    for x in res:
+        tr.append(x['line_str'])
+    return tr
 
 
 def compare_class(class1,class2):
@@ -1154,8 +1203,13 @@ def compare_class(class1,class2):
     })
 
     # using compare
-    for x in class1.m_using_map
-
+    using_res = compare_two_map(class1.m_using_map,class2.m_using_map)
+    added_using = using_res['added']
+    au_arr = sort_map(added_using,"line")
+    if len(au_arr) > 0:
+        au_arr.insert(0,'public:\n')
+        first_tag_idx = class1.get_first_tag()
+        insert_before_idx(first_tag_idx,class1.m_lines,au_arr)
     class1.save()
     
     a = 100
@@ -1271,21 +1325,29 @@ def fix_new_render_bydirs():
         fix_new_render(x)
 
 if __name__ == "__main__":
-    # line = "Renderer::~Renderer()\n"
-    # func_arr = ctor_function_define_re.sub(r'\1|\2',line).split('|')
-    # upgrade_one_file_("/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCTexture2D.cpp","/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer/CCTexture2D.cpp")
-    # fix_multiline_of_file('/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer//CCMaterial.h')
-    # s = input('hahah')
-    # t = file_without_extension('/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCPass.h')
-    # s = toggle_h_cpp_ext('/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCPass.h')
-    # s1 = toggle_h_cpp_ext(s)
+    with open('/Users/tangwen/Downloads/cocos2d-x-4.0/cocos/base/ccTypes.h','r') as f:
+        content = f.read()
+        s = Block_re.findall(content)
+        # s2 = Block_re2.findall(content)
+        lines = f.readlines()
+        lines_len = len(lines)
+        for i,line in enumerate(lines):
+            if i < lines_len - 1:
+                line2 = line + lines[i+1]
+                r1 = Block_re.findall(line2)
+                r2 = Block_re2.findall(line2)
+                if len(r1) > 0 or len(r2) > 0:
+                    a = 100
 
-    # ta = lower_first_ch('_GlProgramState')
-    # fix_new_render_bydirs()
-    # fix_new_render_one_file('/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCPass.h')
-    # upgrade_shader_file('/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer/ccShaders.h','/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/ccShaders.h')
-    # class_arr2 = parse_headerfile('/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCCustomCommand.h')
-    # class_arr1 = parse_headerfile('/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer/CCPass.h')
-    # upgrade_file_header('/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer/CCPass.h','/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCPass.h')
-    a = 100
+        a = 100
+    # line = 'using PrimitiveType = backend::PrimitiveType;'
+    # res = using_grammaer_re.findall(line)
+    # res2 = propvalue_declare_re.findall(line)
+    # upgrade_file_header('/Users/tangwen/Downloads/cocos2d-x-4.0/cocos/renderer/CCCustomCommand.h','/Users/tangwen/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCCustomCommand.h')
+    # a = 100
+    # m1 = {'a':100,'b':200}
+    # m2 = {'b':300,'c':400}
+    # res = compare_two_map(m1,m2)
+    # class_arr1 = parse_headerfile(v4_h)
+    # class_arr2 = parse_headerfile(v3_h)
     main()

@@ -43,8 +43,11 @@ def fix_dir(sourceDir):
 
 def main():
     if len(sys.argv) == 2:
-        sourceDir = sys.argv[1]
-        fix_dir(sourceDir)
+        src = sys.argv[1]
+        if os.path.isfile(src):
+            fix_one_file(src)
+        else:
+            fix_dir(src)
 
 if __name__ == "__main__":
     main()
