@@ -10,8 +10,8 @@ from collections import Mapping, Set, Sequence
 string_types = (str, unicode) if str is bytes else (str, bytes)
 iteritems = lambda mapping: getattr(mapping, 'iteritems', mapping.items)()
 
-# V4_path = "/Users/mac/Downloads/cocos2d-x-4.0"
-V4_path = "/Users/tangwen/Downloads/cocos2d-x-4.0"
+V4_path = "/Users/mac/Downloads/cocos2d-x-4.0"
+# V4_path = "/Users/tangwen/Downloads/cocos2d-x-4.0"
 V3_path = os.path.join( os.getenv("ClientDir"),"cocos2d")
 
 comment1_re = re.compile(r'^\s*/\*\*') # /**
@@ -24,7 +24,7 @@ comment6_re = re.compile(r'\s*\*+/') # *********/
 comment7_re = re.compile(r'/\*.*?\*/') # /* abcd */
 
 function_declare_re = re.compile(r'.*?(\w+)\((.*?)\).*?;\s*}?\n?')
-propvalue_declare_re = re.compile(r'\s*((?:\w*:?:?)?\w+)\s*([*&])?\s*(\w+)\s*=?\s*(.*?)?\s*;.*\n?')
+propvalue_declare_re = re.compile(r'(?:static\s+)?(?:const\s+)?(.*?)\s*([*&])?\s*(\w+)(?:\s*=\s*.*?)?;\n?')
 fp_type_re = re.compile(r'\s*(?:const)?\s*(\w*:?:?\w+\s*[&*]?)\s*(\w+)')
 using_grammaer_re = re.compile(r'using\s+(\w+)\s*=\s*(.*);')
 
@@ -36,7 +36,11 @@ incomplete_func_define_re = re.compile(r'.*?(\w+\s*[&*]?)\s+((?:\w+::)?\w+)\(((?
 Shader_re = re.compile(r'.*\*\s*(?:cc)?(.*?)\s*;')
 
 # Block_re = re.compile(r'(?:(\w+)\s+)?(\w+)\s+\w*?\s*(\w+)\s*(?::\s*\w+)?\s*\n{',re.MULTILINE)
-Block_re = re.compile(r'(?:(\w+)\s+)?(\w+)\s+\w*?\s*(\w+)\s*(?::\s*\w*?\s*\w+)?\s*{\s*\n',re.MULTILINE)
+Block_re = re.compile(r'(?:(\w+)\s+)?(\w+)\s+\w*?\s*(\w+)\s*(?:\n?\s*:\s*\w*?\s*\w+)?\s*{\s*\n',re.MULTILINE)
+Block_re2 = re.compile(r'((?:class)|(?:struct)|(?:enum class)|(?:enum))\s+(?:CC_DLL\s+)?(\w+)\s*(?::.*?)?\s*\n?\s*{',re.MULTILINE)
+
+# 
+ifdef_re = re.compile(r'#ifdef\s+NewRender')
 
 RecUpgrade_Diff_File = "_rec_upgrade_diff"
 V3toV4_error_dir = 'v3tov4_error'
@@ -124,6 +128,8 @@ def objwalk(obj, cb):
 def parse_func_param(param_str):
     if param_str == '':
         return []
+    if 'void' in param_str:
+        return []
     # const Rect& rect, V3F_C4B_T2F_Quad* outQuad
     res = param_str.split(',')
     r = []
@@ -132,7 +138,6 @@ def parse_func_param(param_str):
             tmp = fp_type_re.sub(r'\1|\2',x).split('|')
             # tmp = fp_type_re.sub(r'\1|\2|\3',x).split('|')
             r.append(re.sub('[\s+]', '', tmp[0]))
-
     return r
 
 def parse_prop(prop_str):
@@ -275,7 +280,7 @@ class CppFile():
                 #     ta = function_define_re.findall(line)
                 #     ss = len(ta)
                 #     a = 100
-                # if 'Renderer::Renderer' in line:
+                # if 'void Grid3D::blit(void)' in line:
                 #     a = 100
                 if (len(function_define_re.findall(line)) == 1 and \
                     (self.m_lines[i+1].count('{') == 1 or self.m_lines[i+1].count(':') == 1 or line.rstrip()[-1] == '{')) or \
@@ -355,7 +360,7 @@ class CppFile():
                 s_line_dt = sfunc['end'] - sfunc['start']
                 o_line_dt = ofunc['end'] - ofunc['start']
 
-                if abs(s_line_dt - o_line_dt) > 15:
+                if abs(s_line_dt - o_line_dt) > 0:
                     rec_json = read_json_file(RecUpgrade_Diff_File)
                     tlines = None
                     if sfunc['name_key'] in rec_json:
@@ -437,7 +442,7 @@ class CppFile():
 
     def get_ns_ccbegin(self):
         for i,line in enumerate(self.m_lines):
-            if line.count('NS_CC_BEGIN') == 1:
+            if line.count('NS_CC_BEGIN') == 1 or line.count('USING_NS_CC') == 1:
                 return i
         return None
 
@@ -480,6 +485,16 @@ class CppFile():
         # insert_before_idx(class_start,self.m_lines,res_lines)
         self.save()
 
+def is_after_commentflag(tpos, line):
+    sub_line = line[0:tpos]
+    if '//' in sub_line:
+        return True
+    
+    if '/*' in sub_line:
+        return sub_line.count('/*') > sub_line.count('*/')
+    
+    return False
+
 def get_tag(line):
     for x in Access_tags:
         if x in line:
@@ -515,6 +530,7 @@ class ClassHeader():
         bracket = []
 
         line_in_comment = False
+        lines_len = len(lines)
         # start
         for i,line in enumerate(lines):
             if i < start_p:
@@ -528,15 +544,23 @@ class ClassHeader():
                 if line.rstrip()[-2:] == '*/':
                     line_in_comment = False
                 continue
+            
+            if self.m_start == -1 and i < lines_len - 1:
+                line2 = line + lines[i+1]
+                r1 = Block_re2.findall(line2)
+                if len(r1) > 0:
+                    self.m_start = i
+                    self.m_name = r1[0][1]
+                    self.m_block = r1
 
-            if line[:len('class')] == 'class' and line.count(';') == 0 and lines[i+1][0] == '{':
-                self.m_start = i
-                self.m_name = find_class_name(line)
+            # if line[:len('class')] == 'class' and line.count(';') == 0 and lines[i+1][0] == '{':
+            #     self.m_start = i
+            #     self.m_name = find_class_name(line)
             
             if self.m_start > -1:
                 if not is_comment_line(line):
-                    for ch in line:
-                        if ch == '{':
+                    for chi,ch in enumerate(line):
+                        if ch == '{' and not is_after_commentflag(chi,line):
                             # print('push { ',i,':',line)
                             bracket.append(ch)
                         elif ch == '}':
@@ -546,6 +570,8 @@ class ClassHeader():
                             if len(bracket) == 0:
                                 self.m_end = i
                                 break
+            if self.m_end > -1:
+                break
 
         self.m_prop_map = {}
         self.m_func_map = {}
@@ -559,9 +585,8 @@ class ClassHeader():
             if at:
                 access_tag = at
             
-            # if 'computeIndexSize' in line:
-            #     a = 100
-            #     t = function_declare_re.findall(line)
+            if 'static const char* EVENT_PROJECTION_CHANGED;' in line:
+                a = 100
 
             if len( function_declare_re.findall(line)) > 0:
                 try:
@@ -584,11 +609,11 @@ class ClassHeader():
                 if line.count('using ') == 1 and line.lstrip()[0] == 'u':
                     pass
                 else:
-                    tmp = parse_prop(line)
+                    tmp = propvalue_declare_re.findall(line)[0]
+                    # parse_prop(line)
                     # propvalue_declare_re.sub(r'\1|\2|\3|\4',line).split('|')
-                    self.m_prop_map[tmp[0]] = {
-                        'type': tmp[0],
-                        'default': tmp[2],
+                    self.m_prop_map[tmp[2]] = {
+                        'type': tmp[0]+tmp[1],
                         'line': self.m_start + i,
                         'tag':access_tag
                     }
@@ -768,8 +793,12 @@ def add_one_file(pbx_project,file_info):
     target_name = None
     file_options = FileOptions(weak=True)
     # t_group = pbx_project.get_groups_by_name('renderer')[0]
-    relative_path = get_relative_path(dst_path,dist_dir)
-    pbx_project.add_file(path=dst_path,parent=last_parent,tree=None,target_name=target_name,force=False,file_options=file_options)
+    # /Users/mac/Documents/my_projects/cok/client/cocos2d/build
+    # /Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/backend/metal/CommandBufferMTL.mm
+    relative_path = get_relative_path(dst_path,V3_path)
+    # 
+    res = pbx_project.add_file(path=relative_path,parent=last_parent,target_name=target_name,force=False,file_options=file_options)
+    a = 100
     # pbx_project.add_file(filePath, force=False)
     
 
@@ -826,7 +855,7 @@ def fix_new_render_one_file(file_path):
     out_newr_block = False
     had_changed = False
     for i,line in enumerate(lines):
-        if not is_comment_line(line) and line.count('#ifdef NewRender') == 1:
+        if not is_comment_line(line) and len(ifdef_re.findall(line)) == 1:
             is_in_newr_block = True
             precode_stack.append('#if')
             had_changed = True
@@ -1090,6 +1119,14 @@ def compare_two_map(map1,map2):
         'added': added
     }
 
+def sort_map0(map1,sKey="line"):
+    res = []
+    for x in map1:
+        res.append(map1[x])
+
+    res.sort(key=lambda x: x[sKey])
+    return res
+
 def sort_map(map1,sKey="line"):
     res = []
     for x in map1:
@@ -1101,8 +1138,20 @@ def sort_map(map1,sKey="line"):
         tr.append(x['line_str'])
     return tr
 
+def sort_map2(map1,key1=1,sKey="line"):
+    res = []
+    for x in map1:
+        res.append(map1[x])
+
+    res.sort(key=lambda x: x[key1][sKey])
+    return res
+
 
 def compare_class(class1,class2):
+    print('compare class',class1.m_name,class2.m_name)
+    if class1.m_block[0][0] != 'class':
+        upgrade_one_block_(class2.m_file_path,class1.m_file_path,class2,class1)
+        return
     # prop compare
     prop_cpd = {}
     update_cp = {}
@@ -1300,6 +1349,11 @@ def get_shader_line_map(lines):
             line_map[line_key] = [i,line]
     return line_map
 
+def locate_unique_line(lines,line_str):
+    for i,line in enumerate(lines):
+        if not is_comment_line(line) and line.count(line_str) == 1:
+            return i
+
 def upgrade_shader_file(file_v4,file_v3):
     lines_v3 = get_file_lines(file_v3)
     if not lines_v3:
@@ -1310,12 +1364,32 @@ def upgrade_shader_file(file_v4,file_v3):
     map_v3 = get_shader_line_map(lines_v3)
     map_v4 = get_shader_line_map(lines_v4)
     had_changed = False
+    replaced_map = {}
     for x in map_v3:
         if x in map_v4:
             lines_v3[map_v3[x][0]] = lines_v4[map_v4[x][0]]
             had_changed = True
+            replaced_map[x] = True
             pass
+    added_map = {}
+    for x in map_v4:
+        if not x in replaced_map:
+            added_map[x] = map_v4[x]
 
+    def sort_map_(map1):
+        res = []
+        for x in map1:
+            res.append(map1[x])
+
+        res.sort(key=lambda x: x[0])
+        tr = []
+        for x in res:
+            tr.append(x[1])
+        return tr
+    added_lines = sort_map_(added_map)
+    if len(added_lines) > 0:
+        ns_ccend = locate_unique_line(lines_v3,'NS_CC_END')
+        insert_before_idx(ns_ccend,lines_v3,added_lines)
     if had_changed:
         write_file_lines(file_v3,lines_v3)
 
@@ -1324,30 +1398,155 @@ def fix_new_render_bydirs():
     for x in dirs:
         fix_new_render(x)
 
-if __name__ == "__main__":
-    with open('/Users/tangwen/Downloads/cocos2d-x-4.0/cocos/base/ccTypes.h','r') as f:
-        content = f.read()
-        s = Block_re.findall(content)
-        # s2 = Block_re2.findall(content)
-        lines = f.readlines()
-        lines_len = len(lines)
-        for i,line in enumerate(lines):
-            if i < lines_len - 1:
-                line2 = line + lines[i+1]
-                r1 = Block_re.findall(line2)
-                r2 = Block_re2.findall(line2)
-                if len(r1) > 0 or len(r2) > 0:
-                    a = 100
+def nex_block_end(lines,start_i):
+    bra_stack = []
+    for i,line in enumerate(lines[start_i:]):
+        for ch in line:
+            if ch == '{':
+                bra_stack.append(ch)
+            elif ch == '}':
+                bra_stack.pop()
+                if len(bra_stack) == 0:
+                    return [start_i,start_i + i]
 
+def get_block_map(lines):
+    lines_len = len(lines)
+    block_map = {}
+    for i,line in enumerate(lines):
+        if i < lines_len - 1:
+            line2 = line + lines[i+1]
+            r1 = Block_re.findall(line2)
+            if len(r1) > 0:
+                r2 = nex_block_end(lines,i)
+                block_map[r1[0][-1]] = {
+                    'block': r1,
+                    'start': r2[0],
+                    'end': r2[1],
+                    'line_str': line
+                }
+    return block_map
+
+def upgrade_one_block_(path_v4,path_v3,block_v4,block_v3):
+    lines_v4 = get_file_lines(path_v4)
+    lines_v3 = get_file_lines(path_v3)
+
+    v3_st = block_v3.m_start
+    v3_ed = block_v3.m_end
+
+    v4_st = block_v4.m_start
+    v4_ed = block_v4.m_end
+
+    name_key = "block_one_" + block_v3.m_name
+
+    rec_json = read_json_file(RecUpgrade_Diff_File)
+    tlines = None
+    if name_key in rec_json:
+        tlines = rec_json[name_key]
+    else:
+        tlines = compare_lines(lines_v4[v4_st:v4_ed+1],lines_v3[v3_st:v3_ed+1])
+        rec_json[name_key] = tlines
+        with open(RecUpgrade_Diff_File,'w') as f:
+            f.write(json.dumps(rec_json))
+    
+    lines_v3[v3_st:v3_ed+1] = tlines
+    write_file_lines(path_v3,lines_v3)
+
+def upgrade_with_block_lines(path_v4,path_v3):
+    lines_v4 = get_file_lines(path_v4)
+    lines_v3 = get_file_lines(path_v3)
+
+    map_v4 = get_block_map(lines_v4)
+    map_v3 = get_block_map(lines_v3)
+    map_res = compare_two_map(map_v3,map_v4)
+    sort_res = sort_map0(map_v3,'end')
+    last_block_edline = sort_res[-1]['end']
+
+    replaced_arr = sort_map2(map_res['update'],1,'start')
+    replaced_arr_len = len(replaced_arr)
+    rp_cter = 0
+
+    added_arr = sort_map0(map_res['added'],'start')
+
+    ti = 0
+    new_lines = []
+    while ti < len(lines_v3):
+        line = lines_v3[ti]
+        if rp_cter < replaced_arr_len and ti == replaced_arr[rp_cter][1]['start']:
+            sfunc = replaced_arr[rp_cter][1]
+            ofunc = replaced_arr[rp_cter][2]
+            s_line_dt = sfunc['end'] - sfunc['start']
+            o_line_dt = ofunc['end'] - ofunc['start']
+
+            name_key = "block_" + replaced_arr[rp_cter][0]
+            if abs(s_line_dt - o_line_dt) > 15:
+                rec_json = read_json_file(RecUpgrade_Diff_File)
+                tlines = None
+                if name_key in rec_json:
+                    tlines = rec_json[name_key]
+                else:
+                    tlines = compare_lines(lines_v4[ofunc['start']:ofunc['end']+1],lines_v3[sfunc['start']:sfunc['end']+1])
+                    rec_json[name_key] = tlines
+                    with open(RecUpgrade_Diff_File,'w') as f:
+                        f.write(json.dumps(rec_json))
+                new_lines.extend(tlines)
+            else:
+                new_lines.extend(lines_v4[ofunc['start']:ofunc['end']+1])
+            ti += s_line_dt
+            rp_cter += 1
+            # print('replace {} successful'.format(replaced_arr[rp_cter][0]))
+            if rp_cter == replaced_arr_len:
+                new_lines.append('\n')
+                for ab in added_arr:
+                    st = ab['start']
+                    ed = ab['end'] + 1
+                    new_lines.extend(lines_v4[st:ed])
+                    new_lines.append('\n')
+        else:
+            new_lines.append(line)
+        ti += 1
+    
+    write_file_lines(path_v3,new_lines)
+
+def upgrade_h_and_cpp(v3_h,v4_h):
+    v3_cpp = toggle_h_cpp_ext(v3_h)
+    v4_cpp = toggle_h_cpp_ext(v4_h)
+    upgrade_one_file_(v3_h,v4_h)
+    upgrade_one_file_(v3_cpp,v4_cpp)
+
+def compare_lines_manual(file1,file1st,file1ed,file2,file2st,file2ed):
+    file1st -= 1
+    file2st -= 1
+    lines1 = get_file_lines(file1)
+    lines2 = get_file_lines(file2)
+    left_lines = lines1[file1st:file1ed]
+    right_lines = lines2[file2st:file2ed]
+    new_lines = compare_lines(left_lines,right_lines)
+    write_back = input('save back the changes (y/n)?') == 'y'
+    if write_back:
+        lines2[file2st:file2ed] = new_lines
+        write_file_lines(file2,lines2)
+
+if __name__ == "__main__":
+    if len(sys.argv) == 7:
+        compare_lines_manual(sys.argv[1],int(sys.argv[2]),int(sys.argv[3]),sys.argv[4],int(sys.argv[5]),int(sys.argv[6]))
+    else:
+        # fix_new_render_one_file('/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/2d/CCLabel.cpp')
+        v3_header = '/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/renderer/ccShaders.h'
+        v4_header = '/Users/mac/Downloads/cocos2d-x-4.0/cocos/renderer/ccShaders.h'
+
+        upgrade_shader_file(v4_header,v3_header)
+        # upgrade_h_and_cpp(v3_header,v4_header)
+        # upgrade_one_file_(v3_header,v4_header)
+        # upgrade_one_file_('/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/3d/CCMesh.cpp','/Users/mac/Downloads/cocos2d-x-4.0/cocos/3d/CCMesh.cpp')
+        # upgrade_with_block_lines('/Users/mac/Downloads/cocos2d-x-4.0/cocos/base/ccTypes.h','/Users/mac/Documents/my_projects/cok/client/cocos2d/cocos/base/ccTypes.h')
+        # line = 'using PrimitiveType = backend::PrimitiveType;'
+        # res = using_grammaer_re.findall(line)
+        # res2 = propvalue_declare_re.findall(line)
+        # upgrade_file_header('/Users/tangwen/Downloads/cocos2d-x-4.0/cocos/renderer/CCCustomCommand.h','/Users/tangwen/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCCustomCommand.h')
         a = 100
-    # line = 'using PrimitiveType = backend::PrimitiveType;'
-    # res = using_grammaer_re.findall(line)
-    # res2 = propvalue_declare_re.findall(line)
-    # upgrade_file_header('/Users/tangwen/Downloads/cocos2d-x-4.0/cocos/renderer/CCCustomCommand.h','/Users/tangwen/Documents/my_projects/cok/client/cocos2d/cocos/renderer/CCCustomCommand.h')
-    # a = 100
-    # m1 = {'a':100,'b':200}
-    # m2 = {'b':300,'c':400}
-    # res = compare_two_map(m1,m2)
-    # class_arr1 = parse_headerfile(v4_h)
-    # class_arr2 = parse_headerfile(v3_h)
-    main()
+        # m1 = {'a':100,'b':200}
+        # m2 = {'b':300,'c':400}
+        # res = compare_two_map(m1,m2)
+        # class_arr1 = parse_headerfile(v4_h)
+        # class_arr2 = parse_headerfile(v3_h)
+        # main()
