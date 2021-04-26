@@ -2,6 +2,7 @@
 from __future__ import print_function
 import sys,os,re,subprocess,json
 import myutils
+import argparse
 
 FileName_re = re.compile(r'<filename>(.*?)</filename>')
 RaceType_re = re.compile(r'face_race_(\d)')
@@ -110,6 +111,22 @@ def get_file_md5(file_path):
     md5 = MD5_re.findall(md5)[0]
     return md5
 
+def is_tpsfile_pma_check(tps_file):
+    lines = myutils.get_file_lines(tps_file)
+    idx = myutils.lines_contaion_words(lines,"premultiplyAlpha")
+    tps_pma = lines[idx+1].count('true') > 0
+    return tps_pma
+
+def reverse_tps_pma(tps_file):
+    lines = myutils.get_file_lines(tps_file)
+    idx = myutils.lines_contaion_words(lines,"premultiplyAlpha")
+    tps_pma = lines[idx+1].count('true') > 0
+    if tps_pma:
+        lines[idx+1] = lines[idx+1].replace('true','false')
+    else:
+        lines[idx+1] = lines[idx+1].replace('false','true')
+    myutils.write_file_lines(tps_file,lines)
+
 def check_pma_of_pkmfile(tps_file):
     lines = myutils.get_file_lines(tps_file)
     idx = myutils.lines_contaion_words(lines,"premultiplyAlpha")
@@ -121,18 +138,32 @@ def check_pma_of_pkmfile(tps_file):
     postfix1 = '_pma' if tps_pma else '_nopma'
     etc_prefix = 'etc'
     tp_prefix = 'tp'
-    dot_png = ''
+    dot_png = '.png'
     pack_types = ['etc_pma','etc_nopma','tp_pma','tp_nopma']
+    res = []
+    for i in range(2):
+        # etc pack
+        temp_file_name_p = temp_file_name+etc_prefix+postfix1
+        subprocess.call(['TexturePacker','--texture-format','png','--png-opt-level','0','--opt','RGBA8888','--size-constraints','POT','--sheet',temp_file_name_p+'.png','--data',temp_file_name_p+'.plist',tps_file])
+        subprocess.call(['etcpack', temp_file_name_p+'.png', '.', '-c', 'etc1', '-as'])
+        md5 = get_file_md5(temp_file_name_p+'.pkm')
+        res.append([tps_pma,etc_prefix,md5])
+        # TexturePacker pack
+        temp_file_name_p = temp_file_name+tp_prefix+postfix1
+        subprocess.call(['TexturePacker',tps_file,'--texture-format','pkm','--sheet',temp_file_name_p+'.pkm','--opt','ETC1','--size-constraints','POT','--data',temp_file_name_p+'.plist'])
+        md5 = get_file_md5(temp_file_name_p+'.pkm')
+        res.append([tps_pma,tp_prefix,md5])
 
-    # etc packe
-    temp_file_name_p = temp_file_name+etc_prefix+postfix1
-    subprocess.call(['TexturePacker','--texture-format','png','--png-opt-level','0','--opt','RGBA8888','--size-constraints','POT','--sheet',temp_file_name+'.png','--data',temp_file_name+'.plist',tps_file])
-    subprocess.call(['etcpack', temp_file_name+'.png', '.', '-c', 'etc1', '-as'])
-    md5 = get_file_md5(temp_file_name+'.pkm')
+        tps_pma = not tps_pma
+        postfix1 = '_pma' if postfix1 == '_nopma' else '_nopma'
+        reverse_tps_pma(tps_file)
+
     subprocess.call(['rm','-rf',temp_file_name+'.*'])
-    return [tps_pma,md5]
+    print(res)
+    return res
 
 def check_android_zip(zipfile):
+    zipfile = zipfile.rstrip()
     if zipfile.count('_android.zip') == 0:
         print('please input an android zipfile')
         return
@@ -156,13 +187,36 @@ def trim_file_name(file_name):
     file_name = file_name.replace('_alpha_','')
     return file_name
 
+def get_face_from_zipfilename(zipFile):
+    dir_path = os.path.dirname(zipFile)
+    bn = os.path.basename(zipFile)
+    bn_noext = myutils.file_without_extension(bn)
 
-def try_find_face_path(all_rgb_pkm):
+    if not zipFile.endswith('_a.zip') and not zipFile.endswith('_android.zip') and not zipFile.endswith('_ios.zip'):
+        a_p = os.path.join(dir_path,bn_noext+'_a.zip')
+        android_p = os.path.join(dir_path,bn_noext+'_android.zip')
+        if not os.path.exists(a_p) and not os.path.exists(android_p):
+            return None
+        else:
+            first_ = bn_noext.index('_')
+            return bn_noext[(first_+1):]
+    
+    bn_arr = bn.split('_')
+    bn_arr = bn_arr[1:-1]
+    return '_'.join(bn_arr)
+
+def try_find_face_path(all_rgb_pkm, zipfile):
+    zipfile = zipfile.rstrip()
     if len(all_rgb_pkm) == 0:
         return
-
+    
     ccbPath = os.getenv('CcbDyRes')
     facePath = None
+    facePath = get_face_from_zipfilename(zipfile)
+    facePath = os.path.join(ccbPath,'dynamicResource',facePath)
+    if os.path.exists(facePath):
+        return facePath
+
     for x in all_rgb_pkm:
         y = x[0]
         y = y.replace('.pkm','')
@@ -170,37 +224,42 @@ def try_find_face_path(all_rgb_pkm):
         y = y.replace('_alpha_','')
         facePath = os.path.join(ccbPath,'dynamicResource',y)
         if os.path.exists(facePath):
-            break
+            return facePath
     
-    return facePath
+    return None
+    
 
 def pma_comparewith_source(zipfile, tps_file, doPrint = False):
     all_rgb_pkm = check_android_zip(zipfile)
 
     tm = check_pma_of_pkmfile(tps_file)
+    print('all pack md5 of',tps_file)
+    for x in tm:
+        print(' use {0} with premultialpha {1} pack, md5 is {2}'.format(x[1],x[0],x[2]))
     trim_tps_file = trim_file_name(tps_file)
     for x in all_rgb_pkm:
         y = x[0]
         y_md5 = x[1]
         if trim_file_name(y) == trim_tps_file:
-            if y_md5 == tm[1]:
-                if doPrint:
-                    print(y,"has premulti alpha: ", "YES" if tm[0] else "NO")
-                return tm[0]
-            else:
-                if doPrint:
-                    print(y,"has premulti alpha: ", "YES" if (not tm[0]) else "NO")
-                return not tm[0]
+            for z in tm:
+                if y_md5 == z[2]:
+                    if doPrint:
+                        print('md5 of',y,'is',y_md5)
+                        print(y,"has premulti alpha: ", "YES" if z[0] else "NO",',pack type:',z[1])
+                    return z[0]
+            print('can not detect pma of',y,'mabe it use other packer')
+            return 'undetected'
 
-def pma_compare(zipfile):
+def pma_compare(zipfile, doPrint=False):
     all_rgb_pkm = check_android_zip(zipfile)
     if not all_rgb_pkm:
         return
     
-    facePath = try_find_face_path(all_rgb_pkm)
-    if not facePath:
+    facePath = try_find_face_path(all_rgb_pkm, zipfile)
+    if not facePath or not os.path.exists(facePath):
         print('find face path failed',zipfile)
-        return
+        return [[os.path.basename(zipfile),'not find tps file']]
+    
     
     res = []
     for x in all_rgb_pkm:
@@ -215,13 +274,21 @@ def pma_compare(zipfile):
             res.append(tr)
             continue
         tps_pma = check_pma_of_pkmfile(tps_file)
-        if tps_pma[1] == y_md5:
-            tr.append(tps_pma[0])
-        else:
-            tr.append(not tps_pma[0])
+
+        find_it = False
+        for z in tps_pma:
+            if z[2] == y_md5:
+                find_it = True
+                tr.append(z[0])
+                break
+        if not find_it:
+            tr.append('not detect')
 
         res.append(tr)
-
+    if doPrint:
+        print('result of',zipfile,"is:")
+        for x in res:
+            print(' {0} has premulti alpha: {1}'.format(x[0],'Yes' if x[1] else 'No'))
     return res
 
 def check_android_zip_dir(dir_path, prefix='dr_', check_count=50):
@@ -236,9 +303,8 @@ def check_android_zip_dir(dir_path, prefix='dr_', check_count=50):
                 break
 
     return tmap
-    
 
-def main():
+def public_test_tps_pma():
     dirs = [os.getenv('ClientDir')+'/CCB/IF',os.getenv('CcbDyRes')+'/dynamicResource']
     # dirs = ['/Users/mac/Documents/my_projects/cok/ccbDyRes/dynamicResource/face_race_3']
 
@@ -322,13 +388,20 @@ def check_plist_blendFunc(dir_path):
 
     return type_arr
 
-
-if __name__ == "__main__":
-    # main()
-    tpsFile = '/Users/mac/Documents/my_projects/cok/ccbDyRes/dynamicResource/halo_iceworld_face/_alpha_sk_halo_iceworld_face_front.tps'
-    zipFile = '/Users/mac/Documents/my_projects/cok/innerDyRes/dr_halo_iceworld_face_android.zip'
-    pma_comparewith_source(zipFile, tpsFile, True)
-
+def some_test():
+    # print(args.instruction)
+    # inner_dir = os.getenv('InnerDyRes')
+    
+    # tpsFile = '/Users/mac/Documents/my_projects/cok/ccbDyRes/dynamicResource/halo_iceworld_face/_alpha_sk_halo_iceworld_face_front.tps'
+    # zipFile = '/Users/mac/Documents/my_projects/cok/innerDyRes/dr_halo_iceworld_face_android.zip'
+    # pma_comparewith_source(zipFile, tpsFile, True)
+    # a = pma_compare(os.path.join(inner_dir,'dr_PhoenixFire_face_android.zip'))
+    # a = get_face_from_zipfilename(os.path.join(inner_dir,'dr_TimeTTrAnima_face_android.zip'))
+    # a = get_face_from_zipfilename(os.path.join(inner_dir,'dr_totem_1_face_ios.zip'))
+    # a = get_face_from_zipfilename(os.path.join(inner_dir,'lua_LiBao_shenqijineng_CN_a.zip'))
+    # a = get_face_from_zipfilename(os.path.join(inner_dir,'lua_LiBao_shouchoubeiji_default.zip'))
+    # a = get_face_from_zipfilename(os.path.join(inner_dir,'lua_weekend.zip'))
+    b = 100
     
     # tm = check_pma_of_pkmfile('/Users/mac/Documents/my_projects/cok/ccbDyRes/dynamicResource/Wings_crow_face/_alpha_sk_Wings_crow_face.tps')
     # a = 100
@@ -336,9 +409,12 @@ if __name__ == "__main__":
     # t = MD5_re.findall('MD5 (_temp_check.pkm) = 0e97baa276cbd914924951b8d9e45088\n')[0]
     # a = check_android_zip('/Users/mac/Documents/my_projects/cok/innerDyRes/dr_TimeLimitBuffCell_face_android.zip')
     # res = pma_compare('/Users/mac/Documents/my_projects/cok/innerDyRes/dr_TimeLimitBuffCell_face_android.zip')
+    # res = pma_compare('/Users/mac/Documents/my_projects/cok/innerDyRes/dr_face_Valentine_boy_android.zip')
 
     # inner_dir = os.getenv('InnerDyRes')
-    # tmap = check_android_zip_dir(inner_dir, 'dr_', 10)
+    # tmap = check_android_zip_dir(inner_dir, 'dr_Nameplate', 10)
+    # myutils.write_dict_tofile('checkmap.txt',tmap)
+
     # a = GLBlendConst['ZERO']
     # s = number2blend(770)
     # i = getInteger('<integer>770</integer>')
@@ -351,3 +427,65 @@ if __name__ == "__main__":
     # subprocess.call(['/Users/mac/Documents/my_projects/cok/ccbDyRes/dynAutoPacker/lz4Decompress'])
     # mm = lz4DecompressMd5('/Users/mac/Documents/my_projects/cok/innerDyRes/dresource 34/_alpha_sk_Wings_crow_face.pkm')
     a = 100
+
+def filter_pmaflag(f, f_str):
+    if f_str == 'true':
+        return f == True
+    elif f_str == 'false':
+        return f == False
+    
+    return False
+
+def handle_output(output_file,arr,pmaflag):
+    if len(arr) == 0:
+        print('None of the res with pma: {0} found'.format(pmaflag))
+    else:
+        if output_file:
+            myutils.write_dict_tofile(output_file,arr)
+            print('check pma successful, write result to',output_file)
+        else:
+            print(arr)
+
+def main():
+    parser = argparse.ArgumentParser(description='Usage of check_pma.py.')
+
+    parser.add_argument('-f','--file',help='specify one zip file.')
+    parser.add_argument('-d','--directory',help='specify one directory.')
+    parser.add_argument('-i','--input',help='specify input file, each line indicate one android zip file')
+    parser.add_argument('-pma','--checkpma',help='filter res with premultialpha true with pma true, false otherwise',choices=['true', 'false'],default="false")
+    parser.add_argument('-tps','--tpsfile',help='specify compared tps file. use with -f mode')
+    parser.add_argument('-p','--prefix',help='specify prefix of set of zipfiles. use with -d mode',default="dr_")
+    parser.add_argument('-n','--filecount',help='specify how many file should check. use with -d mode',default=20000,type=int)
+    parser.add_argument('-o','--output',help='specify output file, use with -d mode')
+    
+
+    args = parser.parse_args()
+    if args.file:
+        if args.tpsfile:
+            pma_comparewith_source(args.file, args.tpsfile, True)
+        else:
+            pma_compare(args.file, True)
+    elif args.directory:
+        print('check directory res with premulti alpha',args.checkpma)
+        tmap = check_android_zip_dir(args.directory, args.prefix, args.filecount)
+        res = []
+        for x in tmap:
+            q = tmap[x]
+            for y in q:
+                if filter_pmaflag(y[1],args.checkpma):
+                    res.append(y)
+        handle_output(args.output,res,args.checkpma)
+    elif args.input:
+        print('check all input res with premulti alpha',args.checkpma)
+        lines = myutils.get_file_lines(args.input)
+        res = []
+        for f in lines:
+            t = pma_compare(f.rstrip())
+            if t:
+                for x in t:
+                    if filter_pmaflag(x[1],args.checkpma):
+                        res.append(x)
+        handle_output(args.output,res,args.checkpma)
+
+if __name__ == "__main__":
+    main()
