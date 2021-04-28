@@ -9,6 +9,29 @@ RaceType_re = re.compile(r'face_race_(\d)')
 MD5_re = re.compile(r'.*=\s+(\w+)\n')
 Integer_re = re.compile(r'<\w+>(\d+)</.*?>')
 
+Global_flag = 'false'
+Record_file = '_pma_check_record'
+Record_data = None
+Global_dumplua = 'false'
+
+def parse_recorde_file(file_path):
+    if not os.path.exists(file_path):
+        return {}
+    
+    lines = myutils.get_file_lines(file_path)
+    if len(lines) == 0:
+        return {}
+    
+    t_dict = {}
+    for l in lines:
+        tl = l.rstrip()
+        if tl == '':
+            continue
+        tj = json.loads(tl)
+        t_dict[tj['file_name']] = tj
+
+    return t_dict
+
 def tell_pkm_is_lz4compressed(file_path):
     if not os.path.exists(file_path):
         print('no file found', file_path)
@@ -144,13 +167,13 @@ def check_pma_of_pkmfile(tps_file):
     for i in range(2):
         # etc pack
         temp_file_name_p = temp_file_name+etc_prefix+postfix1
-        subprocess.call(['TexturePacker','--texture-format','png','--png-opt-level','0','--opt','RGBA8888','--size-constraints','POT','--sheet',temp_file_name_p+'.png','--data',temp_file_name_p+'.plist',tps_file])
-        subprocess.call(['etcpack', temp_file_name_p+'.png', '.', '-c', 'etc1', '-as'])
+        subprocess.call(['TexturePacker','--texture-format','png','--png-opt-level','0','--opt','RGBA8888','--size-constraints','POT','--sheet',temp_file_name_p+'.png','--data',temp_file_name_p+'.plist',tps_file],stdout=open(os.devnull, 'wb'))
+        subprocess.call(['etcpack', temp_file_name_p+'.png', '.', '-c', 'etc1', '-as'],stdout=open(os.devnull, 'wb'))
         md5 = get_file_md5(temp_file_name_p+'.pkm')
         res.append([tps_pma,etc_prefix,md5])
         # TexturePacker pack
         temp_file_name_p = temp_file_name+tp_prefix+postfix1
-        subprocess.call(['TexturePacker',tps_file,'--texture-format','pkm','--sheet',temp_file_name_p+'.pkm','--opt','ETC1','--size-constraints','POT','--data',temp_file_name_p+'.plist'])
+        subprocess.call(['TexturePacker',tps_file,'--texture-format','pkm','--sheet',temp_file_name_p+'.pkm','--opt','ETC1','--size-constraints','POT','--data',temp_file_name_p+'.plist'],stdout=open(os.devnull, 'wb'))
         md5 = get_file_md5(temp_file_name_p+'.pkm')
         res.append([tps_pma,tp_prefix,md5])
 
@@ -162,23 +185,94 @@ def check_pma_of_pkmfile(tps_file):
     print(res)
     return res
 
+def find_allextfile_indirectory(dresource_dir, ext, exclude = [], res_in=[]):
+    for f in os.listdir(dresource_dir):
+        sourceF = os.path.join(dresource_dir,f)
+        if os.path.isfile(sourceF) and myutils.file_extension(sourceF) == ext:
+            bn = os.path.basename(sourceF)
+            is_exlude = False
+            for x in exclude:
+                if x in bn:
+                    is_exlude = True
+
+            if not is_exlude:
+                res_in.append(sourceF)
+        elif os.path.isdir(sourceF):
+            find_allextfile_indirectory(sourceF, ext, exclude, res_in)
+
+def check_android_rawdir(rawdir, ext, exclude = []):
+    check_dir_name_ = rawdir
+    all_rgb_pkm = []
+    find_allextfile_indirectory(check_dir_name_,ext,exclude,all_rgb_pkm)
+    all_rgb_pkm_md5 = []
+    for x in all_rgb_pkm:
+        all_rgb_pkm_md5.append([os.path.basename(x),lz4DecompressMd5(x)])
+    return all_rgb_pkm_md5
+
 def check_android_zip(zipfile):
+    print('start check zipfile:',zipfile)
     zipfile = zipfile.rstrip()
     if zipfile.count('_android.zip') == 0:
         print('please input an android zipfile')
         return
     check_dir_name_ = "_temp_checkzip_"
     subprocess.call(['rm','-rf',check_dir_name_])
-    subprocess.call(['unzip',zipfile,'-d',check_dir_name_])
+    subprocess.call(['unzip',zipfile,'-d',check_dir_name_],stdout=open(os.devnull, 'wb'))
 
-    all_rgb_pkm = []
-    dresource_dir = os.path.join(check_dir_name_,'dresource')
-    for f in os.listdir(dresource_dir):
-        sourceF = os.path.join(dresource_dir,f)
-        if os.path.isfile(sourceF) and myutils.file_extension(sourceF) == ".pkm" and sourceF.count('alpha.pkm') == 0:
-            all_rgb_pkm.append([os.path.basename(sourceF),lz4DecompressMd5(sourceF)])
+    all_rgb_pkm_md5 = check_android_rawdir(check_dir_name_,'.pkm',['alpha.pkm'])
+    # all_rgb_pkm = []
+    # find_allextfile_indirectory(check_dir_name_,'.pkm',['alpha.pkm'],all_rgb_pkm)
+    # all_rgb_pkm_md5 = []
+    # for x in all_rgb_pkm:
+    #     all_rgb_pkm_md5.append([os.path.basename(x),lz4DecompressMd5(x)])
     subprocess.call(['rm','-rf',check_dir_name_])
-    return all_rgb_pkm
+    return all_rgb_pkm_md5
+
+def find_without_ext(bn, arr):
+    bn_noext = myutils.file_without_extension(bn)
+    for x in arr:
+        if myutils.file_without_extension(x) == bn_noext:
+            return x
+    return None
+
+def compare_zip_with_tpsdirectory(zipfile,tpsdirectory):
+    pass
+    all_rgb_pkm = []
+    if os.path.isfile(zipfile):
+        all_rgb_pkm = check_android_zip(zipfile)
+    elif os.path.isdir(zipfile):
+        all_rgb_pkm = check_android_rawdir(zipfile,'.pkm',['alpha.pkm'])
+
+    if len(all_rgb_pkm) == 0:
+        return
+    
+    all_tps = []
+    find_allextfile_indirectory(tpsdirectory,'.tps',[],all_tps)
+    if len(all_tps) == 0:
+        return
+    
+    result = []
+    for pkm in all_rgb_pkm:
+        y = pkm[0]
+        y_md5 = pkm[1]
+        find_tps = find_without_ext(y,all_tps)
+        if find_tps:
+            tm = check_pma_of_pkmfile(find_tps)
+            for z in tm:
+                if y_md5 == z[2]:
+                    # print('md5 of',y,'is',y_md5)
+                    result.append([y,z[0],z[1]])
+    need_arr = []
+    for x in result:
+        if filter_pmaflag(x[1],Global_flag):
+            print(x[0],"has premulti alpha: ", "YES" if x[1] else "NO",',pack type:',x[2])
+            need_arr.append([x[0]])
+    if Global_dumplua == 'true':
+        lua_str = convertArr2luatable(need_arr,['resName'])
+        print('lua result table:')
+        print(lua_str)
+
+    return result
 
 def trim_file_name(file_name):
     file_name = os.path.basename(file_name)
@@ -205,10 +299,8 @@ def get_face_from_zipfilename(zipFile):
     bn_arr = bn_arr[1:-1]
     return '_'.join(bn_arr)
 
-def try_find_face_path(all_rgb_pkm, zipfile):
+def try_find_face_path(zipfile):
     zipfile = zipfile.rstrip()
-    if len(all_rgb_pkm) == 0:
-        return
     
     ccbPath = os.getenv('CcbDyRes')
     facePath = None
@@ -217,15 +309,6 @@ def try_find_face_path(all_rgb_pkm, zipfile):
     if os.path.exists(facePath):
         return facePath
 
-    for x in all_rgb_pkm:
-        y = x[0]
-        y = y.replace('.pkm','')
-        y = y.replace('_alpha_sk_','')
-        y = y.replace('_alpha_','')
-        facePath = os.path.join(ccbPath,'dynamicResource',y)
-        if os.path.exists(facePath):
-            return facePath
-    
     return None
     
 
@@ -250,45 +333,58 @@ def pma_comparewith_source(zipfile, tps_file, doPrint = False):
             print('can not detect pma of',y,'mabe it use other packer')
             return 'undetected'
 
+def recored_zipresult(zipfile, res):
+    t_dict = {}
+    t_dict['file_name'] = os.path.basename( zipfile)
+    t_dict['res'] = res
+    with open(Record_file,'a') as f:
+        f.write(json.dumps(t_dict) + '\n')
+
 def pma_compare(zipfile, doPrint=False):
-    all_rgb_pkm = check_android_zip(zipfile)
-    if not all_rgb_pkm:
-        return
-    
-    facePath = try_find_face_path(all_rgb_pkm, zipfile)
+    rec_data = Record_data.get(os.path.basename(zipfile))
+    if rec_data:
+        return rec_data['res']
+
+    facePath = try_find_face_path(zipfile)
     if not facePath or not os.path.exists(facePath):
         print('find face path failed',zipfile)
         return [[os.path.basename(zipfile),'not find tps file']]
     
-    
-    res = []
-    for x in all_rgb_pkm:
-        y = x[0]
-        tr = [y]
-        y_md5 = x[1]
-        t_tps = y.replace('.pkm','.tps')
-        tps_file = os.path.join(facePath,t_tps)
-        if not os.path.exists(tps_file):
-            print('tps file not exist.',tps_file)
-            tr.append('not find tps file')
-            res.append(tr)
-            continue
-        tps_pma = check_pma_of_pkmfile(tps_file)
+    res = compare_zip_with_tpsdirectory(zipfile, facePath)
+    # for x in all_rgb_pkm:
+    #     y = x[0]
+    #     tr = [y]
+    #     y_md5 = x[1]
+    #     t_tps = y.replace('.pkm','.tps')
+    #     tps_file = os.path.join(facePath,t_tps)
+    #     if not os.path.exists(tps_file):
+    #         print('tps file not exist.',tps_file)
+    #         tr.append('not find tps file')
+    #         res.append(tr)
+    #         continue
+    #     tps_pma = check_pma_of_pkmfile(tps_file)
+    #     print('md5 of',y,'is',y_md5)
+    #     find_it = False
+    #     for z in tps_pma:
+    #         if z[2] == y_md5:
+    #             find_it = True
+    #             tr.append(z[0])
+    #             print('pack type of',y,'is',z[1])
+    #             if filter_pmaflag(z[0],Global_flag):
+    #                 with open("__temp_log","a") as f:
+    #                     json_str = json.dumps(tr)
+    #                     f.write(json_str + '\n')
+    #             break
+    #     if not find_it:
+    #         tr.append('not detect')
 
-        find_it = False
-        for z in tps_pma:
-            if z[2] == y_md5:
-                find_it = True
-                tr.append(z[0])
-                break
-        if not find_it:
-            tr.append('not detect')
+    #     res.append(tr)
+    # if doPrint:
+    #     print('result of',zipfile,"is:")
+    #     for x in res:
+    #         print(' {0} has premulti alpha: {1}'.format(x[0],'Yes' if x[1] else 'No'))
 
-        res.append(tr)
-    if doPrint:
-        print('result of',zipfile,"is:")
-        for x in res:
-            print(' {0} has premulti alpha: {1}'.format(x[0],'Yes' if x[1] else 'No'))
+    recored_zipresult(zipfile, res)
     return res
 
 def check_android_zip_dir(dir_path, prefix='dr_', check_count=50):
@@ -389,6 +485,7 @@ def check_plist_blendFunc(dir_path):
     return type_arr
 
 def some_test():
+    a = check_android_zip('/Users/mac/Documents/my_projects/cok/innerDyRes/dr_face_race_2_android.zip')
     # print(args.instruction)
     # inner_dir = os.getenv('InnerDyRes')
     
@@ -438,13 +535,17 @@ def filter_pmaflag(f, f_str):
 
 def handle_output(output_file,arr,pmaflag):
     if len(arr) == 0:
-        print('None of the res with pma: {0} found'.format(pmaflag))
+        ss = 'None of the res with pma: {0} found'.format(pmaflag)
+        print(ss)
+        with open(output_file,'w') as f:
+            f.write(ss)
     else:
         if output_file:
             myutils.write_dict_tofile(output_file,arr)
             print('check pma successful, write result to',output_file)
         else:
             print(arr)
+
 
 def main():
     parser = argparse.ArgumentParser(description='Usage of check_pma.py.')
@@ -457,16 +558,32 @@ def main():
     parser.add_argument('-p','--prefix',help='specify prefix of set of zipfiles. use with -d mode',default="dr_")
     parser.add_argument('-n','--filecount',help='specify how many file should check. use with -d mode',default=20000,type=int)
     parser.add_argument('-o','--output',help='specify output file, use with -d mode')
+    parser.add_argument('-tpsdir','--tpsdirectory',help='specify compared tps directory. use with both -f,-d mode')
+    parser.add_argument('-lua','--dumplua',help='specify lua format output',choices=['true', 'false'],default="false")
     
 
     args = parser.parse_args()
+    global Global_flag
+    global Global_dumplua
+    global Record_data
+
+    Global_dumplua = args.dumplua
+    Record_data = parse_recorde_file(Record_file)
+    with open("__temp_log","w") as f:
+        pass
     if args.file:
         if args.tpsfile:
             pma_comparewith_source(args.file, args.tpsfile, True)
+        elif args.tpsdirectory:
+            compare_zip_with_tpsdirectory(args.file, args.tpsdirectory)
         else:
             pma_compare(args.file, True)
     elif args.directory:
+        Global_flag = args.checkpma
         print('check directory res with premulti alpha',args.checkpma)
+        if args.tpsdirectory:
+            compare_zip_with_tpsdirectory(args.directory, args.tpsdirectory)
+            return
         tmap = check_android_zip_dir(args.directory, args.prefix, args.filecount)
         res = []
         for x in tmap:
@@ -476,6 +593,7 @@ def main():
                     res.append(y)
         handle_output(args.output,res,args.checkpma)
     elif args.input:
+        Global_flag = args.checkpma
         print('check all input res with premulti alpha',args.checkpma)
         lines = myutils.get_file_lines(args.input)
         res = []
@@ -487,5 +605,7 @@ def main():
                         res.append(x)
         handle_output(args.output,res,args.checkpma)
 
+
 if __name__ == "__main__":
     main()
+    # some_test()
