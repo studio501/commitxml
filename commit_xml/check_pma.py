@@ -343,6 +343,11 @@ def recored_zipresult(zipfile, res):
 def pma_compare(zipfile, doPrint=False):
     rec_data = Record_data.get(os.path.basename(zipfile))
     if rec_data:
+        if doPrint:
+            print('result of',zipfile,"is:")
+            res = rec_data['res']
+            for x in res:
+                print(' {0} has premulti alpha: {1}'.format(x[0],'Yes' if x[1] else 'No'))
         return rec_data['res']
 
     facePath = try_find_face_path(zipfile)
