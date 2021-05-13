@@ -15,7 +15,7 @@ def zipdb_onebyone(dst_path ,ver='output', xmlfile=None):
     dn = os.path.dirname(dst_path)
     bn = os.path.basename(dst_path)
     os.chdir(dn)
-    out_path = dst_path + '.rec'
+    out_path = os.path.join(dn,ver+'_'+bn)
     if os.path.exists(out_path):
         shutil.rmtree(out_path)
     os.mkdir(out_path)
@@ -30,11 +30,11 @@ def zipdb_onebyone(dst_path ,ver='output', xmlfile=None):
             if os.path.exists(dst_zipfile):
                 md5_res.append(myutils.file_without_extension(f)+'='+myutils.get_file_md5(dst_zipfile))
 
-    xml_name = 'database.local.xml'
+    xml_name = os.path.basename(xmlfile) if xmlfile else 'database.local.xml'
     md5_file = os.path.join(out_path,xml_name)
     myutils.write_file_lines(md5_file,md5_res,'\n')
 
-    final_rec_zip = ver+'_'+xml_name+'.zip'
+    final_rec_zip = xml_name+'.zip'
     zip_cmd = ['zip','-j',final_rec_zip,md5_file]
     # spd file
     if xmlfile:
@@ -95,7 +95,8 @@ def gen_spd(filename, dst_file=None):
         sys.exit(1)
 
 def split_file_xml(filename):
-    tree = ET.parse(filename)
+    parser = ET.XMLParser(remove_comments=True)
+    tree = ET.parse(filename, parser)
     root = tree.getroot()
 
     dirname = os.path.dirname(filename)
@@ -105,16 +106,21 @@ def split_file_xml(filename):
         shutil.rmtree(output_dir)
     os.mkdir(output_dir)
 
-    
-    for elem in root:
-        temprt = ET.Element('p')
-        temprt.append(elem)
-        content = ET.tostring(elem,pretty_print=True,with_comments=False,method='c14n')
-        res = content.rstrip()
-        output_file = os.path.join(output_dir,elem.attrib.get('id')+'.xml')
-        with open(output_file,'w') as f:
-            f.write(res)
+    try:
+        for elem in root:
+            if not elem.attrib.get('id'):
+                raise Exception("find no name xml.")
+            temprt = ET.Element('p')
+            temprt.append(elem)
+            content = ET.tostring(elem,pretty_print=True,with_comments=False,method='c14n')
+            res = content.rstrip()
+            output_file = os.path.join(output_dir,elem.attrib.get('id')+'.xml')
+            with open(output_file,'w') as f:
+                f.write(res)
+    except Exception as e:
+        print("split xml faild",e)
     print('split xml file successful.')
+
 def main():
 
     parser = argparse.ArgumentParser(description='Usage of check_pma.py.')
