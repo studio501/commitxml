@@ -4,6 +4,8 @@
 from __future__ import print_function
 import sys,os,re,subprocess,codecs,json
 
+MD5_re = re.compile(r'.*=\s+(\w+)\n')
+
 def file_extension(path): 
 	return os.path.splitext(path)[1]
 
@@ -43,3 +45,10 @@ def write_dict_tofile(file_path,tdict):
     f = codecs.open(file_path, 'w', 'utf-8')
     f.write(json_str)
     f.close()
+
+def get_file_md5(file_path):
+    if not os.path.exists(file_path):
+        return ''
+    md5 = subprocess.check_output(['md5',file_path])
+    md5 = MD5_re.findall(md5)[0]
+    return md5

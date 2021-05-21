@@ -123,7 +123,7 @@ def split_file_xml(filename):
 
 def main():
 
-    parser = argparse.ArgumentParser(description='Usage of check_pma.py.')
+    parser = argparse.ArgumentParser(description='Usage of split_db.py.')
 
     parser.add_argument('-s','--split',help='split one large xml to bunch sperate xml.',action='store_true')
     parser.add_argument('-i','--input',help='input file or directory.')

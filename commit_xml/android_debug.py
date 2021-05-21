@@ -28,10 +28,13 @@ def down_load_apk(apk_name,tag):
             pass
         i += 1
 
-def install_apk(apk_name):
+def install_apk(apk_name, simulatorName):
     print('start install apk...')
     try_restart_adb()
-    subprocess.call(['adb','install','-r',apk_name])
+    if simulatorName:
+        subprocess.call(['adb','-s',simulatorName.lstrip().rstrip(),'install','-r',apk_name])
+    else:
+        subprocess.call(['adb','install','-r',apk_name])
 
 def start_log():
     print('start log...')
@@ -43,14 +46,14 @@ def main():
 
     apk_name = 'IF_Inner.apk'
     tag = 'inner'
-    if len(sys.argv) == 2:
+    if len(sys.argv) >= 2:
         if sys.argv[1] == 'inner':
             apk_name = 'IF_Inner.apk'
         else:
             apk_name = 'COK_CN1.apk'
         tag = sys.argv[1]
     down_load_apk(apk_name,tag)
-    install_apk(apk_name)
+    install_apk(apk_name, sys.argv[2] if len(sys.argv) == 3 else None)
 
     # if len(sys.argv) == 2:
     #     if sys.argv[1] == 'nolog':

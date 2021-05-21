@@ -2,7 +2,7 @@
 from __future__ import print_function
 import sys,os,re,subprocess,json
 import myutils
-import argparse
+import argparse,time
 
 FileName_re = re.compile(r'<filename>(.*?)</filename>')
 RaceType_re = re.compile(r'face_race_(\d)')
@@ -264,14 +264,16 @@ def compare_zip_with_tpsdirectory(zipfile,tpsdirectory):
                     result.append([y,z[0],z[1]])
     need_arr = []
     for x in result:
+        print(x[0],"has premulti alpha: ", "YES" if x[1] else "NO",',pack type:',x[2])
         if filter_pmaflag(x[1],Global_flag):
-            print(x[0],"has premulti alpha: ", "YES" if x[1] else "NO",',pack type:',x[2])
             need_arr.append([x[0]])
-    if Global_dumplua == 'true':
+    if len(need_arr) > 0:
         lua_str = convertArr2luatable(need_arr,['resName'])
         print('lua result table:')
         print(lua_str)
-
+    else:
+        print('no res with pma',Global_flag,'found no lua table output.')
+            
     return result
 
 def trim_file_name(file_name):
@@ -310,11 +312,8 @@ def try_find_face_path(zipfile):
         return facePath
 
     return None
-    
 
-def pma_comparewith_source(zipfile, tps_file, doPrint = False):
-    all_rgb_pkm = check_android_zip(zipfile)
-
+def pma_comparewith_source_(all_rgb_pkm, tps_file, doPrint = False):
     tm = check_pma_of_pkmfile(tps_file)
     print('all pack md5 of',tps_file)
     for x in tm:
@@ -332,6 +331,15 @@ def pma_comparewith_source(zipfile, tps_file, doPrint = False):
                     return z[0]
             print('can not detect pma of',y,'mabe it use other packer')
             return 'undetected'
+
+def pma_comparewith_source(zipfile, tps_file, doPrint = False):
+    all_rgb_pkm = check_android_zip(zipfile)
+    return pma_comparewith_source_(all_rgb_pkm,tps_file,doPrint)
+
+def pma_comparewith_pkm(pkmfile, tps_file, doPrint = False):
+    all_rgb_pkm = []
+    all_rgb_pkm.append([os.path.basename(pkmfile),lz4DecompressMd5(pkmfile)])
+    return pma_comparewith_source_(all_rgb_pkm,tps_file,doPrint)
 
 def recored_zipresult(zipfile, res):
     t_dict = {}
@@ -384,10 +392,10 @@ def pma_compare(zipfile, doPrint=False):
     #         tr.append('not detect')
 
     #     res.append(tr)
-    # if doPrint:
-    #     print('result of',zipfile,"is:")
-    #     for x in res:
-    #         print(' {0} has premulti alpha: {1}'.format(x[0],'Yes' if x[1] else 'No'))
+    if doPrint:
+        print('result of',zipfile,"is:")
+        for x in res:
+            print(' {0} has premulti alpha: {1}'.format(x[0],'Yes' if x[1] else 'No'))
 
     recored_zipresult(zipfile, res)
     return res
@@ -565,6 +573,7 @@ def main():
     parser.add_argument('-o','--output',help='specify output file, use with -d mode')
     parser.add_argument('-tpsdir','--tpsdirectory',help='specify compared tps directory. use with both -f,-d mode')
     parser.add_argument('-lua','--dumplua',help='specify lua format output',choices=['true', 'false'],default="false")
+    parser.add_argument('-pkm','--pkmfile',help='specify pkm file')
     
 
     args = parser.parse_args()
@@ -597,6 +606,9 @@ def main():
                 if filter_pmaflag(y[1],args.checkpma):
                     res.append(y)
         handle_output(args.output,res,args.checkpma)
+    elif args.pkmfile:
+        if args.tpsfile:
+            pma_comparewith_pkm(args.pkmfile, args.tpsfile, True)
     elif args.input:
         Global_flag = args.checkpma
         print('check all input res with premulti alpha',args.checkpma)
@@ -610,7 +622,40 @@ def main():
                         res.append(x)
         handle_output(args.output,res,args.checkpma)
 
+def libao_check_(dir_path):
 
+    check_dir_name_ = "_temp_checkzip_"
+    
+    # /Users/mac/Documents/my_projects/cok/outerDyRes75/lua_LiBao_aijiyanhou_default_a/lua/skeleton/android/_alpha_sk_LiBao_aijiyanhou_default_a_icon.pkm
+    res = []
+    for f in os.listdir(dir_path):
+        sourceF = os.path.join(dir_path,f)
+        if os.path.isfile(sourceF) and sourceF.endswith('default_a.zip'):
+            time.sleep( 0.01 )
+            subprocess.call(['rm','-rf',check_dir_name_])
+            time.sleep( 0.01 )
+            subprocess.call(['unzip',sourceF,'-d',check_dir_name_],stdout=open(os.devnull, 'wb'))
+
+            check_path = check_dir_name_+'/'+"lua/skeleton/android"
+            if os.path.isdir(check_path):
+                check_ok_ = False
+                for f2 in os.listdir(check_path):
+                    pkmfile = os.path.join(check_path,f2)
+                    if os.path.isfile(pkmfile) and pkmfile.endswith('a_icon.pkm'):
+                        md5 = myutils.get_file_md5(pkmfile)
+                        if md5 == '66f9ace13a5a68fdcd83673934248993':
+                            check_ok_ = True
+                            break
+                if check_ok_:
+                    # print(f,'is the same')
+                    res.append(f)
+                else:
+                    # print(f,'is not the same!!!!!!!!!!!!!!!')
+                    pass
+    myutils.write_file_lines('old_libao_warning',res,'\n')       
+
+    
 if __name__ == "__main__":
-    main()
+    # main()
     # some_test()
+    libao_check_("/Users/mac/Documents/my_projects/cok/outerDyRes75")

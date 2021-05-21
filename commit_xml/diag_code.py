@@ -228,6 +228,8 @@ def get_code(js_file_name, out_put_dir):
         module_name = get_module_name(contents, word1.p)
         module_contents = contents[word1.p:word2.p + 1]
         print("when_match", module_name)
+        if module_name == '19':
+            a = 100
 
         def when_match2(w1_, w2_):
             file_pts = os.path.join(out_put_dir, module_name + '.js')
