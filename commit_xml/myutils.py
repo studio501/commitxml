@@ -1,8 +1,7 @@
-
-
 # -*- coding: utf-8 -*
 from __future__ import print_function
 import sys,os,re,subprocess,codecs,json
+import shutil,time
 
 MD5_re = re.compile(r'.*=\s+(\w+)\n')
 
@@ -46,9 +45,94 @@ def write_dict_tofile(file_path,tdict):
     f.write(json_str)
     f.close()
 
+def get_jsonfrom_file(f):
+    if not os.path.exists(f):
+        return None
+
+    with open(f,'r') as load_f:
+        load_dict = json.load(load_f)
+        return load_dict
+    return None
+
 def get_file_md5(file_path):
     if not os.path.exists(file_path):
         return ''
     md5 = subprocess.check_output(['md5',file_path])
     md5 = MD5_re.findall(md5)[0]
     return md5
+
+def ensure_dir(dir_path, cleanPrevious=False):
+    try:
+        if cleanPrevious:
+            if os.path.exists(dir_path):
+                shutil.rmtree(dir_path, ignore_errors=True)
+
+        if not os.path.exists(dir_path):
+            os.mkdir(dir_path)
+    except OSError as e:
+        return False
+
+    return True
+
+def force_rename_dir(src_path, dst_path, back_path=None):
+    if os.path.exists(dst_path):
+        if back_path:
+            os.rename(dst_path, back_path)
+        else:
+            shutil.rmtree(dst_path, ignore_errors=True)
+    os.rename(src_path, dst_path)
+
+def is_number(str):
+    try:
+        if str=='NaN':
+            return False
+        float(str)
+        return True
+    except ValueError:
+        return False
+
+def file_isinprocessing(f):
+    if os.path.exists(f):
+        try:
+            os.rename(f, f)
+            return False
+        except OSError as e:
+            return True
+    return False
+
+def progressBar(iterable, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iterable    - Required  : iterable object (Iterable)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    total = len(iterable)
+    # Progress Bar Printing Function
+    def printProgressBar (iteration):
+        percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+        filledLength = int(length * iteration // total)
+        bar = fill * filledLength + '-' * (length - filledLength)
+        print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = printEnd)
+    # Initial Call
+    printProgressBar(0)
+    # Update Progress Bar
+    for i, item in enumerate(iterable):
+        yield item
+        printProgressBar(i + 1)
+    # Print New Line on Complete
+    print()
+
+# usage of progress console
+# # A List of Items
+# items = list(range(0, 57))
+
+# # A Nicer, Single-Call Usage
+# for item in progressBar(items, prefix = 'Progress:', suffix = 'Complete', length = 50):
+#     # Do stuff...
+#     time.sleep(0.1)
