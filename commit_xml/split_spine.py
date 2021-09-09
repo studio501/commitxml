@@ -5,7 +5,6 @@ import myutils
 import math
 import shutil
 import mygui
-import psutil
 
 from PIL import Image
 import numpy as np
