@@ -175,6 +175,11 @@ class SpineGUI():
 
         return entry
 
+def getToolName():
+    return Tool_Name
+def getToolVersion():
+    return Release_Version
+
 def main_ui():
     wd = SpineGUI()
     r = wd.show()

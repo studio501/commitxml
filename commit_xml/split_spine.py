@@ -209,8 +209,8 @@ def write_2json_(ret_dict, name, size, direction, bone, idx ,lastone=False, dec_
 
     ss = idx * OneFrameTime
     animation["slots"][bone]["attachment"].append({"time":idx * OneFrameTime,"name":name})
-    if lastone:
-        animation["slots"][bone]["attachment"].append({"time":(idx + (dec_frame + 1)) * OneFrameTime,"name":None})
+    if lastone and lastone != idx:
+        animation["slots"][bone]["attachment"].append({"time":lastone * OneFrameTime,"name":None})
 
 def trim_png_withcenter(in_file,center,idx=0,deleteOld=False,out_dict=None,lastone=False,dec_frame=0):
     b_name = os.path.basename(in_file)
@@ -534,12 +534,14 @@ def calculate_pngcount(in_dir, scale=1.0, dec_frame=0, act_name=None, v3_method=
         to_dir = (act_name if act_name else base_dirname) + idx2char(i + 1)
         to_dir = os.path.join(group_dir,to_dir)
         myutils.ensure_dir(to_dir)
+        to_dir_image = os.path.join(to_dir,'images')
+        myutils.ensure_dir(to_dir_image)
         if not to_dir in out_dirs:
-            out_dirs.append(to_dir)
+            out_dirs.append([to_dir,to_dir_image])
         for y in x:
             y_bn = os.path.basename(y)
             y_bn = get_packed_name(y_bn,act_name)
-            shutil.copy(y,os.path.join(to_dir, y_bn))
+            shutil.copy(y,os.path.join(to_dir_image, y_bn))
     # 0—18，21-36，39--54，57-72，75-87，90-105，108-126，129-147，150-162
     a = 100
     if has_medium:
@@ -551,11 +553,22 @@ def calculate_pngcount(in_dir, scale=1.0, dec_frame=0, act_name=None, v3_method=
             'frames': 0,
             'dec_frame': dec_frame
         }
-        for x in out_dirs:
-            bn_x = os.path.basename(x)
+
+        total_frame = 0
+        for x1 in out_dirs:
+            x = x1[1]
+            for f in os.listdir(x):
+                sourceF = os.path.join(x,f)
+                if os.path.isfile(sourceF) and f.endswith('.png'):
+                    total_frame += 1
+        total_frame_idx = (total_frame - 1) * (dec_frame + 1)
+        for x1 in out_dirs:
+            x0 = x1[0]
+            x = x1[1]
+            bn_x = os.path.basename(x0)
             out_dict = {
-                'skeleton' : {'images':bn_x},
-                'bones' : [{"name":"root"},{ "name": "ctr", "parent": "root", "scaleX": 1.0, "scaleY": 1.0 }],
+                'skeleton' : {'images':'images'},
+                'bones' : [{"name":"root"},{ "name": "ctr", "parent": "root", "scaleX": 1.0 / scale, "scaleY": 1.0 / scale }],
                 'slots' : [],
                 'skins' : {'default':{}},
                 'animations':{"animation":{'slots':{},'bones':{'ctr':{'translate':[{ "time": 0, "x": 0, "y": 0 }]}}}}
@@ -573,18 +586,17 @@ def calculate_pngcount(in_dir, scale=1.0, dec_frame=0, act_name=None, v3_method=
                 sourceF = cfg[1]
                 f = os.path.basename(sourceF)
                 fidx = idx * (dec_frame + 1) + idx_rec['frames']
-                last_one = idx == ll - 1
                 if v3_method:
                     if not center_p:
                         center_p = get_png_center(sourceF)
-                    trim_png_withcenter(sourceF, center_p, fidx, True, out_dict, last_one, dec_frame)
+                    trim_png_withcenter(sourceF, center_p, fidx, True, out_dict, total_frame_idx, dec_frame)
                 else:
                     noext_name = myutils.file_without_extension(f)
                     im2 = Image.open(sourceF)
-                    write_2json_(out_dict,noext_name,im2.size,'Center',"ctr",fidx,last_one, dec_frame)
-
+                    write_2json_(out_dict,noext_name,im2.size,'Center',"ctr",fidx,total_frame_idx, dec_frame)
+            # 1 .. 1 .. 1 .. 1
             idx_rec['frames'] += ll * (dec_frame + 1)
-            json_file = os.path.join(group_dir,bn_x + '.json')
+            json_file = os.path.join(x0,bn_x + '.json')
             myutils.write_dict_tofile(json_file,out_dict)
         
 def main():
