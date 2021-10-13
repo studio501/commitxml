@@ -13,7 +13,7 @@ import split_spine
 import myutils
 
 Tool_Name = u'Spine切分工具'
-Release_Version = '0.0.2'
+Release_Version = '0.0.3'
 RecFile = "_recopt.json"
 
 class SpineGUI():

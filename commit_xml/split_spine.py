@@ -17,7 +17,8 @@ def raise_error(msg):
     print(u'Error:', msg)
 
 def idx2char(index):
-    return '_%02d' % index
+    # return '_%02d' % index
+    return '_' + chr(64 + index)
 
 def get_packed_name(in_file_bn, act_name = None):
     bn = myutils.file_without_extension(os.path.basename(in_file_bn))
@@ -155,7 +156,8 @@ def direction2_vec2(direction):
     elif direction == 'Center':
         return [-1, -1]
 
-def write_2json_(ret_dict, name, size, direction, bone, idx ,lastone=False, dec_frame=0):
+def write_2json_(ret_dict, name, size, direction, bone, idx ,totalFrameIdx=False, dec_frame=0, lastone=False):
+    # totalFrameIdx
     if ret_dict['bones'] is None:
         return
     if ret_dict['slots'] is None:
@@ -209,10 +211,12 @@ def write_2json_(ret_dict, name, size, direction, bone, idx ,lastone=False, dec_
 
     ss = idx * OneFrameTime
     animation["slots"][bone]["attachment"].append({"time":idx * OneFrameTime,"name":name})
-    if lastone and lastone != idx:
-        animation["slots"][bone]["attachment"].append({"time":lastone * OneFrameTime,"name":None})
+    if lastone:
+        if totalFrameIdx and totalFrameIdx != idx: #set last frame
+            animation["slots"][bone]["attachment"].append({"time":(idx + (dec_frame + 1)) * OneFrameTime,"name":None})
+            animation["slots"][bone]["attachment"].append({"time":totalFrameIdx * OneFrameTime,"name":None})
 
-def trim_png_withcenter(in_file,center,idx=0,deleteOld=False,out_dict=None,lastone=False,dec_frame=0):
+def trim_png_withcenter(in_file,center,idx=0,deleteOld=False,out_dict=None,lastone=False,dec_frame=0,lastone2=False):
     b_name = os.path.basename(in_file)
     out_dir = os.path.dirname(in_file)
 
@@ -240,7 +244,7 @@ def trim_png_withcenter(in_file,center,idx=0,deleteOld=False,out_dict=None,lasto
         im2.save(os.path.join(out_dir,t_name))
         if out_dict:
             noext_name = myutils.file_without_extension(t_name)
-            write_2json_(out_dict,noext_name,im2.size,x[1],t_bone,idx,lastone,dec_frame)
+            write_2json_(out_dict,noext_name,im2.size,x[1],t_bone,idx,lastone,dec_frame,lastone2)
     
     if deleteOld:
         os.remove(in_file)
@@ -586,14 +590,15 @@ def calculate_pngcount(in_dir, scale=1.0, dec_frame=0, act_name=None, v3_method=
                 sourceF = cfg[1]
                 f = os.path.basename(sourceF)
                 fidx = idx * (dec_frame + 1) + idx_rec['frames']
+                last_one = idx == ll - 1
                 if v3_method:
                     if not center_p:
                         center_p = get_png_center(sourceF)
-                    trim_png_withcenter(sourceF, center_p, fidx, True, out_dict, total_frame_idx, dec_frame)
+                    trim_png_withcenter(sourceF, center_p, fidx, True, out_dict, total_frame_idx, dec_frame, last_one)
                 else:
                     noext_name = myutils.file_without_extension(f)
                     im2 = Image.open(sourceF)
-                    write_2json_(out_dict,noext_name,im2.size,'Center',"ctr",fidx,total_frame_idx, dec_frame)
+                    write_2json_(out_dict,noext_name,im2.size,'Center',"ctr",fidx,total_frame_idx, dec_frame, last_one)
             # 1 .. 1 .. 1 .. 1
             idx_rec['frames'] += ll * (dec_frame + 1)
             json_file = os.path.join(x0,bn_x + '.json')
@@ -621,6 +626,8 @@ def bbox(im):
     a[:,:,[0,1,2]] = 255
     m = np.any(a != [255, 255, 255, 0], axis=2)
     coords = np.argwhere(m)
+    if len(coords) == 0:
+        return im.getbbox()
     z1 = np.min(coords, axis=0)
     z2 = np.max(coords, axis=0)
     y0, x0, y1, x1 = z1[0], z1[1], z2[0], z2[1]
@@ -652,7 +659,7 @@ if __name__ == "__main__":
     # myutils.ensure_dir(out_dir, True)
     # resize_png(png_path, 0.7, out_dir)
     # z = get_packed_name('翅膀_变身_特效__合成_135.png')
-    # calculate_pngcount('/Users/mac/Downloads/wings/original/变身翅膀特效序列',0.93, 0, 'idle')
+    # calculate_pngcount(u'/Users/mac/Downloads/wings/original/变身翅膀特效序列',0.93, 0, 'idle',True)
     # replace_force = mygui.yes_no_dialog(u"是否覆盖已存在id")[0] == 'y'
     # aa = insert_dr2name('idle_16_.png','DR')
     # b = 100
@@ -686,7 +693,8 @@ if __name__ == "__main__":
     # # tz = get_trim_size_4grid(tp)
     # tz1 = get_trim_size_4grid(tp1)
     # test_calculate()
-    for idx in range(9):
-        print(0.1 * (idx + 1) / 3)
+
+    # for idx in range(9):
+    #     print(idx2char(idx))
     print('nothing happened')
     pass
