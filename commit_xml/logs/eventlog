@@ -1,0 +1,7 @@
+2021-01-22 14:59:29,183 INFO     Started with pid 40279
+2021-01-22 14:59:29,253 INFO     Starting logcat 0 for device emulator-5554
+2021-01-22 14:59:34,757 ERROR    Unexpected exception in main.
+Traceback (most recent call last):
+  File "/Users/mac/Documents/my_projects/local_project/opengl_st/commit_xml/adb_logcat_monitor.py", line 111, in main
+    time.sleep(5)
+KeyboardInterrupt

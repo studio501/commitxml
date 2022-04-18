@@ -1,0 +1,130 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>构建礼包</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.FileParameterDefinition>
+          <name>LIBAO_ZIP</name>
+          <description>礼包zip文件</description>
+        </hudson.model.FileParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ZIP_MD5_ANDROID</name>
+          <description>如果填写此项,将直接检查之前有没有此md5的结果包,有的话,直接将此包提交</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ZIP_MD5_IOS</name>
+          <description>如果填写此项,将直接检查之前有没有此md5的结果包,有的话,直接将此包提交</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>MULTI_ZIP</name>
+          <description>是否是多个zip放在一块儿</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>TRUNK</name>
+          <description>是否传到trunk</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>BRANCH</name>
+          <description>是否传到branch</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>BRANCH75</name>
+          <description>是否传到branch75</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>FILE_NAME</name>
+          <description>文件名，必填</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>filename=`echo $LIBAO_ZIP | awk -F &quot;\.&quot; &apos;{print $1}&apos;`
+
+if [ -z $filename ];then
+filename=$FILE_NAME
+if [ -z $filename ];then
+echo &quot;必须输入文件名&quot;
+exit 1
+fi
+fi
+
+echo $filename*
+
+ZIP_MD5=&quot;$ZIP_MD5_ANDROID|$ZIP_MD5_IOS&quot;
+trunkpath=/data/zipfiles/$PROJ_NAME/svndocs/TRUNK
+if [[ &quot;$ZIP_MD5&quot; == &quot;|&quot; ]]; then
+  mkdir -p /data/zipfiles/$PROJ_NAME/libaodirs-new/$BUILD_NUMBER/
+  if [ &quot;$MULTI_ZIP&quot; == &quot;true&quot; ]; then
+    unzip LIBAO_ZIP -d /data/zipfiles/$PROJ_NAME/libaodirs-new/$BUILD_NUMBER/
+    rm -rf /data/zipfiles/$PROJ_NAME/libaodirs-new/$BUILD_NUMBER/__MACOSX
+  else
+    mv LIBAO_ZIP /data/zipfiles/$PROJ_NAME/libaodirs-new/$BUILD_NUMBER/${LIBAO_ZIP}
+  fi
+fi
+
+cd /data/zipfiles
+if [[ &quot;$TRUNK&quot; == &quot;true&quot; ]]; then
+sh ./buildzip_libao_new.sh $PROJ_NAME &quot;TRUNK&quot; $BUILD_NUMBER $ZIP_MD5
+fi
+if [[ &quot;$BRANCH&quot; == &quot;true&quot; ]]; then
+branchpath=/data/zipfiles/$PROJ_NAME/svndocs/BRANCH
+cd $branchpath
+#svn revert --depth=infinity $branchpath
+svn up $branchpath
+cp -rf $trunkpath/*$filename* $branchpath/
+sh /data/zipfiles/cok/svndocs/libo.sh  $branchpath $filename
+svn add --force *$filename* 
+svn commit . -m &apos;auto commit&apos;
+#sh ./buildzip_libao_new.sh $PROJ_NAME &quot;BRANCH&quot; $BUILD_NUMBER $ZIP_MD5
+fi
+if [[ &quot;$BRANCH75&quot; == &quot;true&quot; ]]; then
+branchpath75=/data/zipfiles/$PROJ_NAME/svndocs/BRANCH75
+cd $branchpath75
+#svn revert --depth=infinity $branchpath75
+svn up $branchpath75
+cp -rf $trunkpath/*$filename* $branchpath75/
+sh /data/zipfiles/cok/svndocs/libo.sh  $branchpath75 $filename
+svn add --force *$filename*
+svn commit . -m &apos;auto commit&apos;
+#sh ./buildzip_libao_new.sh $PROJ_NAME &quot;BRANCH75&quot; $BUILD_NUMBER $ZIP_MD5
+fi
+cd $WORKSPACE
+rm -f LIBAO_ZIP</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <EnvInjectBuildWrapper plugin="envinject@2.1.5">
+      <info>
+        <propertiesContent>PROJ_NAME=cok</propertiesContent>
+        <secureGroovyScript plugin="script-security@1.41">
+          <script></script>
+          <sandbox>false</sandbox>
+        </secureGroovyScript>
+        <loadFilesFromMaster>false</loadFilesFromMaster>
+      </info>
+    </EnvInjectBuildWrapper>
+  </buildWrappers>
+</project>

@@ -1,0 +1,144 @@
+_temp_check.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+helacb10_
+  rotate: false
+  xy: 888, 441
+  size: 418, 386
+  orig: 418, 386
+  offset: 0, 0
+  index: -1
+helacb16_
+  rotate: false
+  xy: 466, 4
+  size: 440, 401
+  orig: 440, 401
+  offset: 0, 0
+  index: -1
+helacb09_
+  rotate: false
+  xy: 864, 833
+  size: 404, 383
+  orig: 404, 383
+  offset: 0, 0
+  index: -1
+helacb02_
+  rotate: true
+  xy: 1664, 1511
+  size: 383, 357
+  orig: 383, 357
+  offset: 0, 0
+  index: -1
+helacb15_
+  rotate: false
+  xy: 449, 411
+  size: 433, 386
+  orig: 433, 386
+  offset: 0, 0
+  index: -1
+helacb08_
+  rotate: false
+  xy: 441, 1180
+  size: 404, 369
+  orig: 404, 369
+  offset: 0, 0
+  index: -1
+helacb01_
+  rotate: false
+  xy: 1664, 1152
+  size: 376, 353
+  orig: 376, 353
+  offset: 0, 0
+  index: -1
+helacb14_
+  rotate: false
+  xy: 1351, 4
+  size: 427, 364
+  orig: 427, 364
+  offset: 0, 0
+  index: -1
+helacb07_
+  rotate: false
+  xy: 4, 1223
+  size: 402, 370
+  orig: 402, 370
+  offset: 0, 0
+  index: -1
+helacb13_
+  rotate: false
+  xy: 441, 803
+  size: 417, 371
+  orig: 417, 371
+  offset: 0, 0
+  index: -1
+helacb06_
+  rotate: true
+  xy: 742, 1555
+  size: 387, 366
+  orig: 387, 366
+  offset: 0, 0
+  index: -1
+helacb05_
+  rotate: true
+  xy: 372, 1599
+  size: 391, 364
+  orig: 391, 364
+  offset: 0, 0
+  index: -1
+helacb04_
+  rotate: true
+  xy: 4, 1599
+  size: 392, 362
+  orig: 392, 362
+  offset: 0, 0
+  index: -1
+helacb20_
+  rotate: false
+  xy: 4, 4
+  size: 456, 376
+  orig: 456, 376
+  offset: 0, 0
+  index: -1
+helacb03_
+  rotate: false
+  xy: 1274, 1152
+  size: 384, 359
+  orig: 384, 359
+  offset: 0, 0
+  index: -1
+helacb19_
+  rotate: false
+  xy: 4, 386
+  size: 439, 400
+  orig: 439, 400
+  offset: 0, 0
+  index: -1
+helacb12_
+  rotate: false
+  xy: 1312, 763
+  size: 412, 383
+  orig: 412, 383
+  offset: 0, 0
+  index: -1
+helacb18_
+  rotate: false
+  xy: 912, 4
+  size: 433, 431
+  orig: 433, 431
+  offset: 0, 0
+  index: -1
+helacb11_
+  rotate: false
+  xy: 1351, 374
+  size: 420, 383
+  orig: 420, 383
+  offset: 0, 0
+  index: -1
+helacb17_
+  rotate: false
+  xy: 4, 792
+  size: 431, 425
+  orig: 431, 425
+  offset: 0, 0
+  index: -1

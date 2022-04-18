@@ -196,21 +196,21 @@ fi
 
 echo "=========================git update info =========================="
 
-# git_nowrevision=`git log | head -n 1 | awk '{print $2}'`
-# git_Last_revision=`cat ../revision.txt` >/dev/null 2>/dev/null
+git_nowrevision=`git log | head -n 1 | awk '{print $2}'`
+git_Last_revision=`cat ../revision.txt` >/dev/null 2>/dev/null
 # #svn_revision=`svn info | grep "Last Changed Rev" |  awk '{print $4}'`
 # #svn_Last_revision=`cat ../revision.txt` >/dev/null 2>/dev/null
 
-# if [[ -n "$git_Last_revision" ]]; then
+if [[ -n "$git_Last_revision" ]]; then
 	
-# 	if [ ! "$git_nowrevision" == "$git_Last_revision" ]; then
-# 		#svn log -v -r $svn_Last_revision:$svn_revision --username=liuzengyou --password=elextech%5858 
-# 		git log -v $git_Last_revision..$git_nowrevision
-# 	fi
+	if [ ! "$git_nowrevision" == "$git_Last_revision" ]; then
+		#svn log -v -r $svn_Last_revision:$svn_revision --username=liuzengyou --password=elextech%5858 
+		git log -v $git_Last_revision..$git_nowrevision
+	fi
 
-# fi
+fi
 
-# echo "${git_nowrevision}" >../revision.txt	
+echo "${git_nowrevision}" >../revision.txt	
 
 
 echo "=============================end===================================="

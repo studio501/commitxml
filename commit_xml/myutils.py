@@ -2,6 +2,10 @@
 from __future__ import print_function
 import sys,os,re,subprocess,codecs,json
 import shutil,time
+import urllib2
+import platform
+
+from AppKit import NSPasteboard, NSStringPboardType
 
 MD5_re = re.compile(r'.*=\s+(\w+)\n')
 
@@ -25,6 +29,10 @@ def get_file_lines(file_path, withoutSep = False):
     except Exception as e:
         print('can not open',file_path)
         return None
+
+def get_url_contents(url):
+    contents = urllib2.urlopen(url).read()
+    return contents
 
 def write_file_lines(file_path, lines, line_eof=''):
 	f = codecs.open(file_path, 'w', 'utf-8')
@@ -136,3 +144,23 @@ def progressBar(iterable, prefix = '', suffix = '', decimals = 1, length = 100, 
 # for item in progressBar(items, prefix = 'Progress:', suffix = 'Complete', length = 50):
 #     # Do stuff...
 #     time.sleep(0.1)
+
+def change_filename(filepath, postname):
+    dir_path = os.path.dirname(filepath)
+    base_n = os.path.basename(filepath)
+    noext = file_without_extension(base_n)
+    ext = file_extension(base_n)
+    return os.path.join(dir_path,noext + postname + ext)
+
+def getClipBoardContent():
+	if platform.system() == 'Windows':
+		win32clipboard.OpenClipboard()
+		data = win32clipboard.GetClipboardData()
+		win32clipboard.CloseClipboard()
+		td = data.decode('utf-8')
+		# print('getClipBoardContent ', td)
+		return td
+	else:
+		pb = NSPasteboard.generalPasteboard()
+		pbstring = pb.stringForType_(NSStringPboardType)
+        return pbstring.encode("utf-8")

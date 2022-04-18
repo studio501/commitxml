@@ -1,0 +1,96 @@
+--------- beginning of system
+01-22 14:59:29.368   610   920 D PackageManager: trimGetPackagesForUid uid = 10032 result = [com.mumu.store]
+--------- beginning of main
+01-22 14:59:29.372  3632  3632 W System  : ClassLoader referenced unknown path: /system/app/com.mumu.store/lib/x86
+01-22 14:59:29.383  3632  3632 I MultiDex: VM with version 2.1.0 has multidex support
+01-22 14:59:29.383  3632  3632 I MultiDex: Installing application
+01-22 14:59:29.383  3632  3632 I MultiDex: VM has multidex support, MultiDex support library is disabled.
+01-22 14:59:29.411  3632  3653 W art     : Method processed more than once: java.lang.String a.a.a.a.a.b.i.a(byte[])
+01-22 14:59:29.442  3632  3632 I CrashlyticsCore: Initializing Crashlytics 2.6.5.28
+01-22 14:59:29.472   891   998 D com.netease.nemu_android_watchdog_lib.core.Watchdog: upload server response: {"errcode": 100, "errmsg": "ok"}
+01-22 14:59:29.473   891   998 D com.netease.nemu_android_watchdog_lib.core.Watchdog: upload result: true
+01-22 14:59:29.509  3632  3664 W art     : Method processed more than once: void com.netease.mobidroid.n.e()
+01-22 14:59:29.561  3632  3632 D PakcageReceiver: action: android.intent.action.PACKAGE_ADDED data: package:com.clash.of.kings.inner com.clash.of.kings.inner
+01-22 14:59:29.562  3632  3672 W art     : Method processed more than once: java.lang.String b.c.a(long, java.nio.charset.Charset)
+01-22 14:59:29.570   610   626 D Interception: result: allow, reason: calleePkg is system app, rule: runType===broadcast|||callerPkg===android|||calleePkg===com.netease.nemu_vapi_android.nemu|||calleeClass===com.netease.nemu_vapi_android.receiver.LaunchReceiver|||action===android.intent.action.PACKAGE_ADDED
+01-22 14:59:29.571   610  1920 D Interception: result: allow, reason: calleePkg is system app, rule: runType===broadcast|||callerPkg===android|||calleePkg===com.mumu.launcher|||calleeClass===com.mumu.launcher.PackageChangedReceiver|||action===android.intent.action.PACKAGE_REPLACED
+01-22 14:59:29.572   907   907 W Launcher: setApplicationContext called twice! old=com.mumu.launcher.LauncherApplication@e3db0fb new=com.mumu.launcher.LauncherApplication@e3db0fb
+01-22 14:59:29.572   610   677 D Interception: result: allow, reason: calleePkg is system app, rule: runType===broadcast|||callerPkg===android|||calleePkg===com.netease.nemu_vapi_android.nemu|||calleeClass===com.netease.nemu_vapi_android.receiver.LaunchReceiver|||action===android.intent.action.PACKAGE_REPLACED
+01-22 14:59:29.575   610  1747 D Interception: result: allow, reason: callerPkg == calleePkg, rule: runType===broadcast|||callerPkg===com.mumu.store|||calleePkg===com.mumu.store|||calleeClass===com.tmall.wireless.viewtracker.internal.config.ConfigReceiver|||action===com.tmall.wireless.viewtracker.config.changed
+01-22 14:59:29.589  3632  3667 W System.err: java.io.FileNotFoundException: /data/user/0/com.mumu.store/files/track_pkg.2220677: open failed: ENOENT (No such file or directory)
+01-22 14:59:29.590  3632  3667 W System.err: 	at libcore.io.IoBridge.open(IoBridge.java:452)
+01-22 14:59:29.590  3632  3667 W System.err: 	at java.io.FileInputStream.<init>(FileInputStream.java:76)
+01-22 14:59:29.590  3632  3667 W System.err: 	at com.mumu.store.e.h.c(Proguard:121)
+01-22 14:59:29.590  3632  3667 W System.err: 	at com.mumu.store.track.e.a(Proguard:270)
+01-22 14:59:29.590  3632  3667 W System.err: 	at com.mumu.store.b.a.a(Proguard:49)
+01-22 14:59:29.590  3632  3667 W System.err: 	at a.b.e.e.c.d.b(Proguard:40)
+01-22 14:59:29.590  3632  3667 W System.err: 	at a.b.f.a(Proguard:11194)
+01-22 14:59:29.590  3632  3667 W System.err: 	at a.b.e.e.c.u$b.run(Proguard:96)
+01-22 14:59:29.590  3632  3667 W System.err: 	at a.b.a.b.b$b.run(Proguard:109)
+01-22 14:59:29.590  3632  3667 W System.err: 	at android.os.Handler.handleCallback(Handler.java:739)
+01-22 14:59:29.590  3632  3667 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:95)
+01-22 14:59:29.590  3632  3667 W System.err: 	at android.os.Looper.loop(Looper.java:148)
+01-22 14:59:29.590  3632  3667 W System.err: 	at android.os.HandlerThread.run(HandlerThread.java:61)
+01-22 14:59:29.590  3632  3667 W System.err: Caused by: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+01-22 14:59:29.591  3632  3667 W System.err: 	at libcore.io.Posix.open(Native Method)
+01-22 14:59:29.591  3632  3667 W System.err: 	at libcore.io.BlockGuardOs.open(BlockGuardOs.java:186)
+01-22 14:59:29.591  3632  3667 W System.err: 	at libcore.io.IoBridge.open(IoBridge.java:438)
+01-22 14:59:29.591  3632  3667 W System.err: 	... 12 more
+01-22 14:59:29.591  3632  3667 D EventBus: No subscribers registered for event class com.mumu.store.data.PkgData
+01-22 14:59:29.591  3632  3667 D EventBus: No subscribers registered for event class org.greenrobot.eventbus.i
+01-22 14:59:29.592  3632  3667 D EventBus: No subscribers registered for event class com.mumu.store.data.PkgData
+01-22 14:59:29.592  3632  3667 D EventBus: No subscribers registered for event class org.greenrobot.eventbus.i
+01-22 14:59:29.597  3632  3673 W art     : Method processed more than once: com.a.a.a.d.c com.a.a.a.c.h.a(int[], int, int)
+01-22 14:59:29.597  3632  3673 W art     : Method processed more than once: java.lang.String com.a.a.a.e.e.f()
+01-22 14:59:29.600  3632  3667 D BookedDownload: msg: 1
+01-22 14:59:29.704  3632  3673 W art     : Method processed more than once: java.lang.String okhttp3.internal.g.a.a(javax.net.ssl.SSLSocket)
+01-22 14:59:29.757  3632  3673 W art     : Method processed more than once: java.lang.String b.f.a()
+01-22 14:59:29.763  3632  3667 W System.err: com.mumu.store.data.remote.Api$a: 还没登录， 请先登录
+01-22 14:59:29.764  3632  3667 W System.err: 	at com.mumu.store.data.remote.c.a(Proguard:23)
+01-22 14:59:29.764  3632  3667 W System.err: 	at com.mumu.store.data.remote.c.b(Proguard:11)
+01-22 14:59:29.764  3632  3667 W System.err: 	at c.o.a(Proguard:122)
+01-22 14:59:29.764  3632  3667 W System.err: 	at c.i.a(Proguard:217)
+01-22 14:59:29.764  3632  3667 W System.err: 	at c.i.a(Proguard:180)
+01-22 14:59:29.764  3632  3667 W System.err: 	at c.a.a.c.b(Proguard:41)
+01-22 14:59:29.764  3632  3667 W System.err: 	at a.b.f.a(Proguard:11194)
+01-22 14:59:29.764  3632  3667 W System.err: 	at c.a.a.a.b(Proguard:34)
+01-22 14:59:29.764  3632  3667 W System.err: 	at a.b.f.a(Proguard:11194)
+01-22 14:59:29.764  3632  3667 W System.err: 	at a.b.e.e.c.u$b.run(Proguard:96)
+01-22 14:59:29.764  3632  3667 W System.err: 	at a.b.l$a.run(Proguard:463)
+01-22 14:59:29.764  3632  3667 W System.err: 	at a.b.e.g.h.run(Proguard:66)
+01-22 14:59:29.764  3632  3667 W System.err: 	at a.b.e.g.h.call(Proguard:57)
+01-22 14:59:29.764  3632  3667 W System.err: 	at java.util.concurrent.FutureTask.run(FutureTask.java:237)
+01-22 14:59:29.764  3632  3667 W System.err: 	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:269)
+01-22 14:59:29.764  3632  3667 W System.err: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1113)
+01-22 14:59:29.764  3632  3667 W System.err: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:588)
+01-22 14:59:29.764  3632  3667 W System.err: 	at java.lang.Thread.run(Thread.java:818)
+01-22 14:59:29.765   907   947 D updatePackage: version com.clash.of.kings.inner 83
+01-22 14:59:29.779  3632  3632 W System.err: com.mumu.store.data.remote.Api$a: 应用不存在
+01-22 14:59:29.779  3632  3632 W System.err: 	at com.mumu.store.data.remote.c.a(Proguard:23)
+01-22 14:59:29.779  3632  3632 W System.err: 	at com.mumu.store.data.remote.c.b(Proguard:11)
+01-22 14:59:29.779  3632  3632 W System.err: 	at c.o.a(Proguard:122)
+01-22 14:59:29.779  3632  3632 W System.err: 	at c.i.a(Proguard:217)
+01-22 14:59:29.779  3632  3632 W System.err: 	at c.i.a(Proguard:180)
+01-22 14:59:29.779  3632  3632 W System.err: 	at c.a.a.c.b(Proguard:41)
+01-22 14:59:29.779  3632  3632 W System.err: 	at a.b.f.a(Proguard:11194)
+01-22 14:59:29.779  3632  3632 W System.err: 	at c.a.a.a.b(Proguard:34)
+01-22 14:59:29.779  3632  3632 W System.err: 	at a.b.f.a(Proguard:11194)
+01-22 14:59:29.779  3632  3632 W System.err: 	at a.b.e.e.c.u$b.run(Proguard:96)
+01-22 14:59:29.779  3632  3632 W System.err: 	at a.b.l$a.run(Proguard:463)
+01-22 14:59:29.779  3632  3632 W System.err: 	at a.b.e.g.h.run(Proguard:66)
+01-22 14:59:29.779  3632  3632 W System.err: 	at a.b.e.g.h.call(Proguard:57)
+01-22 14:59:29.779  3632  3632 W System.err: 	at java.util.concurrent.FutureTask.run(FutureTask.java:237)
+01-22 14:59:29.779  3632  3632 W System.err: 	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:269)
+01-22 14:59:29.779  3632  3632 W System.err: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1113)
+01-22 14:59:29.779  3632  3632 W System.err: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:588)
+01-22 14:59:29.779  3632  3632 W System.err: 	at java.lang.Thread.run(Thread.java:818)
+01-22 14:59:29.794   907   947 D updatePackage: version com.mumu.store 84
+01-22 14:59:29.808   907   947 D updatePackage: version com.hcg.cok.cn1 13
+01-22 14:59:29.817   907   947 D updatePackage: version com.sy.ysczglyqh.yofun.mumu 128
+01-22 14:59:29.833   907   947 D updatePackage: version com.hcg.cok.beta 8389
+01-22 14:59:29.835   907   947 D updatePackage: version org.cocos2dx.cpp_empty_test 1
+01-22 14:59:29.840   907   947 D updatePackage: version com.fireball.some_component 1
+01-22 14:59:29.855   907   947 D updatePackage: version com.tencent.vega 22
+01-22 14:59:29.856   907   947 D updatePackage: version com.clash.of.kings.inner 83
+01-22 14:59:29.859   907   947 D updatePackage: version com.xlegend.laplace.hk 43
+01-22 14:59:29.861   907   947 D updatePackage: version com.mumu.store 84

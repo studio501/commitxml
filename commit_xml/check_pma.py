@@ -4,6 +4,8 @@ import sys,os,re,subprocess,json
 import myutils
 import argparse,time
 
+from PIL import Image
+
 FileName_re = re.compile(r'<filename>(.*?)</filename>')
 RaceType_re = re.compile(r'face_race_(\d)')
 MD5_re = re.compile(r'.*=\s+(\w+)\n')
@@ -13,6 +15,21 @@ Global_flag = 'false'
 Record_file = '_pma_check_record'
 Record_data = None
 Global_dumplua = 'false'
+
+
+def has_transparency(img_path):
+    img = Image.open(img_path)
+    if img.mode == "P":
+        transparent = img.info.get("transparency", -1)
+        for _, index in img.getcolors():
+            if index == transparent:
+                return True
+    elif img.mode == "RGBA":
+        extrema = img.getextrema()
+        if extrema[3][0] < 255:
+            return True
+
+    return False
 
 def parse_recorde_file(file_path):
     if not os.path.exists(file_path):
@@ -149,6 +166,41 @@ def reverse_tps_pma(tps_file):
     else:
         lines[idx+1] = lines[idx+1].replace('false','true')
     myutils.write_file_lines(tps_file,lines)
+
+def gen_pkm(tps_file, need_pma):
+    lines = myutils.get_file_lines(tps_file)
+    idx = myutils.lines_contaion_words(lines,"premultiplyAlpha")
+    tps_pma = lines[idx+1].count('true') > 0
+
+    if tps_pma != need_pma:
+        reverse_tps_pma(tps_file)
+
+    bn = os.path.basename(tps_file)
+    bn = myutils.file_without_extension(bn)
+    
+    temp_file_name = bn
+    subprocess.call(['rm','-rf',temp_file_name+'*'])
+
+    etc_prefix = 'etc'
+    res = []
+    for i in range(1):
+        # etc pack
+        temp_file_name_p = temp_file_name
+        subprocess.call(['TexturePacker','--texture-format','png','--png-opt-level','0','--opt','RGBA8888','--size-constraints','POT','--sheet',temp_file_name_p+'.png','--data',temp_file_name_p+'.plist',tps_file],stdout=open(os.devnull, 'wb'))
+        subprocess.call(['etcpack', temp_file_name_p+'.png', '.', '-c', 'etc1', '-as'],stdout=open(os.devnull, 'wb'))
+        md5 = get_file_md5(temp_file_name_p+'.pkm')
+        res.append([tps_pma,etc_prefix,md5])
+
+    if tps_pma != need_pma:
+        reverse_tps_pma(tps_file)
+    print(res)
+    adb_path = '/data/data/com.hcg.cok.cn1/files/dresource'
+    print('push to',adb_path)
+    ret_arr = ['.pkm','.plist','_alpha.pkm']
+    for x in ret_arr:
+        tf = temp_file_name+x
+        subprocess.call(['adb','push',tf,adb_path+'/'+tf])
+    return res
 
 def check_pma_of_pkmfile(tps_file):
     lines = myutils.get_file_lines(tps_file)
@@ -574,6 +626,7 @@ def main():
     parser.add_argument('-tpsdir','--tpsdirectory',help='specify compared tps directory. use with both -f,-d mode')
     parser.add_argument('-lua','--dumplua',help='specify lua format output',choices=['true', 'false'],default="false")
     parser.add_argument('-pkm','--pkmfile',help='specify pkm file')
+    parser.add_argument('-android','--genandroid',help='gen pkm for android',choices=['true', 'false'],default="true")
     
 
     args = parser.parse_args()
@@ -585,6 +638,11 @@ def main():
     Record_data = parse_recorde_file(Record_file)
     with open("__temp_log","w") as f:
         pass
+
+    # if args.tpsfile and args.genandroid:
+    #     gen_pkm(args.tpsfile, args.checkpma)
+    #     return
+
     if args.file:
         if args.tpsfile:
             pma_comparewith_source(args.file, args.tpsfile, True)
@@ -656,6 +714,8 @@ def libao_check_(dir_path):
 
     
 if __name__ == "__main__":
-    # main()
+    main()
     # some_test()
-    libao_check_("/Users/mac/Documents/my_projects/cok/outerDyRes75")
+    # libao_check_("/Users/mac/Documents/my_projects/cok/outerDyRes75")
+    # res = has_transparency("/Users/mac/Documents/my_projects/cok/ccbDyRes/dynamicResource/goods_02/prop/BG_Samurai_select.png")
+    # a = 100

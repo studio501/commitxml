@@ -8,6 +8,7 @@ import mygui
 
 from PIL import Image
 import numpy as np
+import argparse
 
 Custom_post_fix = "-_-GR-_-"
 
@@ -79,6 +80,26 @@ def get_trim_size(in_file):
     im = Image.open(in_file)
     box_size = bbox(im)
     return im.crop(box_size).getbbox()[2:]
+
+def shrink_image(in_file, scale):
+    im = Image.open(in_file)
+    b_box = im.getbbox()
+
+    t_w = b_box[2] - b_box[0]
+    t_h = b_box[3] - b_box[1]
+
+    after_w = t_w - t_w * scale
+    after_h = t_h - t_h * scale
+
+    half_w = after_w / 2
+    half_h = after_h / 2
+
+    new_box = (b_box[0] + half_w, b_box[1] + half_h, b_box[2] - half_w, b_box[3] - half_h)
+    im2 = im.crop(new_box)
+
+    res = myutils.change_filename(in_file, '_out')
+    im2.save(res)
+    a = 100
 
 def get_trim_size_4grid(in_file):
     im = Image.open(in_file)
@@ -372,6 +393,13 @@ def trim_png_dirlist(in_pnglist,rowheight):
         bn_name = os.path.basename(x)
         subprocess.call(['TexturePacker',os.path.join(dir_name,'_alpha_{0}.tps'.format(bn_name))])
         atlas_reader(x + ".atlas")
+def test2():
+    # in_png = '/Users/mac/Downloads/spine_split/orignal/spine1/idle_test'
+    # out_png = '/Users/mac/Downloads/spine_split/orignal/spine1/idle_test_out'
+    # myutils.ensure_dir(out_png, True)
+    # trim_png_dir(in_png,out_png,[32])
+
+    atlas_reader('/Users/mac/Downloads/spine_split/orignal/spine1/sk_MaChao_face_out.atlas')
 
 def test():
 
@@ -395,10 +423,10 @@ def test():
     # atlas_reader("/Users/mac/Documents/my_projects/cok/ccbDyRes/dynamicResource/MaChao_face/sk_MaChao_face_out2.atlas")
 
     in_png = '/Users/mac/Downloads/spine_split/orignal/spine1/idle_origin'
-    out_png = '/Users/mac/Downloads/spine_split/orignal/spine1/idle_out'
+    out_png = '/Users/mac/Downloads/spine_split/orignal/spine1/idle_out2'
 
-    in_png = '/Users/mac/Downloads/spine_split/afterAdjust/待机休闲Spine/images'
-    out_png = '/Users/mac/Downloads/spine_split/afterAdjust/待机休闲Spine/images_out'
+    # in_png = '/Users/mac/Downloads/spine_split/afterAdjust/待机休闲Spine/images'
+    # out_png = '/Users/mac/Downloads/spine_split/afterAdjust/待机休闲Spine/images_out'
 
     # in_png = '/Users/mac/Documents/my_projects/cok/ccbDyRes/dynamicResource/MaChao_face/sk_MaChao_face_out2'
     # out_png = '/Users/mac/Documents/my_projects/cok/ccbDyRes/dynamicResource/MaChao_face/sk_MaChao_face_out2_res'
@@ -606,16 +634,19 @@ def calculate_pngcount(in_dir, scale=1.0, dec_frame=0, act_name=None, v3_method=
         
 def main():
 
-    # atlas_reader("/Users/mac/Documents/my_projects/cok/ccbDyRes/dynAutoPacker/dresource 16/sk_VipDukeSys_face.atlas")
+    parser = argparse.ArgumentParser(description='Usage of mergepng.py.')
 
-    in_png = '/Users/mac/Documents/my_projects/cok/client/CCB/IF/Imperial'
-    # out_png = '/Users/mac/Downloads/spine_split/orignal/spine1/idle_test_out'
-    out_png_rc = '/Users/mac/Documents/my_projects/cok/client/CCB/IF/Imperial_rc'
-    myutils.ensure_dir(out_png_rc, True)
-    # myutils.ensure_dir(out_png, True)
-    # trim_png_dir(in_png,out_png_rc,[1000, 1000])
-    trim_png_dir(in_png,out_png_rc,[64])
-    # trim_png_dir(out_png_rc,out_png,[32])
+    parser.add_argument('-pngdirs','--pngdirs',help='specify raw png dir.')
+    parser.add_argument('-height','--height',help='specify block height.')
+    parser.add_argument('-atlas','--atlas',help='specify atlas file.')
+
+    args = parser.parse_args()
+    if args.pngdirs:
+        out_png_dir = args.pngdirs + '_out'
+        myutils.ensure_dir(out_png_dir, True)
+        trim_png_dir(args.pngdirs,out_png_dir,[int(args.height)])
+    elif args.atlas:
+        atlas_reader(args.atlas)
     pass
 
 def test_calculate():
@@ -696,5 +727,8 @@ if __name__ == "__main__":
 
     # for idx in range(9):
     #     print(idx2char(idx))
-    print('nothing happened')
+    # shrink_image('/Users/mac/Documents/my_projects/cok/client/IF/Resources/burn_noise.png', 0.25)
+    # print('nothing happened')
+
+    main()
     pass
