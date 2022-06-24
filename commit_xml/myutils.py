@@ -5,7 +5,7 @@ import shutil,time
 import urllib2
 import platform
 
-from AppKit import NSPasteboard, NSStringPboardType
+# from AppKit import NSPasteboard, NSStringPboardType
 
 MD5_re = re.compile(r'.*=\s+(\w+)\n')
 
@@ -152,15 +152,15 @@ def change_filename(filepath, postname):
     ext = file_extension(base_n)
     return os.path.join(dir_path,noext + postname + ext)
 
-def getClipBoardContent():
-	if platform.system() == 'Windows':
-		win32clipboard.OpenClipboard()
-		data = win32clipboard.GetClipboardData()
-		win32clipboard.CloseClipboard()
-		td = data.decode('utf-8')
-		# print('getClipBoardContent ', td)
-		return td
-	else:
-		pb = NSPasteboard.generalPasteboard()
-		pbstring = pb.stringForType_(NSStringPboardType)
-        return pbstring.encode("utf-8")
+# def getClipBoardContent():
+# 	if platform.system() == 'Windows':
+# 		win32clipboard.OpenClipboard()
+# 		data = win32clipboard.GetClipboardData()
+# 		win32clipboard.CloseClipboard()
+# 		td = data.decode('utf-8')
+# 		# print('getClipBoardContent ', td)
+# 		return td
+# 	else:
+# 		pb = NSPasteboard.generalPasteboard()
+# 		pbstring = pb.stringForType_(NSStringPboardType)
+#         return pbstring.encode("utf-8")
