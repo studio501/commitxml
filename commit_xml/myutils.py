@@ -5,9 +5,13 @@ import shutil,time
 import urllib2
 import platform
 
+from distutils.dir_util import copy_tree
 # from AppKit import NSPasteboard, NSStringPboardType
 
 MD5_re = re.compile(r'.*=\s+(\w+)\n')
+
+def copy_dir(src, dst):
+    copy_tree(src, dst)
 
 def file_extension(path): 
 	return os.path.splitext(path)[1]
